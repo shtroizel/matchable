@@ -1,5 +1,8 @@
-BSD 3-Clause License
+#pragma once
 
+
+
+/*
 Copyright (c) 2019-2020, Eric Hyer
 All rights reserved.
 
@@ -27,3 +30,49 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+
+
+#include <cmath>
+#include <iostream>
+
+
+#define TEST_FAIL -1
+#define TEST_PASS 0
+
+
+struct test_ok
+{
+    bool ok{true};
+    int operator()() const { return ok ? (TEST_PASS) : (TEST_FAIL); }
+    template<typename T>
+    void test_eq(T const & l, T const & r, std::string const & where)
+    {
+        if (!(l == r))
+        {
+            ok = false;
+            std::cout << l << " != " << r << "     <---- failed ---->     " << where << std::endl;
+        }
+    }
+    void fail(std::string const & where)
+    {
+        ok = false;
+        std::cout << "failed ---->     " << where << std::endl;
+    }
+};
+
+
+template<>
+void test_ok::test_eq<double>(double const & l, double const & r, std::string const & where)
+{
+    if (fabs(l) - fabs(r) > 0.0001)
+    {
+        ok = false;
+        std::cout << l << " != " << r << "     <---- failed ---->     " << where << std::endl;
+    }
+}
+
+
+#define TEST_EQ(_test_ok, _l, _r) _test_ok.test_eq(_l, _r, __FILE__ ":" + std::to_string(__LINE__))
+#define FAIL(_test_ok) _test_ok.fail(__FILE__ ":" + std::to_string(__LINE__))

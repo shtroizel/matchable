@@ -1,5 +1,4 @@
-BSD 3-Clause License
-
+/*
 Copyright (c) 2019-2020, Eric Hyer
 All rights reserved.
 
@@ -27,3 +26,34 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+
+#include <iostream>
+#include "matchable.h"
+
+MATCHABLE(Rating, Low, BelowAverage, Average, AboveAverage, High)
+
+MATCHABLE(Status_foo, Ok, Err)
+
+Status_foo::var foo()
+{
+    Rating::var r;
+    for (Rating::var const & v: Rating::variants())
+    {
+        r = Rating::from_string(v.as_string());
+        if (r != v)
+            return Status_foo::Err::grab();
+        std::cout << v << std::endl;
+    }
+    return Status_foo::Ok::grab();
+}
+
+int main()
+{
+    foo().match({
+        { Status_foo::Ok::grab(), [&]() { std::cout << "foo() finished." << std::endl; } },
+        { Status_foo::Err::grab(), [&]() { std::cout << "error!" << std::endl; exit(-1); } }
+    });
+    return 0;
+}
