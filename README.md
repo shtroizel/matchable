@@ -46,7 +46,8 @@ clang >= 7.0.1-8
 or  
 g++ >= 8.3.0
 
-When building the examples CMakeLists.txt:8 forces clang, just comment out or set as desired
+When building the examples CMakeLists.txt:8 forces clang.  
+Comment this line out or set as desired for other compilers.
 
 ### Installing
 Example workflow from project root:
@@ -93,7 +94,7 @@ test/include
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/shtroizel/matchable/tags).
+For the versions available, see the [tags on this repository](https://github.com/shtroizel/matchable/tags).
 
 ## Authors
 
