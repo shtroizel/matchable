@@ -86,10 +86,9 @@ install/test/bin/run_all.sh quietly
 ```
 
 ### Example Source Code
-Example code can be found under these directories:
+Example code can be found under:
 ```
 test/programs
-test/include
 ```
 
 ## Versioning
