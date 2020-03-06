@@ -43,7 +43,7 @@ MATCHABLE(Result, Ok, Err)
 MATCHABLE(NIL)
 
 
-Result::var foo(int number)
+Result::Type foo(int number)
 {
     if (number == 107)
         return Result::Ok::grab();
@@ -56,7 +56,7 @@ int main()
     test_ok ok;
 
     // default construction
-    TimeUnit::var time_unit;
+    TimeUnit::Type time_unit;
     TEST_EQ(ok, time_unit, TimeUnit::nil);
 
     // assignment
@@ -64,17 +64,17 @@ int main()
     TEST_EQ(ok, time_unit, TimeUnit::Minutes::grab());
 
     // copy construction
-    TimeUnit::var time_unit_copied{time_unit};
+    TimeUnit::Type time_unit_copied{time_unit};
     TEST_EQ(ok, time_unit_copied, time_unit);
     TEST_EQ(ok, time_unit, TimeUnit::Minutes::grab());
 
     // move construction
-    TimeUnit::var another_time_unit{std::move(time_unit)};
+    TimeUnit::Type another_time_unit{std::move(time_unit)};
     TEST_EQ(ok, time_unit, TimeUnit::nil);
     TEST_EQ(ok, another_time_unit, TimeUnit::Minutes::grab());
 
     // copy assignment
-    TimeUnit::var another_time_unit_copied = time_unit_copied;
+    TimeUnit::Type another_time_unit_copied = time_unit_copied;
     TEST_EQ(ok, another_time_unit_copied, time_unit_copied);
     TEST_EQ(ok, another_time_unit_copied, TimeUnit::Minutes::grab());
 
@@ -97,7 +97,7 @@ int main()
 
     // as_string()
     TEST_EQ(ok, time_unit.as_string(), std::string("Minutes"));
-    TEST_EQ(ok, TimeUnit::var().as_string(), std::string("nil"));
+    TEST_EQ(ok, TimeUnit::Type().as_string(), std::string("nil"));
 
     // from_string()
     TEST_EQ(ok, TimeUnit::from_string("107"), TimeUnit::nil);
@@ -162,7 +162,7 @@ int main()
 
     // match() with return value
     input = 42;
-    Result::var r = foo(input).match({
+    Result::Type r = foo(input).match({
         {Result::Ok::grab(), [&](){std::cout << "foo0(" << input << ") is ok!" << std::endl;}},
         {Result::Err::grab(), [&](){std::cout << "foo0(" << input << ") failed" << std::endl;}}
     });
@@ -175,7 +175,7 @@ int main()
         std::cout << "    " << variant << std::endl;
 
     // matchable without variants
-    NIL::var n;
+    NIL::Type n;
     TEST_EQ(ok, n.is_nil(), true);
     
     return ok();

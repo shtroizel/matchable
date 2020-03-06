@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *          MATCHABLE(ReturnCode, Zero, MinusOne, MinusTwo)
  *          MATCHABLE(ReturnCodeAsValue, Success, InvalidInput, CalculationFailed)
  *
- *          MatchBox<ReturnCode::var, ReturnCodeAsValue::var> code_value_matcher{
+ *          MatchBox<ReturnCode::Type, ReturnCodeAsValue::Type> code_value_matcher{
  *              { ReturnCode::Zero::grab(), ReturnCodeAsValue::Success::grab() },
  *              { ReturnCode::MinusOne::grab(), ReturnCodeAsValue::InvalidInput::grab() },
  *              { ReturnCode::MinusTwo::grab(), ReturnCodeAsValue::CalculationFailed::grab() }
@@ -252,98 +252,14 @@ std::vector<M> MatchBox<M, void>::currently_set() const
 }
 
 
-/**
- * Variable capable of storing a variant // aliased to var for interface
- */
-template<typename T>
-class Matchable
-{
-public:
-    Matchable() = default;
-    ~Matchable() = default;
-
-    explicit Matchable(std::shared_ptr<T> m) : t{m} {}
-
-    Matchable(Matchable const & o) : t{nullptr == o.t ? nullptr : o.t->clone()} {}
-
-    Matchable(Matchable &&) = default;
-
-    Matchable & operator=(Matchable const &);
-    Matchable & operator=(Matchable &&) = default;
-
-    std::string as_string() const { return nullptr == t ? "nil" : t->as_string(); }
-
-    int as_index() const { return nullptr == t ? -1 : t->as_index(); }
-
-    bool is_nil() const { return nullptr == t; }
-
-    void flag() { if (nullptr == t) T::nil_flag() = true; else t->flag(); }
-
-    void unflag() { if (nullptr == t) T::nil_flag() = false; else t->unflag(); }
-
-    void set_flagged(bool f) { if (nullptr == t) T::nil_flag() = f; else t->set_flagged(f); }
-
-    bool is_flagged() const { return nullptr == t ? T::nil_flag() : t->is_flagged(); }
-
-    typename T::Enum as_enum() const { return nullptr == t ? T::Enum::nil : t->as_enum(); }
-
-    Matchable match(MatchBox<Matchable, std::function<void()>> const &);
-
-    std::vector<Matchable> flagged_variants() const;
-
-    static std::vector<Matchable> const & variants() { return T::variants(); }
-
-    bool operator==(Matchable const & m) const { return as_string() == m.as_string(); }
-    bool operator!=(Matchable const & m) const { return as_string() != m.as_string(); }
-
-    bool operator<(Matchable const & m) const { return as_string() < m.as_string(); }
-    bool lt_alphabetic(Matchable const & m) const { return as_string() < m.as_string(); }
-    bool lt_enum_order(Matchable const & m) const { return as_index() < m.as_index(); }
-
-    friend std::ostream & operator<<(std::ostream & o, Matchable const & m) { return o << m.as_string(); }
-
-private:
-    std::shared_ptr<T> t;
-};
-
-
-template<typename T>
-Matchable<T> & Matchable<T>::operator=(Matchable<T> const & other)
-{
-    if (this != &other)
-        t = nullptr == other.t ? nullptr : other.t->clone();
-
-    return *this;
-}
-
-
-template<typename T>
-Matchable<T> Matchable<T>::match(
-    MatchBox<Matchable<T>, std::function<void()>> const & match_box
-)
-{
-    Matchable<T> ret{t};
-    if (match_box.is_set(ret))
-        match_box.at(ret)();
-    return ret;
-}
-
-
-template<typename T>
-std::vector<Matchable<T>> Matchable<T>::flagged_variants() const
-{
-    return nullptr == t ? std::vector<Matchable>{} : t->flagged_variants();
-}
-
-
 
 #define _matchable_create_type_begin(_t)                                                                   \
     namespace _t                                                                                           \
     {                                                                                                      \
-        using var = Matchable<class I##_t>;                                                                \
+        class Type;                                                                                        \
         class I##_t                                                                                        \
         {                                                                                                  \
-            friend class Matchable<I##_t>;                                                                 \
+            friend class Type;                                                                             \
         public:                                                                                            \
             using Enum = _t::Enum;                                                                         \
             I##_t() = default;                                                                             \
@@ -355,37 +271,70 @@ std::vector<Matchable<T>> Matchable<T>::flagged_variants() const
             virtual void unflag() = 0;                                                                     \
             virtual void set_flagged(bool) = 0;                                                            \
             virtual bool is_flagged() const = 0;                                                           \
-            static std::vector<var> flagged_variants() { return flags().currently_set(); }                 \
-            static std::vector<var> const & variants() { return private_variants(); }                      \
-            static bool register_variant(var const & variant, int * i)                                     \
-            {                                                                                              \
-                if (variant.is_nil())                                                                      \
-                {                                                                                          \
-                    private_variants().clear();                                                            \
-                }                                                                                          \
-                else                                                                                       \
-                {                                                                                          \
-                    if (nullptr != i)                                                                      \
-                        *i = static_cast<int>(variants().size());                                          \
-                    private_variants().push_back(variant);                                                 \
-                }                                                                                          \
-                return true;                                                                               \
-            }                                                                                              \
+            static std::vector<Type> flagged_variants() { return flags().currently_set(); }                \
+            static std::vector<Type> const & variants() { return private_variants(); }                     \
+            static bool register_variant(Type const & variant, int * i);                                   \
         protected:                                                                                         \
-            static MatchBox<var, void> & flags() { static MatchBox<var, void> f; return f; }               \
+            static MatchBox<Type, void> & flags() { static MatchBox<Type, void> f; return f; }             \
         private:                                                                                           \
             virtual std::shared_ptr<I##_t> clone() = 0;                                                    \
             static bool & nil_flag() { static bool nf{false}; return nf; }                                 \
-            static std::vector<var> & private_variants() { static std::vector<var> v; return v; }
+            static std::vector<Type> & private_variants() { static std::vector<Type> v; return v; }        \
+        using T = I##_t;
 
 
 
 #define _matchable_create_type_end(_t)                                                                     \
         };                                                                                                 \
-        inline std::vector<var> const & variants() { return I##_t::variants(); }                           \
-        inline std::vector<var> flagged_variants() { return I##_t::flagged_variants(); }                   \
-        static const var nil{};                                                                            \
-        inline var from_string(std::string const & str)                                                    \
+        class Type                                                                                         \
+        {                                                                                                  \
+            using T = I##_t;                                                                               \
+        public:                                                                                            \
+            Type() = default;                                                                              \
+            ~Type() = default;                                                                             \
+            explicit Type(std::shared_ptr<T> m) : t{m} {}                                                  \
+            Type(Type const & o) : t{nullptr == o.t ? nullptr : o.t->clone()} {}                           \
+            Type(Type &&) = default;                                                                       \
+            Type & operator=(Type const & other)                                                           \
+            {                                                                                              \
+                if (this != &other)                                                                        \
+                    t = nullptr == other.t ? nullptr : other.t->clone();                                   \
+                return *this;                                                                              \
+            }                                                                                              \
+            Type & operator=(Type &&) = default;                                                           \
+            std::string as_string() const { return nullptr == t ? "nil" : t->as_string(); }                \
+            int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
+            bool is_nil() const { return nullptr == t; }                                                   \
+            void flag() { if (nullptr == t) T::nil_flag() = true; else t->flag(); }                        \
+            void unflag() { if (nullptr == t) T::nil_flag() = false; else t->unflag(); }                   \
+            void set_flagged(bool f) { if (nullptr == t) T::nil_flag() = f; else t->set_flagged(f); }      \
+            bool is_flagged() const { return nullptr == t ? T::nil_flag() : t->is_flagged(); }             \
+            typename T::Enum as_enum() const { return nullptr == t ? T::Enum::nil : t->as_enum(); }        \
+            Type match(MatchBox<Type, std::function<void()>> const & match_box)                            \
+            {                                                                                              \
+                Type ret{t};                                                                               \
+                if (match_box.is_set(ret))                                                                 \
+                    match_box.at(ret)();                                                                   \
+                return ret;                                                                                \
+            }                                                                                              \
+            std::vector<Type> flagged_variants() const                                                     \
+            {                                                                                              \
+                return nullptr == t ? std::vector<Type>{} : t->flagged_variants();                         \
+            }                                                                                              \
+            static std::vector<Type> const & variants() { return T::variants(); }                          \
+            bool operator==(Type const & m) const { return as_string() == m.as_string(); }                 \
+            bool operator!=(Type const & m) const { return as_string() != m.as_string(); }                 \
+            bool operator<(Type const & m) const { return as_string() < m.as_string(); }                   \
+            bool lt_alphabetic(Type const & m) const { return as_string() < m.as_string(); }               \
+            bool lt_enum_order(Type const & m) const { return as_index() < m.as_index(); }                 \
+            friend std::ostream & operator<<(std::ostream & o, Type const & m){return o << m.as_string();} \
+        private:                                                                                           \
+            std::shared_ptr<T> t;                                                                          \
+        };                                                                                                 \
+        inline std::vector<Type> const & variants() { return I##_t::variants(); }                          \
+        inline std::vector<Type> flagged_variants() { return I##_t::flagged_variants(); }                  \
+        static const Type nil{};                                                                           \
+        inline Type from_string(std::string const & str)                                                   \
         {                                                                                                  \
             for (auto const & v : I##_t::variants())                                                       \
                 if (v.as_string() == str)                                                                  \
@@ -393,6 +342,20 @@ std::vector<Matchable<T>> Matchable<T>::flagged_variants() const
             return nil;                                                                                    \
         }                                                                                                  \
         static bool const register_##_t = I##_t::register_variant(nil, nullptr);                           \
+        inline bool I##_t::register_variant(Type const & variant, int * i)                                 \
+        {                                                                                                  \
+            if (variant.is_nil())                                                                          \
+            {                                                                                              \
+                private_variants().clear();                                                                \
+            }                                                                                              \
+            else                                                                                           \
+            {                                                                                              \
+                if (nullptr != i)                                                                          \
+                    *i = static_cast<int>(variants().size());                                              \
+                private_variants().push_back(variant);                                                     \
+            }                                                                                              \
+            return true;                                                                                   \
+        }                                                                                                  \
     }
 
 
@@ -415,7 +378,7 @@ std::vector<Matchable<T>> Matchable<T>::flagged_variants() const
             void unflag() override { flags().unset(grab()); }                                              \
             void set_flagged(bool f) override { if (f) flags().set(grab()); else flags().unset(grab()); }  \
             bool is_flagged() const override { return flags().is_set(grab()); }                            \
-            static var grab() { return var(create()); }                                                    \
+            static Type grab() { return Type(create()); }                                                  \
         private:                                                                                           \
             std::shared_ptr<I##_t> clone() override { return create(); }                                   \
             static int * int_member() { static int i{-1}; return &i; }                                     \

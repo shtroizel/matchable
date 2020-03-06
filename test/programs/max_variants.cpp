@@ -151,7 +151,7 @@ int main()
 {
     test_ok ok;
     std::cout << "Test traversal of 108 max supported number of variants..." << std::endl;
-    Number::var n;
+    Number::Type n;
     for (auto number : Number::variants())
     {
         n = Number::from_string(number.as_string());

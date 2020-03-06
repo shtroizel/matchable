@@ -36,10 +36,10 @@ MATCHABLE(Rating, Low, BelowAverage, Average, AboveAverage, High)
 
 MATCHABLE(Status_foo, Ok, Err)
 
-Status_foo::var foo()
+Status_foo::Type foo()
 {
-    Rating::var r;
-    for (Rating::var const & v: Rating::variants())
+    Rating::Type r;
+    for (Rating::Type const & v: Rating::variants())
     {
         r = Rating::from_string(v.as_string());
         if (r != v)
