@@ -81,7 +81,7 @@ int main()
 {
     test_ok ok;
 
-    // just print cenversions [0..107] for fun...
+    // just print conversions [0..107] for fun...
     for (int i = 0; i < 108; ++i)
     {
         for (auto const & unit_from : TimeUnit::variants())
