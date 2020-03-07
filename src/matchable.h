@@ -253,13 +253,13 @@ std::vector<M> MatchBox<M, void>::currently_set() const
 
 
 
-#define _matchable_create_type_begin(_t)                                                                   \
+#define _matchable_declare_begin(_t)                                                                       \
     namespace _t                                                                                           \
     {                                                                                                      \
-        class Type;                                                                                        \
+        using Type = Matchable<class I##_t>;                                                               \
         class I##_t                                                                                        \
         {                                                                                                  \
-            friend class Type;                                                                             \
+            friend class Matchable<I##_t>;                                                                 \
         public:                                                                                            \
             using Enum = _t::Enum;                                                                         \
             I##_t() = default;                                                                             \
@@ -277,31 +277,37 @@ std::vector<M> MatchBox<M, void>::currently_set() const
         protected:                                                                                         \
             static MatchBox<Type, void> & flags() { static MatchBox<Type, void> f; return f; }             \
         private:                                                                                           \
-            virtual std::shared_ptr<I##_t> clone() = 0;                                                    \
+            virtual std::shared_ptr<I##_t> clone() const = 0;                                              \
             static bool & nil_flag() { static bool nf{false}; return nf; }                                 \
-            static std::vector<Type> & private_variants() { static std::vector<Type> v; return v; }        \
-        using T = I##_t;
+            static std::vector<Type> & private_variants() { static std::vector<Type> v; return v; }
 
 
 
-#define _matchable_create_type_end(_t)                                                                     \
+#define _matchable_declare_end(_t)                                                                         \
         };                                                                                                 \
-        class Type                                                                                         \
+    }
+
+
+
+#define _matchable_create_type_begin(_t)                                                                   \
+    namespace _t                                                                                           \
+    {                                                                                                      \
+        template<typename T>                                                                               \
+        class Matchable                                                                                    \
         {                                                                                                  \
-            using T = I##_t;                                                                               \
         public:                                                                                            \
-            Type() = default;                                                                              \
-            ~Type() = default;                                                                             \
-            explicit Type(std::shared_ptr<T> m) : t{m} {}                                                  \
-            Type(Type const & o) : t{nullptr == o.t ? nullptr : o.t->clone()} {}                           \
-            Type(Type &&) = default;                                                                       \
-            Type & operator=(Type const & other)                                                           \
+            Matchable() = default;                                                                         \
+            ~Matchable() = default;                                                                        \
+            explicit Matchable(std::shared_ptr<T> m) : t{m} {}                                             \
+            Matchable(Matchable const & o) : t{nullptr == o.t ? nullptr : o.t->clone()} {}                 \
+            Matchable(Matchable &&) = default;                                                             \
+            Matchable & operator=(Matchable const & other)                                                 \
             {                                                                                              \
                 if (this != &other)                                                                        \
                     t = nullptr == other.t ? nullptr : other.t->clone();                                   \
                 return *this;                                                                              \
             }                                                                                              \
-            Type & operator=(Type &&) = default;                                                           \
+            Matchable & operator=(Matchable &&) = default;                                                 \
             std::string as_string() const { return nullptr == t ? "nil" : t->as_string(); }                \
             int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
             bool is_nil() const { return nullptr == t; }                                                   \
@@ -310,27 +316,41 @@ std::vector<M> MatchBox<M, void>::currently_set() const
             void set_flagged(bool f) { if (nullptr == t) T::nil_flag() = f; else t->set_flagged(f); }      \
             bool is_flagged() const { return nullptr == t ? T::nil_flag() : t->is_flagged(); }             \
             typename T::Enum as_enum() const { return nullptr == t ? T::Enum::nil : t->as_enum(); }        \
-            Type match(MatchBox<Type, std::function<void()>> const & match_box)                            \
+            Matchable match(MatchBox<Matchable, std::function<void()>> const & match_box)                  \
             {                                                                                              \
-                Type ret{t};                                                                               \
+                Matchable ret{t};                                                                          \
                 if (match_box.is_set(ret))                                                                 \
                     match_box.at(ret)();                                                                   \
                 return ret;                                                                                \
             }                                                                                              \
-            std::vector<Type> flagged_variants() const                                                     \
+            std::vector<Matchable> flagged_variants() const                                                \
             {                                                                                              \
-                return nullptr == t ? std::vector<Type>{} : t->flagged_variants();                         \
+                return nullptr == t ? std::vector<Matchable>{} : t->flagged_variants();                    \
             }                                                                                              \
-            static std::vector<Type> const & variants() { return T::variants(); }                          \
-            bool operator==(Type const & m) const { return as_string() == m.as_string(); }                 \
-            bool operator!=(Type const & m) const { return as_string() != m.as_string(); }                 \
-            bool operator<(Type const & m) const { return as_string() < m.as_string(); }                   \
-            bool lt_alphabetic(Type const & m) const { return as_string() < m.as_string(); }               \
-            bool lt_enum_order(Type const & m) const { return as_index() < m.as_index(); }                 \
-            friend std::ostream & operator<<(std::ostream & o, Type const & m){return o << m.as_string();} \
+            static std::vector<Matchable> const & variants() { return T::variants(); }                     \
+            bool operator==(Matchable const & m) const { return as_string() == m.as_string(); }            \
+            bool operator!=(Matchable const & m) const { return as_string() != m.as_string(); }            \
+            bool operator<(Matchable const & m) const { return as_string() < m.as_string(); }              \
+            bool lt_alphabetic(Matchable const & m) const { return as_string() < m.as_string(); }          \
+            bool lt_enum_order(Matchable const & m) const { return as_index() < m.as_index(); }            \
+            friend std::ostream & operator<<(std::ostream & o, Matchable const & m)                        \
+            {                                                                                              \
+                return o << m.as_string();                                                                 \
+            }                                                                                              \
         private:                                                                                           \
-            std::shared_ptr<T> t;                                                                          \
-        };                                                                                                 \
+            std::shared_ptr<T> t;
+
+
+
+#define _matchable_create_type_end(_t) \
+        }; \
+    }
+
+
+
+#define _matchable_define(_t) \
+    namespace _t                                                                                           \
+    {                                                                                                      \
         inline std::vector<Type> const & variants() { return I##_t::variants(); }                          \
         inline std::vector<Type> flagged_variants() { return I##_t::flagged_variants(); }                  \
         static const Type nil{};                                                                           \
@@ -360,12 +380,6 @@ std::vector<M> MatchBox<M, void>::currently_set() const
 
 
 
-#define _matchable_create_type(_t)                                                                         \
-    _matchable_create_type_begin(_t)                                                                       \
-    _matchable_create_type_end(_t)
-
-
-
 #define _matchable_create_variant_begin(_t, _v)                                                            \
     namespace _t                                                                                           \
     {                                                                                                      \
@@ -382,7 +396,7 @@ std::vector<M> MatchBox<M, void>::currently_set() const
             bool is_flagged() const override { return flags().is_set(grab()); }                            \
             static Type grab() { return Type(create()); }                                                  \
         private:                                                                                           \
-            std::shared_ptr<I##_t> clone() override { return create(); }                                   \
+            std::shared_ptr<I##_t> clone() const  override { return create(); }                            \
             static int * int_member() { static int i{-1}; return &i; }                                     \
             static std::shared_ptr<_v> create() { return std::make_shared<_v>(); }                         \
             static bool const register_me;
@@ -559,5 +573,37 @@ std::vector<M> MatchBox<M, void>::currently_set() const
     {                                                                                                      \
         enum class Enum { nil, __VA_ARGS__ };                                                              \
     }                                                                                                      \
-    _matchable_create_type(_t)                                                                             \
+    _matchable_create_type_begin(_t)                                                                       \
+    _matchable_create_type_end(_t)                                                                         \
+    _matchable_declare_begin(_t)                                                                           \
+    _matchable_declare_end(_t)                                                                             \
+    _matchable_define(_t)                                                                                  \
+    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
+
+
+
+/**
+ * Usage: SPREAD_MATCHABLE(spread, type, variant...)
+ *
+ * Where: spread is: a type defined by MATCHABLE() or SPREAD_MATCHABLE()
+ */
+#define SPREAD_MATCHABLE(_s, _t, ...)                                                                      \
+    namespace _t                                                                                           \
+    {                                                                                                      \
+        enum class Enum { nil, __VA_ARGS__ };                                                              \
+    }                                                                                                      \
+    _matchable_create_type_begin(_t)                                                                       \
+    public:                                                                                                \
+        _s::Type as_##_s() const { return nullptr == t ? T::nil_##_s() : t->as_##_s(); }                   \
+        void spread(_s::Type const & s) { if (nullptr == t) T::nil_##_s() = s; else t->spread(s); }        \
+    _matchable_create_type_end(_t)                                                                         \
+    _matchable_declare_begin(_t)                                                                           \
+    public:                                                                                                \
+        _s::Type as_##_s() const { return _s##_().at(Type(clone())); }                                     \
+        void spread(_s::Type const & s) { _s##_().set(Type(clone()), s); }                                 \
+    private:                                                                                               \
+        static MatchBox<_t::Type, _s::Type> & _s##_() { static MatchBox<_t::Type, _s::Type> m; return m; } \
+        static _s::Type nil_##_s() { static _s::Type ns; return ns; }                                      \
+    _matchable_declare_end(_t)                                                                             \
+    _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
