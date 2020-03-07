@@ -158,15 +158,15 @@ int main()
     // match() ignoring return value
     int input{107};
     foo(input).match({
-        {Result::Ok::grab(), [&]() {std::cout << "foo0(" << input << ") is ok!" << std::endl;}},
-        {Result::Err::grab(), [&](){std::cout << "foo0(" << input << ") failed" << std::endl; FAIL(ok);}}
+        {Result::Ok::grab(), [&]() {std::cout << "foo(" << input << ") is ok!" << std::endl;}},
+        {Result::Err::grab(), [&](){std::cout << "foo(" << input << ") failed" << std::endl; FAIL(ok);}}
     });
 
     // match() with return value
     input = 42;
     Result::Type r = foo(input).match({
-        {Result::Ok::grab(), [&](){std::cout << "foo0(" << input << ") is ok!" << std::endl;}},
-        {Result::Err::grab(), [&](){std::cout << "foo0(" << input << ") failed" << std::endl;}}
+        {Result::Ok::grab(), [&](){std::cout << "foo(" << input << ") is ok!" << std::endl;}},
+        {Result::Err::grab(), [&](){std::cout << "foo(" << input << ") failed" << std::endl;}}
     });
     TEST_EQ(ok, r, Result::Err::grab());
 
