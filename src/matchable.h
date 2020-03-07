@@ -550,9 +550,9 @@ std::vector<M> MatchBox<M, void>::currently_set() const
 
 
 /**
- * Usage: MATCHABLE(type, variant, variant...)
+ * Usage: MATCHABLE(type, variant...)
  *
- * Where: variant... is: in [0..107] additional comma separated variants
+ * Where: variant... is: in [0..108] comma separated variants
  */
 #define MATCHABLE(_t, ...)                                                                                 \
     namespace _t                                                                                           \
