@@ -64,7 +64,7 @@ namespace TimeUnit
     });
 
     static MatchBox<Type, MatchBox<Type, std::function<double(double const &)>>> const as_sibling({
-        { nil,             MatchBox<Type, std::function<double(double const &)>>{} },
+        { nil,             {} },
         { Seconds::grab(), as_seconds },
         { Minutes::grab(), as_minutes },
         { Hours::grab(),   as_hours },
