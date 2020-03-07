@@ -29,6 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
+
 #include <iostream>
 
 #include "matchable.h"
@@ -43,12 +44,14 @@ MATCHABLE(Result, Ok, Err)
 MATCHABLE(NIL)
 
 
+
 Result::Type foo(int number)
 {
     if (number == 107)
         return Result::Ok::grab();
     return Result::Err::grab();
 }
+
 
 
 int main()
@@ -90,7 +93,7 @@ int main()
 
     if (another_time_unit == time_unit)
         FAIL(ok);
-    
+
     another_time_unit = time_unit;
     if (another_time_unit != time_unit)
         FAIL(ok);
@@ -152,7 +155,6 @@ int main()
     TEST_EQ(ok, fv[0], TimeUnit::Seconds::grab());
     TEST_EQ(ok, fv[1], TimeUnit::Minutes::grab());
 
-
     // match() ignoring return value
     int input{107};
     foo(input).match({
@@ -177,6 +179,6 @@ int main()
     // matchable without variants
     NIL::Type n;
     TEST_EQ(ok, n.is_nil(), true);
-    
+
     return ok();
 }

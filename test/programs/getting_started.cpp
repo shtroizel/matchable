@@ -29,12 +29,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
+
 #include <iostream>
 #include "matchable.h"
+
+
 
 MATCHABLE(Rating, Low, BelowAverage, Average, AboveAverage, High)
 
 MATCHABLE(Status_foo, Ok, Err)
+
+
 
 Status_foo::Type foo()
 {
@@ -48,6 +53,7 @@ Status_foo::Type foo()
     }
     return Status_foo::Ok::grab();
 }
+
 
 int main()
 {
