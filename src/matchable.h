@@ -588,6 +588,25 @@ std::vector<M> MatchBox<M, void>::currently_set() const
 
 
 
+#define _spread_matchable_amend_type(_s, _t)                                                               \
+    public:                                                                                                \
+        _s::Type as_##_s() const { return nullptr == t ? T::nil_##_s() : t->as_##_s(); }                   \
+        void set_##_s(_s::Type const & s) { if (nullptr == t) T::nil_##_s() = s; else t->spread(s); }
+
+
+
+#define _spread_matchable_amend_declaration(_s, _t)                                                        \
+    public:                                                                                                \
+        _s::Type as_##_s() const { return _s##_().at(Type(clone())); }                                     \
+        void spread(_s::Type const & s) { _s##_().set(Type(clone()), s); }                                 \
+    private:                                                                                               \
+        static MatchBox<_t::Type, _s::Type> & _s##_() { static MatchBox<_t::Type, _s::Type> m; return m; } \
+        static _s::Type nil_##_s() { static _s::Type ns; return ns; }                                      \
+
+
+
+
+
 /**
  * Usage: SPREAD_MATCHABLE(spread, type, variant...)
  *
@@ -599,17 +618,10 @@ std::vector<M> MatchBox<M, void>::currently_set() const
         enum class Enum { nil, __VA_ARGS__ };                                                              \
     }                                                                                                      \
     _matchable_create_type_begin(_t)                                                                       \
-    public:                                                                                                \
-        _s::Type as_##_s() const { return nullptr == t ? T::nil_##_s() : t->as_##_s(); }                   \
-        void set_##_s(_s::Type const & s) { if (nullptr == t) T::nil_##_s() = s; else t->spread(s); }      \
+    _spread_matchable_amend_type(_s, _t)                                                                   \
     _matchable_create_type_end(_t)                                                                         \
     _matchable_declare_begin(_t)                                                                           \
-    public:                                                                                                \
-        _s::Type as_##_s() const { return _s##_().at(Type(clone())); }                                     \
-        void spread(_s::Type const & s) { _s##_().set(Type(clone()), s); }                                 \
-    private:                                                                                               \
-        static MatchBox<_t::Type, _s::Type> & _s##_() { static MatchBox<_t::Type, _s::Type> m; return m; } \
-        static _s::Type nil_##_s() { static _s::Type ns; return ns; }                                      \
+    _spread_matchable_amend_declaration(_s, _t)                                                            \
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
