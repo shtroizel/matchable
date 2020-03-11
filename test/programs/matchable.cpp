@@ -125,6 +125,12 @@ int main()
     TEST_EQ(ok, TimeUnit::Days::grab().as_index(), 3);
     TEST_EQ(ok, TimeUnit::Weeks::grab().as_index(), 4);
 
+    // from_index()
+    TEST_EQ(ok, TimeUnit::from_index(-1), TimeUnit::nil);
+    for (auto tu : TimeUnit::variants())
+        TEST_EQ(ok, tu, TimeUnit::from_index(tu.as_index()));
+    TEST_EQ(ok, TimeUnit::from_index(107), TimeUnit::nil);
+
     // is_nil()
     if (time_unit.is_nil())
         FAIL(ok);

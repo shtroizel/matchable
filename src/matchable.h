@@ -354,6 +354,12 @@ std::vector<M> MatchBox<M, void>::currently_set() const
         inline std::vector<Type> const & variants() { return I##_t::variants(); }                          \
         inline std::vector<Type> flagged_variants() { return I##_t::flagged_variants(); }                  \
         static const Type nil{};                                                                           \
+        inline Type from_index(int index)                                                                  \
+        {                                                                                                  \
+            if (index < 0 || index >= (int) I##_t::variants().size())                                      \
+                return nil;                                                                                \
+            return I##_t::variants().at(index);                                                            \
+        }                                                                                                  \
         inline Type from_string(std::string const & str)                                                   \
         {                                                                                                  \
             for (auto const & v : I##_t::variants())                                                       \
