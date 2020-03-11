@@ -595,7 +595,7 @@ std::vector<M> MatchBox<M, void>::currently_set() const
     _matchable_create_type_begin(_t)                                                                       \
     public:                                                                                                \
         _s::Type as_##_s() const { return nullptr == t ? T::nil_##_s() : t->as_##_s(); }                   \
-        void spread(_s::Type const & s) { if (nullptr == t) T::nil_##_s() = s; else t->spread(s); }        \
+        void set_##_s(_s::Type const & s) { if (nullptr == t) T::nil_##_s() = s; else t->spread(s); }      \
     _matchable_create_type_end(_t)                                                                         \
     _matchable_declare_begin(_t)                                                                           \
     public:                                                                                                \

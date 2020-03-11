@@ -46,12 +46,12 @@ int main()
 {
     test_ok ok;
 
-    Room::Bathroom::grab().spread(Floor::Tile::grab());
-    Room::Bedroom::grab().spread(Floor::Carpet::grab());
-    Room::Garage::grab().spread(Floor::Concrete::grab());
-    Room::Hallway::grab().spread(Floor::Linoleum::grab());
-    Room::Kitchen::grab().spread(Floor::Tile::grab());
-    Room::Lounge::grab().spread(Floor::Parquet::grab());
+    Room::Bathroom::grab().set_Floor(Floor::Tile::grab());
+    Room::Bedroom::grab().set_Floor(Floor::Carpet::grab());
+    Room::Garage::grab().set_Floor(Floor::Concrete::grab());
+    Room::Hallway::grab().set_Floor(Floor::Linoleum::grab());
+    Room::Kitchen::grab().set_Floor(Floor::Tile::grab());
+    Room::Lounge::grab().set_Floor(Floor::Parquet::grab());
 
     for (auto room : Room::variants())
         std::cout << "Room::" << room << "::grab().as_Floor() --> " << room.as_Floor() << std::endl;
