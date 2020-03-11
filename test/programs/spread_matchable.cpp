@@ -31,37 +31,85 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <iostream>
+#include <random>
 
 #include "matchable.h"
 #include "test_ok.h"
 
 
 
-MATCHABLE(Floor, Carpet, Concrete, Linoleum, Parquet, Tile)
-SPREAD_MATCHABLE(Floor, Room, Bathroom, Bedroom, Garage, Hallway, Kitchen, Lounge)
+MATCHABLE(Color, Black, Red)
+SPREAD_MATCHABLE(Color, Suit, Clubs, Diamonds, Hearts, Spades)
+MATCHABLE(Rank, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace)
 
+
+
+struct Card
+{
+    Suit::Type suit;
+    Rank::Type rank;
+    bool operator==(Card const & other) { return suit == other.suit && rank == other.rank; }
+};
+
+
+
+std::array<Card, 5> deal()
+{
+    static std::mt19937 engine{std::random_device()()};
+    static std::uniform_int_distribution<int> suit_distribution{0, (int) Suit::variants().size() - 1};
+    static std::uniform_int_distribution<int> rank_distribution{0, (int) Rank::variants().size() - 1};
+
+    std::array<Card, 5> cards;
+    std::vector<Card> already_used;
+    for (auto & card : cards)
+    {
+        do
+        {
+            card.suit = Suit::from_index(suit_distribution(engine));
+            card.rank = Rank::from_index(rank_distribution(engine));
+        }
+        while (std::find(already_used.begin(), already_used.end(), card) != already_used.end());
+        already_used.push_back(card);
+    }
+
+    return cards;
+}
 
 
 int main()
 {
     test_ok ok;
 
-    Room::Bathroom::grab().set_Floor(Floor::Tile::grab());
-    Room::Bedroom::grab().set_Floor(Floor::Carpet::grab());
-    Room::Garage::grab().set_Floor(Floor::Concrete::grab());
-    Room::Hallway::grab().set_Floor(Floor::Linoleum::grab());
-    Room::Kitchen::grab().set_Floor(Floor::Tile::grab());
-    Room::Lounge::grab().set_Floor(Floor::Parquet::grab());
+    Suit::Clubs::grab().set_Color(Color::Black::grab());
+    Suit::Diamonds::grab().set_Color(Color::Red::grab());
+    Suit::Hearts::grab().set_Color(Color::Red::grab());
+    Suit::Spades::grab().set_Color(Color::Black::grab());
 
-    for (auto room : Room::variants())
-        std::cout << "Room::" << room << "::grab().as_Floor() --> " << room.as_Floor() << std::endl;
+    auto cards = deal();
+    int black_count{0};
 
-    TEST_EQ(ok, Room::Bathroom::grab().as_Floor(), Floor::Tile::grab());
-    TEST_EQ(ok, Room::Bedroom::grab().as_Floor(), Floor::Carpet::grab());
-    TEST_EQ(ok, Room::Garage::grab().as_Floor(), Floor::Concrete::grab());
-    TEST_EQ(ok, Room::Hallway::grab().as_Floor(), Floor::Linoleum::grab());
-    TEST_EQ(ok, Room::Kitchen::grab().as_Floor(), Floor::Tile::grab());
-    TEST_EQ(ok, Room::Lounge::grab().as_Floor(), Floor::Parquet::grab());
+    for (auto card : cards)
+    {
+        std::cout << card.rank << " of " << card.suit << std::endl;
+
+        if (card.suit.as_Color() == Color::Black::grab())
+            ++black_count;
+
+        card.suit.match({
+            { Suit::Clubs::grab(),    [&](){ TEST_EQ(ok, card.suit.as_Color(), Color::Black::grab()); } },
+            { Suit::Diamonds::grab(), [&](){ TEST_EQ(ok, card.suit.as_Color(), Color::Red::grab()); } },
+            { Suit::Hearts::grab(),   [&](){ TEST_EQ(ok, card.suit.as_Color(), Color::Red::grab()); } },
+            { Suit::Spades::grab(),   [&](){ TEST_EQ(ok, card.suit.as_Color(), Color::Black::grab()); } },
+            { Suit::nil,              [&](){ FAIL(ok); } }
+        });
+    }
+
+    std::cout << black_count << " card";
+    if (black_count == 1)
+        std::cout << " is ";
+    else
+        std::cout << "s are ";
+    std::cout << "black." << std::endl;
 
     return ok();
 }
