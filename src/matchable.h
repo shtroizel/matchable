@@ -601,7 +601,7 @@ std::vector<M> MatchBox<M, void>::currently_set() const
         void set_##_s(_s::Type const & s) { _s##_().set(Type(clone()), s); }                               \
     private:                                                                                               \
         static MatchBox<_t::Type, _s::Type> & _s##_() { static MatchBox<_t::Type, _s::Type> m; return m; } \
-        static _s::Type nil_##_s() { static _s::Type ns; return ns; }                                      \
+        static _s::Type nil_##_s() { static _s::Type ns; return ns; }
 
 
 
