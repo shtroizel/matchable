@@ -111,7 +111,7 @@ int main()
         SortingAlgorithm::variants().begin(),
         SortingAlgorithm::variants().end(),
         stable_algorithms_by_space_complexity.begin(),
-        [](SortingAlgorithm::Type sa) { return sa.as_Stability() == Stability::Stable::grab(); }
+        [](auto sa) { return sa.as_Stability() == Stability::Stable::grab(); }
     );
     stable_algorithms_by_space_complexity.resize(
         std::distance(stable_algorithms_by_space_complexity.begin(), it)
