@@ -605,8 +605,6 @@ std::vector<M> MatchBox<M, void>::currently_set() const
 
 
 
-
-
 /**
  * Usage: SPREAD_MATCHABLE(spread, type, variant...)
  *
@@ -622,6 +620,29 @@ std::vector<M> MatchBox<M, void>::currently_set() const
     _matchable_create_type_end(_t)                                                                         \
     _matchable_declare_begin(_t)                                                                           \
     _spread_matchable_amend_declaration(_s, _t)                                                            \
+    _matchable_declare_end(_t)                                                                             \
+    _matchable_define(_t)                                                                                  \
+    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
+
+
+
+/**
+ * Usage: SPREADx2_MATCHABLE(spread, spread, type, variant...)
+ *
+ * Where: spreads are: types defined by MATCHABLE() or SPREAD*_MATCHABLE()
+ */
+#define SPREADx2_MATCHABLE(_s0, _s1, _t, ...)                                                              \
+    namespace _t                                                                                           \
+    {                                                                                                      \
+        enum class Enum { nil, __VA_ARGS__ };                                                              \
+    }                                                                                                      \
+    _matchable_create_type_begin(_t)                                                                       \
+    _spread_matchable_amend_type(_s0, _t)                                                                  \
+    _spread_matchable_amend_type(_s1, _t)                                                                  \
+    _matchable_create_type_end(_t)                                                                         \
+    _matchable_declare_begin(_t)                                                                           \
+    _spread_matchable_amend_declaration(_s0, _t)                                                           \
+    _spread_matchable_amend_declaration(_s1, _t)                                                           \
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
