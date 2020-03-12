@@ -591,14 +591,14 @@ std::vector<M> MatchBox<M, void>::currently_set() const
 #define _spread_matchable_amend_type(_s, _t)                                                               \
     public:                                                                                                \
         _s::Type as_##_s() const { return nullptr == t ? T::nil_##_s() : t->as_##_s(); }                   \
-        void set_##_s(_s::Type const & s) { if (nullptr == t) T::nil_##_s() = s; else t->spread(s); }
+        void set_##_s(_s::Type const & s) { if (nullptr == t) T::nil_##_s() = s; else t->set_##_s(s); }
 
 
 
 #define _spread_matchable_amend_declaration(_s, _t)                                                        \
     public:                                                                                                \
         _s::Type as_##_s() const { return _s##_().at(Type(clone())); }                                     \
-        void spread(_s::Type const & s) { _s##_().set(Type(clone()), s); }                                 \
+        void set_##_s(_s::Type const & s) { _s##_().set(Type(clone()), s); }                               \
     private:                                                                                               \
         static MatchBox<_t::Type, _s::Type> & _s##_() { static MatchBox<_t::Type, _s::Type> m; return m; } \
         static _s::Type nil_##_s() { static _s::Type ns; return ns; }                                      \
