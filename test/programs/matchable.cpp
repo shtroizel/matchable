@@ -88,7 +88,13 @@ int main()
 
     // compare operators
     another_time_unit = TimeUnit::Seconds::grab();
-    if (another_time_unit < time_unit) // string compare!
+    if (another_time_unit < time_unit) // string compare! (same as lt_alphabetic())
+        FAIL(ok);
+
+    if (another_time_unit.lt_alphabetic(time_unit))
+        FAIL(ok);
+
+    if (time_unit.lt_enum_order(another_time_unit))
         FAIL(ok);
 
     if (another_time_unit == time_unit)
