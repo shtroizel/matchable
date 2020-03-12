@@ -342,13 +342,13 @@ std::vector<M> MatchBox<M, void>::currently_set() const
 
 
 
-#define _matchable_create_type_end(_t) \
-        }; \
+#define _matchable_create_type_end(_t)                                                                     \
+        };                                                                                                 \
     }
 
 
 
-#define _matchable_define(_t) \
+#define _matchable_define(_t)                                                                              \
     namespace _t                                                                                           \
     {                                                                                                      \
         inline std::vector<Type> const & variants() { return I##_t::variants(); }                          \
