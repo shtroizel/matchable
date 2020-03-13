@@ -204,6 +204,14 @@ public:
     void unset(M const &);
     bool is_set(M const &) const;
     std::vector<M> currently_set() const;
+    bool operator==(MatchBox const &) const;
+    bool operator!=(MatchBox const &) const;
+    friend std::ostream & operator<<(std::ostream & o, MatchBox<M, void> const & m)
+    {
+        for (auto v : M::variants())
+            o << v << ": " << m.is_set(v) << ", ";
+        return o << M() << ": " << m.is_set(M());
+    }
 
 private:
     bool nil_init_flag;
@@ -259,6 +267,26 @@ std::vector<M> MatchBox<M, void>::currently_set() const
     return ret;
 }
 
+
+template<typename M>
+bool MatchBox<M, void>::operator==(MatchBox<M, void> const & other) const
+{
+    return init_flags == other.init_flags;
+}
+
+
+template<typename M>
+bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
+{
+    return !operator==(other);
+}
+
+
+
+// next come the macros...
+//
+// note that compiling backslashes is slow!
+// code is formatted to minimize backslashes while maintaining some semblance of readability
 
 
 #define _matchable_declare_begin(_t)                                                                       \
