@@ -7,54 +7,21 @@ Where: variant... is: in [0..108] comma separated variants
 ## Getting Started
 
 This compile time library consists of a single header file, "matchable.h".
-Just copy src/matchable.h to somewhere in your project and then do something like:
-```
-#include <iostream>
-#include "matchable.h"
-
-MATCHABLE(Rating, Low, BelowAverage, Average, AboveAverage, High)
-
-MATCHABLE(Status_foo, Ok, Err)
-
-Status_foo::Type foo()
-{
-    Rating::Type r;
-    for (Rating::Type const & v: Rating::variants())
-    {
-        r = Rating::from_string(v.as_string());
-        if (r != v)
-            return Status_foo::Err::grab();
-        std::cout << v << std::endl;
-    }
-    return Status_foo::Ok::grab();
-}
-
-int main()
-{
-    foo().match({
-        { Status_foo::Ok::grab(), [&]() { std::cout << "foo() finished." << std::endl; } },
-        { Status_foo::Err::grab(), [&]() { std::cout << "error!" << std::endl; exit(-1); } }
-    });
-    return 0;
-}
-
-```
+Just copy src/matchable.h to somewhere in your project. To get started, take a look
+at the examples under test/programs.
 
 ### Prerequisites
 
-clang >= 7.0.1-8  
-or  
+clang >= 7.0.1-8
+or
 g++ >= 8.3.0
-
-When building the examples CMakeLists.txt:8 forces clang.  
-Comment this line out or set as desired for other compilers.
 
 ### Installing
 Example workflow from project root:
 ```
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=../install ..
+cmake -DCMAKE_CXX_COMPILER="/usr/bin/clang++" -DCMAKE_INSTALL_PREFIX=../install ..
 make install
 cd ..
 ```
