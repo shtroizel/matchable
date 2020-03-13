@@ -16,7 +16,8 @@ clang >= 7.0.1-8
 or
 g++ >= 8.3.0
 
-### Installing
+### Running Tests / Examples
+
 Example workflow from project root:
 ```
 mkdir build
@@ -26,7 +27,6 @@ make install
 cd ..
 ```
 
-### Running Tests / Examples
 Assuming workflow above with install directory under the project root (modify paths accordingly for your workflow).
 <br/>
 <br/>
