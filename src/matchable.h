@@ -248,7 +248,7 @@ void MatchBox<M, void>::unset(M const & match)
 
 
 template<typename M>
-bool MatchBox<M, void>::is_set(const M & match) const
+bool MatchBox<M, void>::is_set(M const & match) const
 {
     if (match.is_nil())
         return nil_init_flag;
