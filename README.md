@@ -12,8 +12,8 @@ at the examples under test/programs.
 
 ### Prerequisites
 
-clang >= 7.0.1-8
-or
+clang >= 7.0.1-8<br/>
+or<br/>
 g++ >= 8.3.0
 
 ### Running Tests / Examples
