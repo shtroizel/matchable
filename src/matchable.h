@@ -78,6 +78,7 @@ public:
     explicit MatchBox(T const & fill);
     MatchBox(std::initializer_list<std::pair<M, T>> init_list);
     T const & at(M const &) const;
+    T & mut_at(M const &);
     void set(M const &, T const &);
     void unset(M const &);
     bool is_set(M const &) const;
@@ -120,6 +121,13 @@ MatchBox<M, T>::MatchBox(std::initializer_list<std::pair<M, T>> init_list)
 
 template<typename M, typename T>
 T const & MatchBox<M, T>::at(M const & match) const
+{
+    return match.is_nil() ? nil_target : targets[static_cast<size_t>(match.as_index())];
+}
+
+
+template<typename M, typename T>
+T & MatchBox<M, T>::mut_at(M const & match)
 {
     return match.is_nil() ? nil_target : targets[static_cast<size_t>(match.as_index())];
 }
