@@ -89,20 +89,20 @@ int main()
     // compare operators
     another_time_unit = TimeUnit::Seconds::grab();
     if (another_time_unit < time_unit) // string compare! (same as lt_alphabetic())
-        FAIL(ok);
+        TEST_FAIL(ok);
 
     if (another_time_unit.lt_alphabetic(time_unit))
-        FAIL(ok);
+        TEST_FAIL(ok);
 
     if (time_unit.lt_enum_order(another_time_unit))
-        FAIL(ok);
+        TEST_FAIL(ok);
 
     if (another_time_unit == time_unit)
-        FAIL(ok);
+        TEST_FAIL(ok);
 
     another_time_unit = time_unit;
     if (another_time_unit != time_unit)
-        FAIL(ok);
+        TEST_FAIL(ok);
 
     // as_string()
     TEST_EQ(ok, time_unit.as_string(), std::string("Minutes"));
@@ -120,7 +120,7 @@ int main()
         case TimeUnit::Enum::Hours:
         case TimeUnit::Enum::Days:
         case TimeUnit::Enum::Weeks:
-        case TimeUnit::Enum::nil: FAIL(ok);
+        case TimeUnit::Enum::nil: TEST_FAIL(ok);
         case TimeUnit::Enum::Minutes:;
     }
 
@@ -138,8 +138,7 @@ int main()
     TEST_EQ(ok, TimeUnit::from_index(107), TimeUnit::nil);
 
     // is_nil()
-    if (time_unit.is_nil())
-        FAIL(ok);
+    TEST_NE(ok, time_unit, TimeUnit::nil);
 
     // flag(), unflag(), set_flagged(), is_flagged()
     for (auto const & tu : TimeUnit::variants())
@@ -171,14 +170,14 @@ int main()
     int input{107};
     foo(input).match({
         {Result::Ok::grab(), [&]() {std::cout << "foo(" << input << ") is ok!" << std::endl;}},
-        {Result::Err::grab(), [&](){std::cout << "foo(" << input << ") failed" << std::endl; FAIL(ok);}}
+        {Result::Err::grab(), [&](){std::cout << "foo(" << input << ") error" << std::endl; TEST_FAIL(ok);}}
     });
 
     // match() with return value
     input = 42;
     Result::Type r = foo(input).match({
         {Result::Ok::grab(), [&](){std::cout << "foo(" << input << ") is ok!" << std::endl;}},
-        {Result::Err::grab(), [&](){std::cout << "foo(" << input << ") failed" << std::endl;}}
+        {Result::Err::grab(), [&](){std::cout << "foo(" << input << ") error" << std::endl;}}
     });
     TEST_EQ(ok, r, Result::Err::grab());
 

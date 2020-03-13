@@ -136,7 +136,7 @@ int main()
         SortingAlgorithm::RadixSort::grab()
     };
     if (stable_algorithms_by_space_complexity != truth)
-        FAIL(ok);
+        TEST_FAIL(ok);
 
     return ok();
 }

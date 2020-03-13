@@ -102,7 +102,7 @@ int main()
             { Suit::Diamonds::grab(), [&](){ TEST_EQ(ok, card.suit.as_Color(), Color::Red::grab()); } },
             { Suit::Hearts::grab(),   [&](){ TEST_EQ(ok, card.suit.as_Color(), Color::Red::grab()); } },
             { Suit::Spades::grab(),   [&](){ TEST_EQ(ok, card.suit.as_Color(), Color::Black::grab()); } },
-            { Suit::nil,              [&](){ FAIL(ok); } }
+            { Suit::nil,              [&](){ TEST_FAIL(ok); } }
         });
     }
 
