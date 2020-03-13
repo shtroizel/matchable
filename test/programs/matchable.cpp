@@ -140,31 +140,22 @@ int main()
     // is_nil()
     TEST_NE(ok, time_unit, TimeUnit::nil);
 
-    // flag(), unflag(), set_flagged(), is_flagged()
+    // Flags
+    TimeUnit::Flags flags;
     for (auto const & tu : TimeUnit::variants())
-        TEST_EQ(ok, tu.is_flagged(), false);
-    TimeUnit::Seconds::grab().flag();
+        TEST_EQ(ok, flags.is_set(tu), false);
+    flags.set(TimeUnit::Seconds::grab());
     time_unit = TimeUnit::Seconds::grab();
-    TEST_EQ(ok, time_unit.is_flagged(), true);
-    time_unit.unflag();
-    TEST_EQ(ok, time_unit.is_flagged(), false);
-    time_unit.set_flagged(true);
-    TEST_EQ(ok, time_unit.is_flagged(), true);
-    time_unit.set_flagged(false);
-    TEST_EQ(ok, time_unit.is_flagged(), false);
-
-    // flagged_variants()   [static]
-    time_unit.flag();
-    auto fv = TimeUnit::flagged_variants();
-    TEST_EQ(ok, fv.size(), (size_t) 1);
-    TEST_EQ(ok, fv[0], time_unit);
-
-    // flagged_variants()
-    TimeUnit::Minutes::grab().flag();
-    fv = time_unit.flagged_variants();
-    TEST_EQ(ok, fv.size(), (size_t) 2);
-    TEST_EQ(ok, fv[0], TimeUnit::Seconds::grab());
-    TEST_EQ(ok, fv[1], TimeUnit::Minutes::grab());
+    TEST_EQ(ok, flags.is_set(time_unit), true);
+    TimeUnit::Flags more_flags{flags};
+    flags.unset(TimeUnit::Seconds::grab());
+    TEST_EQ(ok, more_flags.is_set(time_unit), true);
+    TEST_EQ(ok, flags.is_set(time_unit), false);
+    TEST_NE(ok, flags, more_flags);
+    flags.set(TimeUnit::Hours::grab());
+    flags.set(TimeUnit::Seconds::grab());
+    more_flags.set(TimeUnit::Hours::grab());
+    TEST_EQ(ok, flags, more_flags);
 
     // match() ignoring return value
     int input{107};

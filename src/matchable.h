@@ -303,11 +303,6 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
             virtual std::string const & as_string() const = 0;                                             \
             virtual Enum as_enum() const = 0;                                                              \
             virtual int as_index() const = 0;                                                              \
-            virtual void flag() = 0;                                                                       \
-            virtual void unflag() = 0;                                                                     \
-            virtual void set_flagged(bool) = 0;                                                            \
-            virtual bool is_flagged() const = 0;                                                           \
-            static std::vector<Type> flagged_variants() { return flags().currently_set(); }                \
             static std::vector<Type> const & variants() { return private_variants(); }                     \
             static bool register_variant(Type const & variant, int * i);                                   \
         protected:                                                                                         \
@@ -347,10 +342,6 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
             std::string as_string() const { return nullptr == t ? "nil" : t->as_string(); }                \
             int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
             bool is_nil() const { return nullptr == t; }                                                   \
-            void flag() { if (nullptr == t) T::nil_flag() = true; else t->flag(); }                        \
-            void unflag() { if (nullptr == t) T::nil_flag() = false; else t->unflag(); }                   \
-            void set_flagged(bool f) { if (nullptr == t) T::nil_flag() = f; else t->set_flagged(f); }      \
-            bool is_flagged() const { return nullptr == t ? T::nil_flag() : t->is_flagged(); }             \
             typename T::Enum as_enum() const { return nullptr == t ? T::Enum::nil : t->as_enum(); }        \
             Matchable match(MatchBox<Matchable, std::function<void()>> const & match_box)                  \
             {                                                                                              \
@@ -387,8 +378,8 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 #define _matchable_define(_t)                                                                              \
     namespace _t                                                                                           \
     {                                                                                                      \
+        using Flags = MatchBox<Type, void>;                                                                \
         inline std::vector<Type> const & variants() { return I##_t::variants(); }                          \
-        inline std::vector<Type> flagged_variants() { return I##_t::flagged_variants(); }                  \
         static const Type nil{};                                                                           \
         inline Type from_index(int index)                                                                  \
         {                                                                                                  \
@@ -432,10 +423,6 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
             std::string const & as_string() const override { static std::string const s{#_v}; return s; }  \
             Enum as_enum() const override { return Enum::_v; }                                             \
             int as_index() const override { return *int_member(); }                                        \
-            void flag() override { flags().set(grab()); }                                                  \
-            void unflag() override { flags().unset(grab()); }                                              \
-            void set_flagged(bool f) override { if (f) flags().set(grab()); else flags().unset(grab()); }  \
-            bool is_flagged() const override { return flags().is_set(grab()); }                            \
             static Type grab() { return Type(create()); }                                                  \
         private:                                                                                           \
             std::shared_ptr<I##_t> clone() const  override { return create(); }                            \
