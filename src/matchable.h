@@ -651,7 +651,7 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 /**
  * Usage: SPREAD_MATCHABLE(spread, type, variant...)
  *
- * Where: spread is: a type defined by *MATCHABLE()
+ * Where: spread is: a type defined by MATCHABLE() or SPREAD*_MATCHABLE()
  */
 #define SPREAD_MATCHABLE(_s, _t, ...)                                                                      \
     namespace _t                                                                                           \
@@ -672,7 +672,7 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 /**
  * Usage: SPREADx2_MATCHABLE(spread, spread, type, variant...)
  *
- * Where: spreads are: types defined by *MATCHABLE()
+ * Where: spreads are: types defined by MATCHABLE() or SPREAD*_MATCHABLE()
  */
 #define SPREADx2_MATCHABLE(_s0, _s1, _t, ...)                                                              \
     namespace _t                                                                                           \
@@ -716,7 +716,7 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 /**
  * Usage: SPREADVECTOF_MATCHABLE(spread, type, variant...)
  *
- * Where: spread is: a type defined by *MATCHABLE()
+ * Where: spread is: a type defined by MATCHABLE() or SPREAD*_MATCHABLE()
  */
 #define SPREADVECTOF_MATCHABLE(_s, _t, ...)                                                                \
     namespace _t                                                                                           \
