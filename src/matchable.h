@@ -745,6 +745,15 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 
 
 
+#define VARIANT_SPREADVARIANTVECT(_t, _v, _st, ...)                                                        \
+    inline bool VARIANT_SPREADVARIANTVECT_set_##_t##_##_v_##_st(std::vector<_st::Type> sv)                 \
+        { _t::_v::grab().set_##_st##_vect(sv); return true; }                                              \
+    static bool const VARIANT_SPREADVARIANTVECT_init_##_t##_##_v_##_st =                                   \
+        VARIANT_SPREADVARIANTVECT_set_##_t##_##_v_##_st({                                                  \
+            _mcv(_matchable_concat_variant, _st, ##__VA_ARGS__)});
+
+
+
 /**
  * Remove variants for the current scope (when the scope exits the removed variants are restored).
  * Usage: UNMATCHABLE(type, variant...)

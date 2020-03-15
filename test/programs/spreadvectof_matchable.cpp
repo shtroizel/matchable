@@ -39,22 +39,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 MATCHABLE(Day, Sun, Mon, Tue, Wed, Thu, Fri, Sat)
+
+// create new MATCHABLE called Days with set_Day_vect() and as_Day_vect()
 SPREADVECTOF_MATCHABLE(Day, Days, Weekdays, Weekend)
 
-
+// set a Days variant's vector of Day...
+// Note there are two syntaxes for this. The VARIANT_SPREADVARIANTVECT macro is used here for Weekdays.
+// To demonstrate the other syntax we use the run-time interface within main() to set the Days::Weekend
+// variant. Note that the macro syntax here is link-time.
+VARIANT_SPREADVARIANTVECT(Days, Weekdays, Day, Mon, Tue, Wed, Thu, Fri)
 
 int main()
 {
     test_ok ok;
 
+    // accomplishes the same as VARIANT_SPREADVARIANTVECT() above, but at run-time...
     Days::Weekend::grab().set_Day_vect({Day::Sat::grab(), Day::Sun::grab()});
-    Days::Weekdays::grab().set_Day_vect({
-        Day::Mon::grab(),
-        Day::Tue::grab(),
-        Day::Wed::grab(),
-        Day::Thu::grab(),
-        Day::Fri::grab()
-    });
 
     for (auto days : Days::variants())
     {
