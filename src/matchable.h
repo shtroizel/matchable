@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+#include <algorithm>
 #include <functional>
 #include <memory>
 #include <ostream>
@@ -296,6 +297,7 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
         class I##_t                                                                                        \
         {                                                                                                  \
             friend class Matchable<I##_t>;                                                                 \
+            friend class Unmatchable;                                                                      \
         public:                                                                                            \
             using Enum = _t::Enum;                                                                         \
             I##_t() = default;                                                                             \
@@ -315,6 +317,23 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 
 
 #define _matchable_declare_end(_t)                                                                         \
+        };                                                                                                 \
+        class Unmatchable                                                                                  \
+        {                                                                                                  \
+        public:                                                                                            \
+            explicit Unmatchable(std::vector<Type> um)                                                     \
+            {                                                                                              \
+                prev_variants = I##_t::variants();                                                         \
+                auto i = std::remove_if(I##_t::private_variants().begin(), I##_t::private_variants().end(),\
+                    [&](Type t){ return std::find(um.begin(), um.end(), t) != um.end(); });                \
+                I##_t::private_variants().erase(i, I##_t::private_variants().end());                       \
+            }                                                                                              \
+            ~Unmatchable()                                                                                 \
+            {                                                                                              \
+                I##_t::private_variants() = prev_variants;                                                 \
+            }                                                                                              \
+        private:                                                                                           \
+            std::vector<Type> prev_variants;                                                               \
         };                                                                                                 \
     }
 
@@ -712,3 +731,15 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
+
+
+
+#define _matchable_concat_variant(_t, _v) _t::_v::grab(),
+
+
+
+/**
+ * Usage: UNMATCHABLE(type, variant...)
+ */
+#define UNMATCHABLE(_t, ...)                                                                               \
+    _t::Unmatchable unmatchable_##_t{{_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)}};
