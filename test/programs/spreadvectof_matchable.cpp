@@ -67,5 +67,22 @@ int main()
     TEST_EQ(ok, Days::Weekend::grab().as_Day_vect().size(), static_cast<size_t>(2));
     TEST_EQ(ok, Days::Weekdays::grab().as_Day_vect().size(), static_cast<size_t>(5));
 
+    {
+        std::vector<Day::Type> const TRUTH{Day::Sat::grab(), Day::Sun::grab()};
+        if (Days::Weekend::grab().as_Day_vect() != TRUTH)
+            TEST_FAIL(ok);
+    }
+    {
+        std::vector<Day::Type> const TRUTH{
+            Day::Mon::grab(),
+            Day::Tue::grab(),
+            Day::Wed::grab(),
+            Day::Thu::grab(),
+            Day::Fri::grab(),
+        };
+        if (Days::Weekdays::grab().as_Day_vect() != TRUTH)
+            TEST_FAIL(ok);
+    }
+
     return ok();
 }
