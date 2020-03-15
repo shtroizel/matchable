@@ -670,3 +670,45 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
+
+
+
+
+#define _spreadvectof_matchable_amend_type(_s, _t)                                                         \
+    public:                                                                                                \
+        std::vector<_s::Type> as_##_s##_vect() const                                                       \
+            { return nullptr == t ? T::nil_##_s##_vect() : t->as_##_s##_vect(); }                          \
+        void set_##_s##_vect(std::vector<_s::Type> s_vect)                                                 \
+            { if (nullptr == t) T::nil_##_s##_vect() = s_vect; else t->set_##_s##_vect(s_vect); }
+
+
+
+#define _spreadvectof_matchable_amend_declaration(_s, _t)                                                  \
+    public:                                                                                                \
+        std::vector<_s::Type> as_##_s##_vect() const { return _s##_vect_mb().at(Type(clone())); }          \
+        void set_##_s##_vect(std::vector<_s::Type> s_vect) { _s##_vect_mb().set(Type(clone()), s_vect); }  \
+    private:                                                                                               \
+        static MatchBox<_t::Type, std::vector<_s::Type>> & _s##_vect_mb()                                  \
+            { static MatchBox<_t::Type, std::vector<_s::Type>> m; return m; }                              \
+        static std::vector<_s::Type> nil_##_s##_vect() { static std::vector<_s::Type> ns; return ns; }
+
+
+
+/**
+ * Usage: SPREADVECTOF_MATCHABLE(spread, type, variant...)
+ *
+ * Where: spread is: a type defined by *MATCHABLE()
+ */
+#define SPREADVECTOF_MATCHABLE(_s, _t, ...)                                                                \
+    namespace _t                                                                                           \
+    {                                                                                                      \
+        enum class Enum { nil, __VA_ARGS__ };                                                              \
+    }                                                                                                      \
+    _matchable_create_type_begin(_t)                                                                       \
+    _spreadvectof_matchable_amend_type(_s, _t)                                                             \
+    _matchable_create_type_end(_t)                                                                         \
+    _matchable_declare_begin(_t)                                                                           \
+    _spreadvectof_matchable_amend_declaration(_s, _t)                                                      \
+    _matchable_declare_end(_t)                                                                             \
+    _matchable_define(_t)                                                                                  \
+    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
