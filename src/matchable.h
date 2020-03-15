@@ -464,6 +464,10 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 
 
 
+#define _matchable_concat_variant(_t, _v) _t::_v::grab(),
+
+
+
 #define   _mcv_0(_m, _t, ...)
 #define   _mcv_1(_m, _t, _v)      _m(_t, _v)
 #define   _mcv_2(_m, _t, _v, ...) _m(_t, _v)   _mcv_1(_m, _t, __VA_ARGS__)
@@ -692,6 +696,13 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 
 
 
+#define SPREADVARIANT_VARIANTS(_st, _sv, _t, ...)                                                          \
+    inline bool SPREADVARIANT_VARIANTS_set_##_st##_##_sv##_t(std::vector<_t::Type> t)                      \
+        { for (auto v : t) v.set_##_st(_st::_sv::grab()); return true; }                                   \
+    static bool const SPREADVARIANT_VARIANTS_init_##_st##_##_sv##_t =                                      \
+        SPREADVARIANT_VARIANTS_set_##_st##_##_sv##_t({_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)});
+
+
 
 #define _spreadvectof_matchable_amend_type(_s, _t)                                                         \
     public:                                                                                                \
@@ -734,11 +745,8 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 
 
 
-#define _matchable_concat_variant(_t, _v) _t::_v::grab(),
-
-
-
 /**
+ * Remove variants for the current scope (when the scope exits the removed variants are restored).
  * Usage: UNMATCHABLE(type, variant...)
  */
 #define UNMATCHABLE(_t, ...)                                                                               \

@@ -41,7 +41,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 MATCHABLE(Color, Black, Red)
+
+// create new MATCHABLE called Suit with set_Color() and as_Color()
 SPREAD_MATCHABLE(Color, Suit, Clubs, Diamonds, Hearts, Spades)
+
+// Set the spread for one or more Suit variants...
+// There are two syntaxes for this. The SPREADVARIANT_VARIANTS() macro is used here for the black suits.
+// To demonstrate the other syntax we use the run-time interface within main() to set the red suits.
+// Note that the macro syntax here is link-time.
+SPREADVARIANT_VARIANTS(Color, Black, Suit, Clubs, Spades)
+
 MATCHABLE(Rank, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace)
 
 
@@ -82,10 +91,9 @@ int main()
 {
     test_ok ok;
 
-    Suit::Clubs::grab().set_Color(Color::Black::grab());
+    // accomplishes the same as SPREADVARIANT_VARIANTS() above, but at run-time...
     Suit::Diamonds::grab().set_Color(Color::Red::grab());
     Suit::Hearts::grab().set_Color(Color::Red::grab());
-    Suit::Spades::grab().set_Color(Color::Black::grab());
 
     auto cards = deal();
     int black_count{0};
