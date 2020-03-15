@@ -620,10 +620,11 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 
 #define _spread_matchable_amend_declaration(_s, _t)                                                        \
     public:                                                                                                \
-        _s::Type as_##_s() const { return _s##_().at(Type(clone())); }                                     \
-        void set_##_s(_s::Type const & s) { _s##_().set(Type(clone()), s); }                               \
+        _s::Type as_##_s() const { return _s##_mb().at(Type(clone())); }                                   \
+        void set_##_s(_s::Type const & s) { _s##_mb().set(Type(clone()), s); }                             \
     private:                                                                                               \
-        static MatchBox<_t::Type, _s::Type> & _s##_() { static MatchBox<_t::Type, _s::Type> m; return m; } \
+        static MatchBox<_t::Type, _s::Type> & _s##_mb()                                                    \
+            { static MatchBox<_t::Type, _s::Type> m; return m; }                                           \
         static _s::Type nil_##_s() { static _s::Type ns; return ns; }
 
 
