@@ -369,10 +369,6 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
                     match_box.at(ret)();                                                                   \
                 return ret;                                                                                \
             }                                                                                              \
-            std::vector<Matchable> flagged_variants() const                                                \
-            {                                                                                              \
-                return nullptr == t ? std::vector<Matchable>{} : t->flagged_variants();                    \
-            }                                                                                              \
             static std::vector<Matchable> const & variants() { return T::variants(); }                     \
             bool operator==(Matchable const & m) const { return as_string() == m.as_string(); }            \
             bool operator!=(Matchable const & m) const { return as_string() != m.as_string(); }            \
