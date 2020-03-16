@@ -26,16 +26,16 @@ MATCHABLE(TimeUnit, Seconds, Minutes, Hours, Days, Weeks)
 int main()
 {
     // default construction
-    TimeUnit::Type const default_constructed;
+    {
+        TimeUnit::Type const default_constructed;
+    }
 
     // static functions returning TimeUnit::Type
-    {
-        TimeUnit::Seconds::grab();
-        TimeUnit::Minutes::grab();
-        TimeUnit::Hours::grab();
-        TimeUnit::Days::grab();
-        TimeUnit::Weeks::grab();
-    }
+    TimeUnit::Seconds::grab();
+    TimeUnit::Minutes::grab();
+    TimeUnit::Hours::grab();
+    TimeUnit::Days::grab();
+    TimeUnit::Weeks::grab();
 
     // assignment
     TimeUnit::Type const time_unit = TimeUnit::Minutes::grab();
@@ -164,6 +164,7 @@ int main()
 
     return -1;
 }
+
 ```
 ## Macro-API<a name="macro_api"></a>
 macro names<br/>
