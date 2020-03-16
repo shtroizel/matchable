@@ -224,10 +224,18 @@ Example: test/programs/spreadvectof_matchable.cpp
 ```
 SPREADVARIANT_VARIANTS(spread_type, spread_variant, type, variant...)
 ```
-#### Call \`type\`::\`variant\`::grab().set_\`spread_type\`_vect() with a vector formed by the given \`spread_variants...\` of \`spread_type\` at link-time
+Example: test/programs/spread_matchable.cpp
+#### Call \`type\`::\`variant\`::grab().set_\`spread_type\`_vect() with a vector formed by the given \`spread_variants...\` of \`spread_type\` at link-time with:
 ```
 VARIANT_SPREADVARIANTVECT(type, variant, spread_type, spread_variants...)
 ```
+Example: test/programs/spreadvectof_matchable.cpp
+#### Remove variants for the current scope with:
+```
+UNMATCHABLE(type, variant...)
+```
+when the scope exits the removed variants are restored<br/>
+Example: test/programs/unmatchable.cpp
 ### Prerequisites
 
 clang >= 7.0.1-8<br/>
