@@ -216,7 +216,7 @@ Where: spread is: a type defined by MATCHABLE() or SPREAD\*\_MATCHABLE()<br/>
 Injects:
 ```
 void set_`spread`_vect(std::vector<`spread`::Type>)
-std::vector<`spread`::Type> as_<spread>_vect() const
+std::vector<`spread`::Type> as_`spread`_vect() const
 ```
 as member functions of \`type\`::Type<br/>
 Example: test/programs/spreadvectof_matchable.cpp
