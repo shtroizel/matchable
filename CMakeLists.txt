@@ -5,6 +5,7 @@ project(matchable)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
 
+install(FILES src/matchable.h DESTINATION include)
 
 ####### test scripts  #######
 install(PROGRAMS scripts/run_all.sh DESTINATION test/bin/)
