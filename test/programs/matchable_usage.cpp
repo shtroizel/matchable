@@ -42,8 +42,8 @@ MATCHABLE(TimeUnit, Seconds, Minutes, Hours, Days, Weeks)
 
 int main()
 {
-    // default construction
     {
+        // default construction
         TimeUnit::Type const default_constructed;
     }
 
@@ -57,14 +57,14 @@ int main()
     // assignment
     TimeUnit::Type const time_unit = TimeUnit::Minutes::grab();
 
-    // copy construction / assignment
     {
+        // copy construction / assignment
         TimeUnit::Type copied{time_unit};
         TimeUnit::Type assigned = time_unit;
     }
 
-    // move construction / assignment
     {
+        // move construction / assignment
         TimeUnit::Type tu = TimeUnit::Minutes::grab();
         TimeUnit::Type move_constructed{std::move(tu)};
         TimeUnit::Type move_assigned = std::move(move_constructed);
@@ -96,8 +96,8 @@ int main()
         s = TimeUnit::Type().as_string(); // s is "nil"
     }
 
-    // from_string()
     {
+        // from_string()
         TimeUnit::Type tu = TimeUnit::from_string("107"); // tu is TimeUnit::nil
         tu = TimeUnit::from_string("nil"); // tu is TimeUnit::nil
         tu = TimeUnit::from_string("Weeks"); // tu is TimeUnit::Weeks::grab()
@@ -148,8 +148,8 @@ int main()
         b = more_flags.is_set(TimeUnit::Hours::grab()); // b is false
     }
 
-    // match()
     {
+        // match()
         TimeUnit::Type const tu = [](){ return TimeUnit::Minutes::grab(); }().match({
             { TimeUnit::Seconds::grab(), [](){ exit(-1); } },
             { TimeUnit::Minutes::grab(), [](){ std::cout << "match!" << std::endl; } },
