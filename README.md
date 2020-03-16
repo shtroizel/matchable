@@ -41,9 +41,8 @@ int main()
     TimeUnit::Type const time_unit = TimeUnit::Minutes::grab();
 
     {
-        // copy construction / assignment
+        // copy construction
         TimeUnit::Type copied{time_unit};
-        TimeUnit::Type assigned = time_unit;
     }
 
     {
@@ -93,7 +92,7 @@ int main()
         case TimeUnit::Enum::Hours:
         case TimeUnit::Enum::Days:
         case TimeUnit::Enum::Weeks:
-        case TimeUnit::Enum::nil: return -1;
+        case TimeUnit::Enum::nil: return EXIT_FAILURE;
         case TimeUnit::Enum::Minutes:;
         // no default, compile warning as error better than runtime default
     }
@@ -111,8 +110,9 @@ int main()
         tu = TimeUnit::from_index(107); // tu is TimeUnit::nil
     }
 
-    // is_nil();
-    time_unit.is_nil(); // false
+    // is_nil()
+    if (time_unit.is_nil())
+        exit(EXIT_FAILURE);
 
     {
         // flags
@@ -134,12 +134,12 @@ int main()
     {
         // match()
         TimeUnit::Type const tu = [](){ return TimeUnit::Minutes::grab(); }().match({
-            { TimeUnit::Seconds::grab(), [](){ exit(-1); } },
+            { TimeUnit::Seconds::grab(), [](){ exit(EXIT_FAILURE); } },
             { TimeUnit::Minutes::grab(), [](){ std::cout << "match!" << std::endl; } },
-            { TimeUnit::Hours::grab(), [](){ exit(-1); } },
-            { TimeUnit::Days::grab(), [](){ exit(-1); } },
-            { TimeUnit::Weeks::grab(), [](){ exit(-1); } },
-            { TimeUnit::nil, [](){ exit(-1); } },
+            { TimeUnit::Hours::grab(), [](){ exit(EXIT_FAILURE); } },
+            { TimeUnit::Days::grab(), [](){ exit(EXIT_FAILURE); } },
+            { TimeUnit::Weeks::grab(), [](){ exit(EXIT_FAILURE); } },
+            { TimeUnit::nil, [](){ exit(EXIT_FAILURE); } },
         }); // tu is TimeUnit::Minutes::grab()
     }
 
@@ -163,10 +163,10 @@ int main()
 
     // return success
     [](int magic){ if (magic == 107) return TimeUnit::Weeks::grab(); return TimeUnit::nil; }(107).match({
-        { TimeUnit::Weeks::grab(), [](){ exit(0); } },
+        { TimeUnit::Weeks::grab(), [](){ exit(EXIT_SUCCESS); } },
     });
 
-    return -1;
+    return EXIT_FAILURE;
 }
 
 ```
