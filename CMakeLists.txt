@@ -22,6 +22,7 @@ endfunction()
 
 add_matchable_test(max_variants)
 add_matchable_test(matchable)
+add_matchable_test(matchable_usage)
 add_matchable_test(matchbox)
 add_matchable_test(spread_matchable)
 add_matchable_test(spreadx2_matchable)

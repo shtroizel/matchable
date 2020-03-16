@@ -1,18 +1,35 @@
-# MATCHABLE
+/*
+Copyright (c) 2019-2020, Eric Hyer
+All rights reserved.
 
-seemlessly flow<br/>
-between strings and identifiers<br/>
-itemized in groups<br/>
-that can spread forming relationships<br/>
-as a compile-time tool<br/>
-for inconspicuous efficiency<br/>
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-## Getting Started
-MATCHABLE is implemented entirely by src/matchable.h
-## Matchable API
-Matchables are created using the macro API (see Macro API below). Here we describe what can be
-done with those types that are already created, as a complete example:
-```
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+
+
 #include <iostream>
 
 #include "matchable.h"
@@ -164,128 +181,3 @@ int main()
 
     return -1;
 }
-```
-## Macro-API<a name="macro_api"></a>
-macro names<br/>
-mirror their parameters<br/>
-respectively<br/>
-<br/>
-where a MATCHABLE is a type followed by its variants
-<br/>
-<br/>
-for documention here note that backticks are used to notate parameter substitution
-### Macros for creating new types
-#### Create a new type and its variants with:
-```
-MATCHABLE(type, variant...)
-```
-Where: variant... is: in [0..108] comma separated variants<br/>
-Example: test/programs/matchable.cpp
-#### Create a new type and its variants having a matchable property with:
-```
-SPREAD_MATCHABLE(spread, type, variant...)
-```
-Where: spread is: a type defined by MATCHABLE() or SPREAD\*\_MATCHABLE()<br/>
-Injects:
-```
-void set_`spread`(`spread`::Type)
-`spread`::Type as_`spread`() const
-```
-as member functions of \`type\`::Type<br/>
-Example: test/programs/spread_matchable.cpp
-#### Create a new type and its variants having 2 matchable properties with:
-```
-SPREADx2_MATCHABLE(spread0, spread1, type, variant...)
-```
-Where: spreads are: independent types defined by MATCHABLE() or SPREAD\*\_MATCHABLE()<br/>
-Injects:
-```
-void set_`spread0`(`spread`::Type)
-`spread0`::Type as_`spread0`() const
-void set_`spread1`(`spread1`::Type)
-`spread1`::Type as_`spread1`() const
-```
-as member functions of \`type\`::Type<br/>
-Example: test/programs/spreadx2matchable.cpp
-#### Create a new type and its variants having a "vector of matchable" property with:
-```
-SPREADVECTOF_MATCHABLE(spread, type, variant...)
-```
-Where: spread is: a type defined by MATCHABLE() or SPREAD\*\_MATCHABLE()<br/>
-Injects:
-```
-void set_`spread`_vect(std::vector<`spread`::Type>)
-std::vector<`spread`::Type> as_<spread>_vect() const
-```
-as member functions of \`type\`::Type<br/>
-Example: test/programs/spreadvectof_matchable.cpp
-### Macros manipulating existing types
-#### Call set_\`spread_type\`(\`spread_type\`::\`spread_variant\`::grab()) with each \`variant...\` of \`type\` at link-time with:
-```
-SPREADVARIANT_VARIANTS(spread_type, spread_variant, type, variant...)
-```
-#### Call \`type\`::\`variant\`::grab().set_\`spread_type\`_vect() with a vector formed by the given \'spread_variants...\' of \'spread_type\' at link-time
-```
-VARIANT_SPREADVARIANTVECT(type, variant, spread_type, spread_variants...)
-```
-### Prerequisites
-
-clang >= 7.0.1-8<br/>
-or<br/>
-eg++ >= 8.3.0
-
-### Running Tests / Examples
-
-Example workflow from project root:
-```
-mkdir build
-cd build
-cmake -DCMAKE_CXX_COMPILER="/usr/bin/clang++" -DCMAKE_INSTALL_PREFIX=../install ..
-make install
-cd ..
-```
-
-Assuming workflow above with install directory under the project root (modify paths accordingly for your workflow).
-<br/>
-<br/>
-
-List all tests:
-```
-install/test/bin/list.sh
-```
-Run Single Test (for example "max_variants"):
-```
-install/test/bin/run_test.sh max_variants
-```
-Run Quietly:
-```
-install/test/bin/run_test.sh max_variants quietly
-```
-Run All Tests:
-```
-install/test/bin/run_all.sh
-```
-Run All Tests Quietly
-```
-install/test/bin/run_all.sh quietly
-```
-
-### Example Source Code
-Example code can be found under:
-```
-test/programs
-```
-
-## Versioning
-
-For the versions available, see the [tags on this repository](https://github.com/shtroizel/matchable/tags).
-
-## Authors
-
-* **Eric Hyer**
-
-See also the list of [contributors](https://github.com/shtroizel/matchable/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the "BSD 3-Clause License" - see the [LICENSE](LICENSE) file for details
