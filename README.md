@@ -224,7 +224,7 @@ Example: test/programs/spreadvectof_matchable.cpp
 ```
 SPREADVARIANT_VARIANTS(spread_type, spread_variant, type, variant...)
 ```
-#### Call \`type\`::\`variant\`::grab().set_\`spread_type\`_vect() with a vector formed by the given \'spread_variants...\' of \'spread_type\' at link-time
+#### Call \`type\`::\`variant\`::grab().set_\`spread_type\`_vect() with a vector formed by the given \`spread_variants...\` of \`spread_type\` at link-time
 ```
 VARIANT_SPREADVARIANTVECT(type, variant, spread_type, spread_variants...)
 ```
