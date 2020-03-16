@@ -243,7 +243,7 @@ when the scope exits the removed variants are restored<br/>
 Example: test/programs/unmatchable.cpp
 ### Prerequisites
 
-clang >= 7.0.1-8<br/>
+clang >= 7.0.1<br/>
 or<br/>
 eg++ >= 8.3.0
 
@@ -257,7 +257,18 @@ cmake -DCMAKE_CXX_COMPILER="/usr/bin/clang++" -DCMAKE_INSTALL_PREFIX=../install 
 make install
 cd ..
 ```
+#### Alternatively configure + build + test in one step with scripts/setup.sh
+give the script "clang" to do like above setting CMAKE_CXX_COMPILER or leave off to let cmake do whatever
+```
+scripts/setup.sh clang
+```
+or
+```
+scripts/setup.sh
+```
+setup.sh will return 0 if cmake + build + test are all ok<br/>
 
+#### Testing
 Assuming workflow above with install directory under the project root (modify paths accordingly for your workflow).
 <br/>
 <br/>
