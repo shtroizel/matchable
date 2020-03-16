@@ -245,7 +245,7 @@ Example: test/programs/unmatchable.cpp
 
 clang >= 7.0.1<br/>
 or<br/>
-eg++ >= 8.3.0
+g++ >= 8.3.0
 
 ### Running Tests / Examples
 
