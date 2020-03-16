@@ -73,6 +73,7 @@ int main()
     {
         // string compare! (same as lt_alphabetic())
         bool lt = TimeUnit::Seconds::grab() < time_unit; // lt is false
+        (void) lt;
 
         // explicit string compare
         lt = TimeUnit::Seconds::grab().lt_alphabetic(time_unit); // lt is false
@@ -84,6 +85,7 @@ int main()
     {
         // equality compare
         bool eq = TimeUnit::Seconds::grab() == time_unit; // eq is false
+        (void) eq;
         eq = TimeUnit::Seconds::grab() != time_unit; // eq is true
     }
 
@@ -116,6 +118,7 @@ int main()
     {
         // as_index()
         int index = TimeUnit::Seconds::grab().as_index(); // index is 0
+        (void) index;
         index = TimeUnit::Days::grab().as_index(); // index is 3
     }
 
@@ -132,6 +135,7 @@ int main()
         // flags
         TimeUnit::Flags flags;
         bool b = flags.is_set(TimeUnit::Seconds::grab()); // b is false (all are unset by default)
+        (void) b;
         flags.set(TimeUnit::Hours::grab());
         b = flags.is_set(TimeUnit::Hours::grab()); // b is true
 
