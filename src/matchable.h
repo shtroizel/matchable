@@ -362,7 +362,7 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
             int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
             bool is_nil() const { return nullptr == t; }                                                   \
             typename T::Enum as_enum() const { return nullptr == t ? T::Enum::nil : t->as_enum(); }        \
-            Matchable match(MatchBox<Matchable, std::function<void()>> const & match_box)                  \
+            Matchable match(MatchBox<Matchable, std::function<void()>> const & match_box) const            \
             {                                                                                              \
                 Matchable ret{t};                                                                          \
                 if (match_box.is_set(ret))                                                                 \
