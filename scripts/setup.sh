@@ -17,7 +17,7 @@ if [ $? -ne 0 ]
 then
     exit $?
 fi
-make -j install
+make -j `nproc` install
 if [ $? -ne 0 ]
 then
     exit $?
