@@ -448,7 +448,7 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 
 #define _matchable_create_variant_end(_t, _v)                                                              \
         };                                                                                                 \
-        static bool const register_me_##_##_t##_v = I##_t::register_variant(_v::grab(), _v::int_member());                \
+        static bool const register_me_##_t##_v = I##_t::register_variant(_v::grab(), _v::int_member());    \
     }
 
 
