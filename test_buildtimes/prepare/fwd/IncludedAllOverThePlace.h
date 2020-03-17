@@ -1,5 +1,6 @@
 #pragma once
-#include "TimeUnit.h"
+#include "matchable_fwd.h"
+MATCHABLE_FWD(TimeUnit)
 class IncludedAllOverThePlace
 {
 public:
