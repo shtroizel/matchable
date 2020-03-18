@@ -257,17 +257,15 @@ cmake -DCMAKE_CXX_COMPILER="/usr/bin/clang++" -DCMAKE_INSTALL_PREFIX=../install 
 make install
 cd ..
 ```
-#### Alternatively configure + build + test in one step with scripts/setup.sh
-give the script "clang" to do like above setting CMAKE_CXX_COMPILER or leave off to let cmake do whatever
-```
-scripts/setup.sh clang
-```
-or
+#### Alternatively configure + build + test in one step with:
 ```
 scripts/setup.sh
 ```
-setup.sh will return 0 if cmake + build + test are all ok<br/>
-
+setup without arguments will use the default system compiler. To specify clang do:
+```
+scripts/setup.sh --clang
+```
+use --help for details<br/>
 #### Testing
 Assuming workflow above with install directory under the project root (modify paths accordingly for your workflow).
 <br/>
