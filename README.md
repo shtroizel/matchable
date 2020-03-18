@@ -8,7 +8,9 @@ as a compile-time tool<br/>
 for inconspicuous efficiency<br/>
 
 ## Getting Started
-MATCHABLE is implemented entirely by src/matchable.h
+MATCHABLE is implemented by:<br/>
+* src/matchable.h<br/>
+* src/matchable_fwd.h
 ## Matchable API
 Matchables are created using the macro API (see Macro API below). Here we describe what can be
 done with those types that are already created, as a complete example:
@@ -241,6 +243,15 @@ UNMATCHABLE(type, variant...)
 ```
 when the scope exits the removed variants are restored<br/>
 Example: test/programs/unmatchable.cpp
+#### Forward declare a MATCHABLE type - TimeUnit for example:
+```
+#include "matchable_fwd.h"
+MATCHABLE_FWD(TimeUnit)
+```
+To understand why MATCHABLE_FWD exists run:
+```
+scripts/test_buildtimes.py
+```
 ### Prerequisites
 
 clang >= 7.0.1<br/>
