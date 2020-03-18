@@ -258,26 +258,26 @@ clang >= 7.0.1<br/>
 or<br/>
 g++ >= 8.3.0
 
-### Running Tests / Examples
-
-Example workflow from project root:
-```
-mkdir build
-cd build
-cmake -DCMAKE_CXX_COMPILER="/usr/bin/clang++" -DCMAKE_INSTALL_PREFIX=../install ..
-make install
-cd ..
-```
-#### Alternatively configure + build + test in one step with:
+### Building, Installing and Running Tests In One Step
 ```
 scripts/setup.sh
 ```
-setup without arguments will use the default system compiler. To specify clang do:
+setup.sh without arguments will from the project root do:
 ```
-scripts/setup.sh --clang
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=../install ..
+make install
+cd ..
+install/test/bin/run_all.sh again_quietly
 ```
-use --help for details<br/>
-#### Testing
+to specify custom build or install directories or to force use of clang see:
+```
+scripts/setup.sh --help
+```
+* use of setup.sh is of course optional and serves as a reference or example workflow
+* setup.sh will remove the build and install directories before starting!
+### Running Tests / Examples
 Assuming workflow above with install directory under the project root (modify paths accordingly for your workflow).
 <br/>
 <br/>
