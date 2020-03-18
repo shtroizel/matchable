@@ -147,9 +147,10 @@ int main()
 
     // traversal, variants(), operator<<()
     TimeUnit::variants().size(); // 5
-    std::cout << "Traversing TimeUnit variants..." << std::endl;
+    std::cout << "Printing some TimeUnit variants..." << std::endl;
     for (auto variant : TimeUnit::variants())
-        std::cout << "    " << variant << std::endl;
+        if (MATCHABLE_INSTANCE_IN(TimeUnit, variant, Hours, Days, Weeks))
+            std::cout << "    " << variant << std::endl;
 
     {
         // remove Days and Weeks
@@ -234,7 +235,7 @@ SPREADVARIANT_VARIANTS(spread_type, spread_variant, type, variant...)
 Example: test/programs/spread_matchable.cpp
 #### Call \`type\`::\`variant\`::grab().set_\`spread_type\`_vect() with a vector formed by the given \`spread_variants...\` of \`spread_type\` at link-time with:
 ```
-VARIANT_SPREADVARIANTVECT(type, variant, spread_type, spread_variants...)
+VARIANT_SPREADVARIANTVECT(type, variant, spread_type, spread_variant...)
 ```
 Example: test/programs/spreadvectof_matchable.cpp
 #### Remove variants for the current scope with:
@@ -243,7 +244,13 @@ UNMATCHABLE(type, variant...)
 ```
 when the scope exits the removed variants are restored<br/>
 Example: test/programs/unmatchable.cpp
-#### Forward declare a MATCHABLE type - TimeUnit for example:
+### Macros for working with matchable instances
+#### Test if a matchable instance matches one of some given variants
+```
+MATCHABLE_INSTANCE_IN(type, instance, variant...) -> bool
+```
+returns true if instance is one of the given variants or false otherwise
+### Forward declare a MATCHABLE type - TimeUnit for example:
 ```
 #include "matchable_fwd.h"
 MATCHABLE_FWD(TimeUnit)

@@ -756,3 +756,13 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
  */
 #define UNMATCHABLE(_t, ...)                                                                               \
     _t::Unmatchable unmatchable_##_t{{_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)}};
+
+
+
+/**
+ * Test if a given matchable instance is contained within a given list of variants
+ */
+#define MATCHABLE_INSTANCE_IN(_t, _i, ...)                                                                 \
+    [](_t::Type const & t, std::vector<_t::Type> const & v)                                                \
+        { return std::find(v.begin(), v.end(), t) != v.end(); }                                            \
+            (_i, {_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)})

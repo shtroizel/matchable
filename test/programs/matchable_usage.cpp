@@ -162,9 +162,10 @@ int main()
 
     // traversal, variants(), operator<<()
     TimeUnit::variants().size(); // 5
-    std::cout << "Traversing TimeUnit variants..." << std::endl;
+    std::cout << "Printing some TimeUnit variants..." << std::endl;
     for (auto variant : TimeUnit::variants())
-        std::cout << "    " << variant << std::endl;
+        if (MATCHABLE_INSTANCE_IN(TimeUnit, variant, Hours, Days, Weeks))
+            std::cout << "    " << variant << std::endl;
 
     {
         // remove Days and Weeks
