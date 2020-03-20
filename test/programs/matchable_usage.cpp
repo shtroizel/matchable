@@ -70,15 +70,15 @@ int main()
     }
 
     {
-        // string compare! (same as lt_alphabetic())
-        bool lt = TimeUnit::Seconds::grab() < time_unit; // lt is false
+        // same as lt_by_index())
+        bool lt = TimeUnit::Seconds::grab() < time_unit; // lt is true
         (void) lt;
 
-        // explicit string compare
-        lt = TimeUnit::Seconds::grab().lt_alphabetic(time_unit); // lt is false
+        // string compare
+        lt = TimeUnit::Seconds::grab().lt_by_string(time_unit); // lt is false
 
         // enum order compare
-        lt = TimeUnit::Seconds::grab().lt_enum_order(time_unit); // lt is true
+        lt = TimeUnit::Seconds::grab().lt_by_index(time_unit); // lt is true
     }
 
     {
@@ -100,18 +100,6 @@ int main()
         TimeUnit::Type tu = TimeUnit::from_string("107"); // tu is TimeUnit::nil
         tu = TimeUnit::from_string("nil"); // tu is TimeUnit::nil
         tu = TimeUnit::from_string("Weeks"); // tu is TimeUnit::Weeks::grab()
-    }
-
-    // as_enum()
-    switch (time_unit.as_enum())
-    {
-        case TimeUnit::Enum::Seconds:
-        case TimeUnit::Enum::Hours:
-        case TimeUnit::Enum::Days:
-        case TimeUnit::Enum::Weeks:
-        case TimeUnit::Enum::nil: return EXIT_FAILURE;
-        case TimeUnit::Enum::Minutes:;
-        // no default, compile warning as error better than runtime default
     }
 
     {
@@ -150,7 +138,7 @@ int main()
 
     {
         // match()
-        TimeUnit::Type const tu = [](){ return TimeUnit::Minutes::grab(); }().match({
+        time_unit.match({
             { TimeUnit::Seconds::grab(), [](){ exit(EXIT_FAILURE); } },
             { TimeUnit::Minutes::grab(), [](){ std::cout << "match!" << std::endl; } },
             { TimeUnit::Hours::grab(), [](){ exit(EXIT_FAILURE); } },

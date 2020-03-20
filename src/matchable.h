@@ -35,10 +35,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <memory>
 #include <ostream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 
@@ -299,11 +301,9 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
             friend class Matchable<I##_t>;                                                                 \
             friend class Unmatchable;                                                                      \
         public:                                                                                            \
-            using Enum = _t::Enum;                                                                         \
             I##_t() = default;                                                                             \
             virtual ~I##_t() = default;                                                                    \
             virtual std::string const & as_string() const = 0;                                             \
-            virtual Enum as_enum() const = 0;                                                              \
             virtual int as_index() const = 0;                                                              \
             static std::vector<Type> const & variants() { return private_variants(); }                     \
             static bool register_variant(Type const & variant, int * i);                                   \
@@ -359,22 +359,22 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
             }                                                                                              \
             Matchable & operator=(Matchable &&) = default;                                                 \
             std::string as_string() const { return nullptr == t ? "nil" : t->as_string(); }                \
+            std::string as_text() const                                                                    \
+                { std::string s{as_string()}; std::replace(s.begin(), s.end(), '_', ' '); return s; }      \
             int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
             bool is_nil() const { return nullptr == t; }                                                   \
-            typename T::Enum as_enum() const { return nullptr == t ? T::Enum::nil : t->as_enum(); }        \
-            Matchable match(MatchBox<Matchable, std::function<void()>> const & match_box) const            \
+            void match(MatchBox<Matchable, std::function<void()>> const & match_box) const                 \
             {                                                                                              \
-                Matchable ret{t};                                                                          \
-                if (match_box.is_set(ret))                                                                 \
-                    match_box.at(ret)();                                                                   \
-                return ret;                                                                                \
+                Matchable m{t};                                                                            \
+                if (match_box.is_set(m))                                                                   \
+                    match_box.at(m)();                                                                     \
             }                                                                                              \
             static std::vector<Matchable> const & variants() { return T::variants(); }                     \
             bool operator==(Matchable const & m) const { return as_string() == m.as_string(); }            \
             bool operator!=(Matchable const & m) const { return as_string() != m.as_string(); }            \
-            bool operator<(Matchable const & m) const { return as_string() < m.as_string(); }              \
-            bool lt_alphabetic(Matchable const & m) const { return as_string() < m.as_string(); }          \
-            bool lt_enum_order(Matchable const & m) const { return as_index() < m.as_index(); }            \
+            bool operator<(Matchable const & m) const { return as_index() < m.as_index(); }                \
+            bool lt_by_string(Matchable const & m) const { return as_string() < m.as_string(); }           \
+            bool lt_by_index(Matchable const & m) const { return as_index() < m.as_index(); }              \
             friend std::ostream & operator<<(std::ostream & o, Matchable const & m)                        \
             {                                                                                              \
                 return o << m.as_string();                                                                 \
@@ -436,7 +436,6 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
         public:                                                                                            \
             _v() = default;                                                                                \
             std::string const & as_string() const override { static std::string const s{#_v}; return s; }  \
-            Enum as_enum() const override { return Enum::_v; }                                             \
             int as_index() const override { return *int_member(); }                                        \
             static Type grab() { return Type(create()); }                                                  \
             static int * int_member() { static int i{-1}; return &i; }                                     \
@@ -617,10 +616,6 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
  * Where: variant... is: in [0..108] comma separated variants
  */
 #define MATCHABLE(_t, ...)                                                                                 \
-    namespace _t                                                                                           \
-    {                                                                                                      \
-        enum class Enum { nil, __VA_ARGS__ };                                                              \
-    }                                                                                                      \
     _matchable_create_type_begin(_t)                                                                       \
     _matchable_create_type_end(_t)                                                                         \
     _matchable_declare_begin(_t)                                                                           \
@@ -633,14 +628,14 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 #define _spread_matchable_amend_type(_s, _t)                                                               \
     public:                                                                                                \
         _s::Type as_##_s() const { return nullptr == t ? T::nil_##_s() : t->as_##_s(); }                   \
-        void set_##_s(_s::Type const & s) { if (nullptr == t) T::nil_##_s() = s; else t->set_##_s(s); }
+        void set_##_s(_s::Type s) { if (nullptr == t) T::nil_##_s() = s; else t->set_##_s(s); }
 
 
 
 #define _spread_matchable_amend_declaration(_s, _t)                                                        \
     public:                                                                                                \
         _s::Type as_##_s() const { return _s##_mb().at(Type(clone())); }                                   \
-        void set_##_s(_s::Type const & s) { _s##_mb().set(Type(clone()), s); }                             \
+        void set_##_s(_s::Type s) { _s##_mb().set(Type(clone()), s); }                                     \
     private:                                                                                               \
         static MatchBox<_t::Type, _s::Type> & _s##_mb()                                                    \
             { static MatchBox<_t::Type, _s::Type> m; return m; }                                           \
@@ -654,10 +649,6 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
  * Where: spread is: a type defined by MATCHABLE() or SPREAD*_MATCHABLE()
  */
 #define SPREAD_MATCHABLE(_s, _t, ...)                                                                      \
-    namespace _t                                                                                           \
-    {                                                                                                      \
-        enum class Enum { nil, __VA_ARGS__ };                                                              \
-    }                                                                                                      \
     _matchable_create_type_begin(_t)                                                                       \
     _spread_matchable_amend_type(_s, _t)                                                                   \
     _matchable_create_type_end(_t)                                                                         \
@@ -675,10 +666,6 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
  * Where: spreads are: types defined by MATCHABLE() or SPREAD*_MATCHABLE()
  */
 #define SPREADx2_MATCHABLE(_s0, _s1, _t, ...)                                                              \
-    namespace _t                                                                                           \
-    {                                                                                                      \
-        enum class Enum { nil, __VA_ARGS__ };                                                              \
-    }                                                                                                      \
     _matchable_create_type_begin(_t)                                                                       \
     _spread_matchable_amend_type(_s0, _t)                                                                  \
     _spread_matchable_amend_type(_s1, _t)                                                                  \
@@ -692,11 +679,31 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 
 
 
+/**
+ * Usage: SPREADx3_MATCHABLE(spread, spread, spread, type, variant...)
+ *
+ * Where: spreads are: types defined by MATCHABLE() or SPREAD*_MATCHABLE()
+ */
+#define SPREADx3_MATCHABLE(_s0, _s1, _s2, _t, ...)                                                         \
+    _matchable_create_type_begin(_t)                                                                       \
+    _spread_matchable_amend_type(_s0, _t)                                                                  \
+    _spread_matchable_amend_type(_s1, _t)                                                                  \
+    _spread_matchable_amend_type(_s2, _t)                                                                  \
+    _matchable_create_type_end(_t)                                                                         \
+    _matchable_declare_begin(_t)                                                                           \
+    _spread_matchable_amend_declaration(_s0, _t)                                                           \
+    _spread_matchable_amend_declaration(_s1, _t)                                                           \
+    _spread_matchable_amend_declaration(_s2, _t)                                                           \
+    _matchable_declare_end(_t)                                                                             \
+    _matchable_define(_t)                                                                                  \
+    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
+
+
+
 #define SPREADVARIANT_VARIANTS(_st, _sv, _t, ...)                                                          \
-    inline bool SPREADVARIANT_VARIANTS_set_##_st##_##_sv##_t(std::vector<_t::Type> t)                      \
-        { for (auto v : t) v.set_##_st(_st::_sv::grab()); return true; }                                   \
     static bool const SPREADVARIANT_VARIANTS_init_##_st##_##_sv##_t =                                      \
-        SPREADVARIANT_VARIANTS_set_##_st##_##_sv##_t({_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)});
+        [](std::vector<_t::Type> t){for (auto v : t) v.set_##_st(_st::_sv::grab()); return true;}          \
+            ({_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)});
 
 
 
@@ -726,10 +733,6 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
  * Where: spread is: a type defined by MATCHABLE() or SPREAD*_MATCHABLE()
  */
 #define SPREADVECTOF_MATCHABLE(_s, _t, ...)                                                                \
-    namespace _t                                                                                           \
-    {                                                                                                      \
-        enum class Enum { nil, __VA_ARGS__ };                                                              \
-    }                                                                                                      \
     _matchable_create_type_begin(_t)                                                                       \
     _spreadvectof_matchable_amend_type(_s, _t)                                                             \
     _matchable_create_type_end(_t)                                                                         \
@@ -742,12 +745,9 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 
 
 #define VARIANT_SPREADVARIANTVECT(_t, _v, _st, ...)                                                        \
-    inline bool VARIANT_SPREADVARIANTVECT_set_##_t##_##_v_##_st(std::vector<_st::Type> sv)                 \
-        { _t::_v::grab().set_##_st##_vect(sv); return true; }                                              \
-    static bool const VARIANT_SPREADVARIANTVECT_init_##_t##_##_v_##_st =                                   \
-        VARIANT_SPREADVARIANTVECT_set_##_t##_##_v_##_st({                                                  \
-            _mcv(_matchable_concat_variant, _st, ##__VA_ARGS__)});
-
+    static bool const VARIANT_SPREADVARIANTVECT_init_##_t_##_v##_##_st =                                   \
+        [](std::vector<_st::Type> sv) { _t::_v::grab().set_##_st##_##vect(sv); return true; }              \
+            ({_mcv(_matchable_concat_variant, _st, ##__VA_ARGS__)});
 
 
 /**
@@ -766,3 +766,150 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
     [](_t::Type const & t, std::vector<_t::Type> const & v)                                                \
         { return std::find(v.begin(), v.end(), t) != v.end(); }                                            \
             (_i, {_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)})
+
+
+
+#define _create_MergedMatchable_begin(_m0, _m1)                                                            \
+        class MergedMatchable                                                                              \
+        {                                                                                                  \
+        public:                                                                                            \
+            MergedMatchable() = default;                                                                   \
+            ~MergedMatchable() = default;                                                                  \
+            explicit MergedMatchable(_m0::Type m) : m0{m}, m1{} {}                                         \
+            explicit MergedMatchable(_m1::Type m) : m0{}, m1{m} {}                                         \
+            MergedMatchable(_m0::Type m_0, _m1::Type m_1) : m0{m_0}, m1{m_1} {}                            \
+            MergedMatchable(MergedMatchable const & o) = default;                                          \
+            MergedMatchable(MergedMatchable &&) = default;                                                 \
+            MergedMatchable & operator=(MergedMatchable const & other) = default;                          \
+            MergedMatchable & operator=(MergedMatchable &&) = default;                                     \
+            std::string as_string() const                                                                  \
+            {                                                                                              \
+                if (!m0.is_nil())                                                                          \
+                {                                                                                          \
+                    assert(m1.is_nil());                                                                   \
+                    return m0.as_string();                                                                 \
+                }                                                                                          \
+                return m1.as_string();                                                                     \
+            }                                                                                              \
+            std::string as_text() const                                                                    \
+            {                                                                                              \
+                if (!m0.is_nil())                                                                          \
+                {                                                                                          \
+                    assert(m1.is_nil());                                                                   \
+                    return m0.as_text();                                                                   \
+                }                                                                                          \
+                return m1.as_text();                                                                       \
+            }                                                                                              \
+            int as_index() const                                                                           \
+            {                                                                                              \
+                if (!m0.is_nil())                                                                          \
+                {                                                                                          \
+                    assert(m1.is_nil());                                                                   \
+                    return m0.as_index();                                                                  \
+                }                                                                                          \
+                else if (!m1.is_nil())                                                                     \
+                {                                                                                          \
+                    return m1.as_index() + (int) m0.variants().size();                                     \
+                }                                                                                          \
+                return -1;                                                                                 \
+            }                                                                                              \
+            std::tuple<_m0::Type, _m1::Type> as_matchables()                                               \
+            {                                                                                              \
+                if (!m0.is_nil())                                                                          \
+                {                                                                                          \
+                    assert(m1.is_nil());                                                                   \
+                }                                                                                          \
+                return std::make_tuple(m0, m1);                                                            \
+            }                                                                                              \
+            bool is_nil() const                                                                            \
+            {                                                                                              \
+                return m0.is_nil() && m1.is_nil();                                                         \
+            }                                                                                              \
+            void match(MatchBox<MergedMatchable, std::function<void()>> const & match_box) const           \
+            {                                                                                              \
+                if (match_box.is_set(*this))                                                               \
+                    match_box.at(*this)();                                                                 \
+            }                                                                                              \
+            static std::vector<MergedMatchable> const & variants() { return private_variants(); }          \
+            bool operator==(MergedMatchable const & mm) const { return as_string() == mm.as_string(); }    \
+            bool operator!=(MergedMatchable const & mm) const { return as_string() != mm.as_string(); }    \
+            bool operator<(MergedMatchable const & mm) const { return as_index() < mm.as_index(); }        \
+            bool lt_by_string(MergedMatchable const & mm) const { return as_string() < mm.as_string(); }   \
+            bool lt_by_index(MergedMatchable const & mm) const { return as_index() < mm.as_index(); }      \
+            friend std::ostream & operator<<(std::ostream & o, MergedMatchable const & mm)                 \
+                { return o << mm.as_string(); }                                                            \
+        private:                                                                                           \
+            static std::vector<MergedMatchable> & private_variants()                                       \
+            {                                                                                              \
+                auto init_variants = []()                                                                  \
+                {                                                                                          \
+                    std::vector<MergedMatchable> mm_vect;                                                  \
+                    for (auto m : _m0::variants())                                                         \
+                        mm_vect.push_back(MergedMatchable{m});                                             \
+                    for (auto m : _m1::variants())                                                         \
+                        mm_vect.push_back(MergedMatchable{m});                                             \
+                    return mm_vect;                                                                        \
+                };                                                                                         \
+                static std::vector<MergedMatchable> mm_vect = init_variants();                             \
+                return mm_vect;                                                                            \
+            }                                                                                              \
+            _m0::Type m0;                                                                                  \
+            _m1::Type m1;
+
+
+
+#define _create_MergedMatchable_end(_m0, _m1) \
+        };
+
+
+
+#define _MergedMatchable_add_spread(_107, _s)                                                              \
+        public:                                                                                            \
+            _s::Type as_##_s() const                                                                       \
+            {                                                                                              \
+                if (!m0.is_nil())                                                                          \
+                {                                                                                          \
+                    assert(m1.is_nil());                                                                   \
+                    return m0.as_##_s();                                                                   \
+                }                                                                                          \
+                return m1.as_##_s();                                                                       \
+            }                                                                                              \
+            void set_##_s(_s::Type s)                                                                      \
+            {                                                                                              \
+                if (!m0.is_nil())                                                                          \
+                {                                                                                          \
+                    assert(m1.is_nil());                                                                   \
+                    m0.set_##_s(s);                                                                        \
+                }                                                                                          \
+                else                                                                                       \
+                {                                                                                          \
+                    m1.set_##_s(s);                                                                        \
+                }                                                                                          \
+            }
+
+
+
+#define MATCHABLES_MERGE_SPREADS(_m0, _m1, _merge, ...)                                                    \
+    namespace _merge                                                                                       \
+    {                                                                                                      \
+        _create_MergedMatchable_begin(_m0, _m1)                                                            \
+        _mcv(_MergedMatchable_add_spread, "107", ##__VA_ARGS__)                                            \
+        _create_MergedMatchable_end(_m0, _m1)                                                              \
+        using Type = MergedMatchable;                                                                      \
+        using Flags = MatchBox<Type, void>;                                                                \
+        inline std::vector<Type> const & variants() { return Type::variants(); }                           \
+        static const Type nil{};                                                                           \
+        inline Type from_index(int index)                                                                  \
+        {                                                                                                  \
+            if (index < 0 || index >= (int) Type::variants().size())                                       \
+                return nil;                                                                                \
+            return Type::variants().at(index);                                                             \
+        }                                                                                                  \
+        inline Type from_string(std::string const & str)                                                   \
+        {                                                                                                  \
+            for (auto const & v : Type::variants())                                                        \
+                if (v.as_string() == str)                                                                  \
+                    return v;                                                                              \
+            return nil;                                                                                    \
+        }                                                                                                  \
+    }

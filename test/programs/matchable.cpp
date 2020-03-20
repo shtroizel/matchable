@@ -88,13 +88,13 @@ int main()
 
     // compare operators
     another_time_unit = TimeUnit::Seconds::grab();
-    if (another_time_unit < time_unit) // string compare! (same as lt_alphabetic())
+    if (time_unit < another_time_unit) // index compare! (same as lt_by_index())
         TEST_FAIL(ok);
 
-    if (another_time_unit.lt_alphabetic(time_unit))
+    if (time_unit.lt_by_index(another_time_unit))
         TEST_FAIL(ok);
 
-    if (time_unit.lt_enum_order(another_time_unit))
+    if (another_time_unit.lt_by_string(time_unit))
         TEST_FAIL(ok);
 
     if (another_time_unit == time_unit)
@@ -112,17 +112,6 @@ int main()
     TEST_EQ(ok, TimeUnit::from_string("107"), TimeUnit::nil);
     TEST_EQ(ok, TimeUnit::from_string("nil"), TimeUnit::nil);
     TEST_EQ(ok, TimeUnit::from_string("Weeks"), TimeUnit::Weeks::grab());
-
-    // as_enum()
-    switch (time_unit.as_enum())
-    {
-        case TimeUnit::Enum::Seconds:
-        case TimeUnit::Enum::Hours:
-        case TimeUnit::Enum::Days:
-        case TimeUnit::Enum::Weeks:
-        case TimeUnit::Enum::nil: TEST_FAIL(ok);
-        case TimeUnit::Enum::Minutes:;
-    }
 
     // as_index()
     TEST_EQ(ok, TimeUnit::Seconds::grab().as_index(), 0);
@@ -163,14 +152,6 @@ int main()
         {Result::Ok::grab(), [&]() {std::cout << "foo(" << input << ") is ok!" << std::endl;}},
         {Result::Err::grab(), [&](){std::cout << "foo(" << input << ") error" << std::endl; TEST_FAIL(ok);}}
     });
-
-    // match() with return value
-    input = 42;
-    Result::Type r = foo(input).match({
-        {Result::Ok::grab(), [&](){std::cout << "foo(" << input << ") is ok!" << std::endl;}},
-        {Result::Err::grab(), [&](){std::cout << "foo(" << input << ") error" << std::endl;}}
-    });
-    TEST_EQ(ok, r, Result::Err::grab());
 
     // traversal, variants(), operator<<()
     TEST_EQ(ok, TimeUnit::variants().size(), static_cast<size_t>(5));

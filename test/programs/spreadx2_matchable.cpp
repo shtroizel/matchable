@@ -118,7 +118,7 @@ int main()
     std::sort(
         stable_algorithms_by_space_complexity.begin(),
         stable_algorithms_by_space_complexity.end(),
-        [](auto a, auto b) { return a.as_SpaceComplexity().lt_enum_order(b.as_SpaceComplexity()); }
+        [](auto a, auto b) { return a.as_SpaceComplexity() < b.as_SpaceComplexity(); }
     );
 
     std::cout << "Stable sorting algorithms: " << std::endl;
