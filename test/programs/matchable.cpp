@@ -146,7 +146,7 @@ int main()
     more_flags.set(TimeUnit::Hours::grab());
     TEST_EQ(ok, flags, more_flags);
 
-    // match() ignoring return value
+    // match()
     int input{107};
     foo(input).match({
         {Result::Ok::grab(), [&]() {std::cout << "foo(" << input << ") is ok!" << std::endl;}},
