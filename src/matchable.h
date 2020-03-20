@@ -308,7 +308,6 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
             static std::vector<Type> const & variants() { return private_variants(); }                     \
             static bool register_variant(Type const & variant, int * i);                                   \
         protected:                                                                                         \
-            static MatchBox<Type, void> & flags() { static MatchBox<Type, void> f; return f; }             \
         private:                                                                                           \
             virtual std::shared_ptr<I##_t> clone() const = 0;                                              \
             static bool & nil_flag() { static bool nf{false}; return nf; }                                 \
