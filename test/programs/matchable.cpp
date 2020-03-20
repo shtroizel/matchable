@@ -162,18 +162,18 @@ int main()
     {
         magic++;
         MATCH_WITH_FLOW_CONTROL foo(magic).match({
-            { Result::Ok::grab(),  [](FlowControl & lc) { lc.brk();}}, // break
-            { Result::Err::grab(), [&](FlowControl & lc)
-                                   {
-                                       if (magic < 105)
-                                       {
-                                           lc.cont();
-                                           // note need to return here
-                                           // since lc is evaluateded after this function returns
-                                           return;
-                                       }
-                                       std::cout << magic << " failed..." << std::endl;
-                                   }}
+            {Result::Ok::grab(),  [](FlowControl & lc){ lc.brk();}}, // break
+            {Result::Err::grab(), [&](FlowControl & lc)
+                                  {
+                                      if (magic < 105)
+                                      {
+                                          lc.cont();
+                                          // note need to return here
+                                          // since lc is evaluateded after this function returns
+                                          return;
+                                      }
+                                      std::cout << magic << " failed..." << std::endl;
+                                  }}
         }); EVAL_FLOW_CONTROL // apply break or continue requested from lambda within match({}) above
     }
     TEST_EQ(ok, magic, 107);
@@ -183,7 +183,7 @@ int main()
     switch (task)
     {
         case Task::Task0: MATCH_WITH_FLOW_CONTROL foo(107).match({
-                              { Result::Ok::grab(), [&](FlowControl & lc) { lc.brk(); }},
+                              {Result::Ok::grab(), [&](FlowControl & lc) { lc.brk(); }},
                           }); EVAL_BREAK_ONLY // not in loop here so continue is invalid - eval break only
                           [[fallthrough]];
         case Task::Task1: TEST_FAIL(ok); break;
@@ -197,12 +197,12 @@ int main()
         switch (task)
         {
             case Task::Task0: MATCH_WITH_FLOW_CONTROL foo(magic).match({
-                                  { Result::Ok::grab(), [&](FlowControl & lc) { lc.brk(); }},
-                                  { Result::Err::grab(), [&](FlowControl & lc) { lc.cont(); }},
+                                  {Result::Ok::grab(), [&](FlowControl & lc) { lc.brk(); }},
+                                  {Result::Err::grab(), [&](FlowControl & lc) { lc.cont(); }},
                               }); EVAL_FLOW_CONTROL
                               [[fallthrough]];
             case Task::Task1: MATCH_WITH_FLOW_CONTROL foo(107).match({
-                                  { Result::Ok::grab(), [&](FlowControl & lc) { lc.cont(); }},
+                                  {Result::Ok::grab(), [&](FlowControl & lc) { lc.cont(); }},
                               }); EVAL_FLOW_CONTROL
                               [[fallthrough]];
             case Task::Task2: TEST_FAIL(ok);
