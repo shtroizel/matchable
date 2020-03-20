@@ -337,6 +337,17 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
     }
 
 
+class FlowControl
+{
+public:
+    void cont() { c = true; }
+    void brk() { b = true; }
+    bool cont_requested() const { return c; }
+    bool brk_requested() const { return b; }
+private:
+    bool c{false};
+    bool b{false};
+};
 
 #define _matchable_create_type_begin(_t)                                                                   \
     namespace _t                                                                                           \
@@ -362,10 +373,17 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
                 { std::string s{as_string()}; std::replace(s.begin(), s.end(), '_', ' '); return s; }      \
             int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
             bool is_nil() const { return nullptr == t; }                                                   \
-            void match(MatchBox<Matchable, std::function<void()>> const & match_box) const                 \
+            FlowControl match(MatchBox<Matchable, std::function<void(FlowControl &)>> const & mb) const    \
             {                                                                                              \
-                if (match_box.is_set(*this))                                                               \
-                    match_box.at(*this)();                                                                 \
+                FlowControl lc;                                                                            \
+                if (mb.is_set(*this))                                                                      \
+                    mb.at(*this)(lc);                                                                      \
+                return lc;                                                                                 \
+            }                                                                                              \
+            void match(MatchBox<Matchable, std::function<void()>> const & mb) const                        \
+            {                                                                                              \
+                if (mb.is_set(*this))                                                                      \
+                    mb.at(*this)();                                                                        \
             }                                                                                              \
             static std::vector<Matchable> const & variants() { return T::variants(); }                     \
             bool operator==(Matchable const & m) const { return as_string() == m.as_string(); }            \
@@ -911,3 +929,9 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
             return nil;                                                                                    \
         }                                                                                                  \
     }
+
+
+
+#define MATCH_WITH_FLOW_CONTROL { FlowControl fc =
+#define EVAL_FLOW_CONTROL if (fc.brk_requested()) break; if (fc.cont_requested()) continue; }
+#define EVAL_BREAK_ONLY if (fc.brk_requested()) break; }

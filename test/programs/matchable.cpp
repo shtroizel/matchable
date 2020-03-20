@@ -45,13 +45,16 @@ MATCHABLE(NIL)
 
 
 
+enum class Task { Task0, Task1, Task2 };
+
+
+
 Result::Type foo(int number)
 {
     if (number == 107)
         return Result::Ok::grab();
     return Result::Err::grab();
 }
-
 
 
 int main()
@@ -146,12 +149,65 @@ int main()
     more_flags.set(TimeUnit::Hours::grab());
     TEST_EQ(ok, flags, more_flags);
 
-    // match()
-    int input{107};
-    foo(input).match({
-        {Result::Ok::grab(), [&]() {std::cout << "foo(" << input << ") is ok!" << std::endl;}},
-        {Result::Err::grab(), [&](){std::cout << "foo(" << input << ") error" << std::endl; TEST_FAIL(ok);}}
+    // match() by its self - not used within switch or loop...
+    int magic{107};
+    foo(magic).match({
+        {Result::Ok::grab(), [&]() {std::cout << "foo(" << magic << ") is ok!" << std::endl;}},
+        {Result::Err::grab(), [&](){std::cout << "foo(" << magic << ") error" << std::endl; TEST_FAIL(ok);}}
     });
+
+    // match() used within a loop
+    magic = 99;
+    while (magic < 999)
+    {
+        magic++;
+        MATCH_WITH_FLOW_CONTROL foo(magic).match({
+            { Result::Ok::grab(),  [](FlowControl & lc) { lc.brk();}}, // break
+            { Result::Err::grab(), [&](FlowControl & lc)
+                                   {
+                                       if (magic < 105)
+                                       {
+                                           lc.cont();
+                                           // note need to return here
+                                           // since lc is evaluateded after this function returns
+                                           return;
+                                       }
+                                       std::cout << magic << " failed..." << std::endl;
+                                   }}
+        }); EVAL_FLOW_CONTROL // apply break or continue requested from lambda within match({}) above
+    }
+    TEST_EQ(ok, magic, 107);
+
+    // match used within a switch
+    Task task = Task::Task0;
+    switch (task)
+    {
+        case Task::Task0: MATCH_WITH_FLOW_CONTROL foo(107).match({
+                              { Result::Ok::grab(), [&](FlowControl & lc) { lc.brk(); }},
+                          }); EVAL_BREAK_ONLY // not in loop here so continue is invalid - eval break only
+                          [[fallthrough]];
+        case Task::Task1: TEST_FAIL(ok); break;
+        case Task::Task2: TEST_FAIL(ok);
+    }
+
+    // match used within a switch that is within a loop
+    magic = 99;
+    while (magic++ < 999)
+    {
+        switch (task)
+        {
+            case Task::Task0: MATCH_WITH_FLOW_CONTROL foo(magic).match({
+                                  { Result::Ok::grab(), [&](FlowControl & lc) { lc.brk(); }},
+                                  { Result::Err::grab(), [&](FlowControl & lc) { lc.cont(); }},
+                              }); EVAL_FLOW_CONTROL
+                              [[fallthrough]];
+            case Task::Task1: MATCH_WITH_FLOW_CONTROL foo(107).match({
+                                  { Result::Ok::grab(), [&](FlowControl & lc) { lc.cont(); }},
+                              }); EVAL_FLOW_CONTROL
+                              [[fallthrough]];
+            case Task::Task2: TEST_FAIL(ok);
+        }
+    }
 
     // traversal, variants(), operator<<()
     TEST_EQ(ok, TimeUnit::variants().size(), static_cast<size_t>(5));
