@@ -58,7 +58,7 @@ MATCHABLE(
     , sixteen
     , seventeen
     , eighteen
-    , NineTeen
+    , nineteen
     , twenty
     , twentyone
     , twentytwo
