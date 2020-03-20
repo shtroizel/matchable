@@ -365,9 +365,8 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
             bool is_nil() const { return nullptr == t; }                                                   \
             void match(MatchBox<Matchable, std::function<void()>> const & match_box) const                 \
             {                                                                                              \
-                Matchable m{t};                                                                            \
-                if (match_box.is_set(m))                                                                   \
-                    match_box.at(m)();                                                                     \
+                if (match_box.is_set(*this))                                                               \
+                    match_box.at(*this)();                                                                 \
             }                                                                                              \
             static std::vector<Matchable> const & variants() { return T::variants(); }                     \
             bool operator==(Matchable const & m) const { return as_string() == m.as_string(); }            \
