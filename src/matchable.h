@@ -285,6 +285,19 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
 }
 
 
+class FlowControl
+{
+public:
+    void cont() { c = true; }
+    void brk() { b = true; }
+    bool cont_requested() const { return c; }
+    bool brk_requested() const { return b; }
+private:
+    bool c{false};
+    bool b{false};
+};
+
+
 
 // next come the macros...
 //
@@ -336,18 +349,6 @@ bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
         };                                                                                                 \
     }
 
-
-class FlowControl
-{
-public:
-    void cont() { c = true; }
-    void brk() { b = true; }
-    bool cont_requested() const { return c; }
-    bool brk_requested() const { return b; }
-private:
-    bool c{false};
-    bool b{false};
-};
 
 #define _matchable_create_type_begin(_t)                                                                   \
     namespace _t                                                                                           \
