@@ -378,7 +378,11 @@ private:
                 return *this;                                                                              \
             }                                                                                              \
             Matchable & operator=(Matchable &&) = default;                                                 \
-            std::string as_string() const { return nullptr == t ? "nil" : t->as_string(); }                \
+            std::string const & as_string() const                                                          \
+            {                                                                                              \
+                static std::string const nil_str{"nil"};                                                   \
+                return nullptr == t ? nil_str : t->as_string();                                            \
+            }                                                                                              \
             std::string as_text() const                                                                    \
                 { std::string s{as_string()}; std::replace(s.begin(), s.end(), '_', ' '); return s; }      \
             int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
@@ -818,7 +822,7 @@ private:
                                                                                                            \
             MergedMatchable & operator=(MergedMatchable const & other) = default;                          \
             MergedMatchable & operator=(MergedMatchable &&) = default;                                     \
-            std::string as_string() const                                                                  \
+            std::string const & as_string() const                                                          \
             {                                                                                              \
                 if (!m0.is_nil())                                                                          \
                 {                                                                                          \
