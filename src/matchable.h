@@ -778,8 +778,6 @@ private:
     Unmatchable<_t::Type> unmatchable_##_t{{_mcv(_merged_matchable_concat_variant, _t, ##__VA_ARGS__)}}
 
 
-
-
 /**
  * Test if a given matchable instance is contained within a given list of variants
  */
@@ -802,6 +800,22 @@ private:
             MergedMatchable(_m0::Type m_0, _m1::Type m_1) : m0{m_0}, m1{m_1} {}                            \
             MergedMatchable(MergedMatchable const & o) = default;                                          \
             MergedMatchable(MergedMatchable &&) = default;                                                 \
+                                                                                                           \
+            /******** Implemented as operator=() only - intentionally not as constructor *********/        \
+            template<typename T>                                                                           \
+            MergedMatchable & operator=(T m)                                                               \
+            {                                                                                              \
+                m0 = _m0::nil; m1 = _m1::nil;                                                              \
+                for (auto const & v : _m0::variants())                                                     \
+                    if (v.as_string() == m.as_string())                                                    \
+                        { m0 = v; return *this; }                                                          \
+                for (auto const & v : _m1::variants())                                                     \
+                    if (v.as_string() == m.as_string())                                                    \
+                        { m1 = v; return *this; }                                                          \
+                return *this;                                                                              \
+            }                                                                                              \
+            /*************************************************************************************/        \
+                                                                                                           \
             MergedMatchable & operator=(MergedMatchable const & other) = default;                          \
             MergedMatchable & operator=(MergedMatchable &&) = default;                                     \
             std::string as_string() const                                                                  \

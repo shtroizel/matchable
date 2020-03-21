@@ -41,12 +41,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 MATCHABLE(Result, Ok, Err)
 MATCHABLE(Error, AlreadyDone, CylindricalCubeOutOfRound)
 
-// Create a new type called MergedResult with all of the variants from types Result and Error.
+// Create a new type called MergeResult with all of the variants from types Result and Error.
 //
 //   * No common spreads exist between Result and Error so none are provided.
 //   * Note that even if spreads existed specifying them here is optional. The merged type will have
 //     whatever is specified. For an example where the spreads are specified see relationships.cpp
-MATCHABLES_MERGE_SPREADS(Result, Error, MergedResult)
+MATCHABLES_MERGE_SPREADS(Result, Error, MergeResult)
+
+MATCHABLE(CustomError, InvalidInput)
+
+// The new "MERGE" type created by MATCHABLES_MERGE_SPREADS() walks like a MATCHABLE and quacks
+// like a MATCHABLE, so we can merge it with something else to create another merged matchable.
+MATCHABLES_MERGE_SPREADS(CustomError, MergeResult, CustomResult)
+
+MATCHABLE(TimeError, Timeout)
+
+// The order in which the "MATCHABLES" (first two args) are specified determines how the indexing
+// works when indexed through the new type. Here we do yet another merge to test this even more.
+MATCHABLES_MERGE_SPREADS(TimeError, CustomResult, MegaResult)
 
 
 
@@ -54,41 +66,40 @@ int main()
 {
     test_ok ok;
 
-    // Assign Matchable to MergedMatchable
-    MergedResult::Type merged_result = Error::CylindricalCubeOutOfRound::grab();
+    MergeResult::Type merged_result{Error::CylindricalCubeOutOfRound::grab()};
 
     // indexes
     TEST_EQ(ok, Error::CylindricalCubeOutOfRound::grab().as_index(), 1);
     TEST_EQ(ok, merged_result.as_index(), 3);
-    TEST_EQ(ok, merged_result, MergedResult::from_index(3));
+    TEST_EQ(ok, merged_result, MergeResult::from_index(3));
 
     // * match used on a MergedMatchable within a loop
     // * MergedMatchable::from_string()
     do
     {
         MATCH_WITH_FLOW_CONTROL merged_result.match({
-            {MergedResult::Type{Result::Err::grab()}, [](FlowControl & lc) { lc.brk(); }},
-            {MergedResult::Type{Error::CylindricalCubeOutOfRound::grab()}, [&](FlowControl & lc)
-                { merged_result = MergedResult::from_string("Err"); lc.cont(); }},
+            {MergeResult::Type{Result::Err::grab()}, [](FlowControl & lc) { lc.brk(); }},
+            {MergeResult::Type{Error::CylindricalCubeOutOfRound::grab()}, [&](FlowControl & lc)
+                { merged_result = MergeResult::from_string("Err"); lc.cont(); }},
         }); EVAL_FLOW_CONTROL
         TEST_FAIL(ok);
     }
     while (false);
-    TEST_EQ(ok, merged_result, MergedResult::Type{Result::Err::grab()});
+    TEST_EQ(ok, merged_result, MergeResult::Type{Result::Err::grab()});
 
     // simple match on a MergedMatchable
     merged_result.match({
-        {MergedResult::Type{Result::Ok::grab()}, [&](){ TEST_FAIL(ok); }},
-        {MergedResult::Type{Error::AlreadyDone::grab()}, [&](){ TEST_FAIL(ok); }},
-        {MergedResult::Type{Error::CylindricalCubeOutOfRound::grab()}, [&](){ TEST_FAIL(ok); }},
+        {MergeResult::Type{Result::Ok::grab()}, [&](){ TEST_FAIL(ok); }},
+        {MergeResult::Type{Error::AlreadyDone::grab()}, [&](){ TEST_FAIL(ok); }},
+        {MergeResult::Type{Error::CylindricalCubeOutOfRound::grab()}, [&](){ TEST_FAIL(ok); }},
     });
 
     {
-        MERGED_UNMATCHABLE(MergedResult, AlreadyDone);
+        MERGED_UNMATCHABLE(MergeResult, AlreadyDone);
 
-        // AlreadyDone is removed from MergedResult
-        if (std::find(MergedResult::variants().begin(), MergedResult::variants().end(),
-                MergedResult::Type{Error::AlreadyDone::grab()}) != MergedResult::variants().end())
+        // AlreadyDone is removed from MergeResult
+        if (std::find(MergeResult::variants().begin(), MergeResult::variants().end(),
+                MergeResult::Type{Error::AlreadyDone::grab()}) != MergeResult::variants().end())
             TEST_FAIL(ok);
 
         // However, the Error matchable should still have AlreadyDone!
@@ -99,9 +110,9 @@ int main()
         {
             UNMATCHABLE(Result, Err);
 
-            // MergedResult should still have Err!
-            if (std::find(MergedResult::variants().begin(), MergedResult::variants().end(),
-                    MergedResult::Type{Result::Err::grab()}) == MergedResult::variants().end())
+            // MergeResult should still have Err!
+            if (std::find(MergeResult::variants().begin(), MergeResult::variants().end(),
+                    MergeResult::Type{Result::Err::grab()}) == MergeResult::variants().end())
                 TEST_FAIL(ok);
         }
 
@@ -116,10 +127,82 @@ int main()
                 Result::variants().end())
             TEST_FAIL(ok);
 
-        // MergedResult should still have Err!
-        if (std::find(MergedResult::variants().begin(), MergedResult::variants().end(),
-                MergedResult::Type{Result::Err::grab()}) == MergedResult::variants().end())
+        // MergeResult should still have Err!
+        if (std::find(MergeResult::variants().begin(), MergeResult::variants().end(),
+                MergeResult::Type{Result::Err::grab()}) == MergeResult::variants().end())
             TEST_FAIL(ok);
+    }
+
+    // One level of implicit conversion works with assignment construction
+    CustomResult::Type custom_result = CustomError::InvalidInput::grab();
+
+    // but, two levels does not...
+//     CustomResult::Type another_custom_result = Error::CylindricalCubeOutOfRound::grab(); // compile error
+
+    // so do this instead:
+    CustomResult::Type another_custom_result{Error::CylindricalCubeOutOfRound::grab()};
+
+    // 3 levels breaks this as well
+//     MegaResult::Type mega_result{Result::Ok::grab()}; // compile error
+
+    // we need to help by reducing a level somehow:
+    MegaResult::Type mega_result_0{MergeResult::Type{Result::Ok::grab()}};
+    MegaResult::Type mega_result_1{CustomResult::Type{Result::Err::grab()}};
+
+    // To summarize:
+    //   * up to one level works with assignment construction
+    //   * up to two levels work with construction (no =)
+    //   * more than two levels need help
+    //
+    // Also, its just implicit construction that breaks.
+    // Existing instances can be assigned without issues:
+    custom_result = Error::CylindricalCubeOutOfRound::grab();
+    another_custom_result = Result::Ok::grab();
+    mega_result_0 = Result::Err::grab();
+    mega_result_1 = Result::Ok::grab();
+
+    // non-merged indexes
+    TEST_EQ(ok, Result::Ok::grab().as_index(), 0);
+    TEST_EQ(ok, Result::Err::grab().as_index(), 1);
+    TEST_EQ(ok, Error::AlreadyDone::grab().as_index(), 0);
+    TEST_EQ(ok, Error::CylindricalCubeOutOfRound::grab().as_index(), 1);
+    TEST_EQ(ok, CustomError::InvalidInput::grab().as_index(), 0);
+
+    // MergeResult indexes
+    TEST_EQ(ok, MergeResult::Type{Result::Ok::grab()}.as_index(), 0);
+    TEST_EQ(ok, MergeResult::Type{Result::Err::grab()}.as_index(), 1);
+    TEST_EQ(ok, MergeResult::Type{Error::AlreadyDone::grab()}.as_index(), 2);
+    TEST_EQ(ok, MergeResult::Type{Error::CylindricalCubeOutOfRound::grab()}.as_index(), 3);
+
+    // CustomResult indexes
+    TEST_EQ(ok, CustomResult::Type{CustomError::InvalidInput::grab()}.as_index(), 0);
+    TEST_EQ(ok, CustomResult::Type{Result::Ok::grab()}.as_index(), 1);
+    TEST_EQ(ok, CustomResult::Type{Result::Err::grab()}.as_index(), 2);
+    TEST_EQ(ok, CustomResult::Type{Error::AlreadyDone::grab()}.as_index(), 3);
+    TEST_EQ(ok, CustomResult::Type{Error::CylindricalCubeOutOfRound::grab()}.as_index(), 4);
+
+    // MegaResult indexes
+    TEST_EQ(ok, MegaResult::Type{TimeError::Timeout::grab()}.as_index(), 0);
+    TEST_EQ(ok, MegaResult::Type{CustomError::InvalidInput::grab()}.as_index(), 1);
+    TEST_EQ(ok, MegaResult::Type{MergeResult::Type{Result::Ok::grab()}}.as_index(), 2);
+    TEST_EQ(ok, MegaResult::Type{CustomResult::Type{Result::Err::grab()}}.as_index(), 3); // switch up help
+    TEST_EQ(ok, MegaResult::Type{MergeResult::Type{Error::AlreadyDone::grab()}}.as_index(), 4);
+    TEST_EQ(ok, MegaResult::Type{MergeResult::Type{Error::CylindricalCubeOutOfRound::grab()}}.as_index(),5);
+
+    // test MegaResult indexes without needing "help" (chaining)
+    TEST_EQ(ok, (mega_result_0 = TimeError::Timeout::grab()).as_index(), 0);
+    TEST_EQ(ok, (mega_result_0 = CustomError::InvalidInput::grab()).as_index(), 1);
+    TEST_EQ(ok, (mega_result_0 = Result::Ok::grab()).as_index(), 2);
+    TEST_EQ(ok, (mega_result_0 = Result::Err::grab()).as_index(), 3);
+    TEST_EQ(ok, (mega_result_0 = Error::AlreadyDone::grab()).as_index(), 4);
+    TEST_EQ(ok, (mega_result_0 = Error::CylindricalCubeOutOfRound::grab()).as_index(), 5);
+
+    // test MegaResult::from_index()
+    for (int i = 0; i < (int) MegaResult::variants().size(); ++i)
+    {
+        mega_result_0 = MegaResult::from_index(i);
+        TEST_EQ(ok, mega_result_0.as_index(), i);
+        std::cout << mega_result_0 << " has index: " << mega_result_0.as_index() << std::endl;
     }
 
     return ok();
