@@ -357,6 +357,8 @@ private:
         class Matchable                                                                                    \
         {                                                                                                  \
         public:                                                                                            \
+            using MatchParam = MatchBox<Matchable, std::function<void()>>;                                 \
+            using MatchParamWithFlowControl = MatchBox<Matchable, std::function<void(FlowControl &)>>;     \
             Matchable() = default;                                                                         \
             ~Matchable() = default;                                                                        \
             explicit Matchable(std::shared_ptr<T> m) : t{m} {}                                             \
@@ -374,14 +376,14 @@ private:
                 { std::string s{as_string()}; std::replace(s.begin(), s.end(), '_', ' '); return s; }      \
             int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
             bool is_nil() const { return nullptr == t; }                                                   \
-            FlowControl match(MatchBox<Matchable, std::function<void(FlowControl &)>> const & mb) const    \
+            FlowControl match(MatchParamWithFlowControl const & mb) const                                  \
             {                                                                                              \
                 FlowControl lc;                                                                            \
                 if (mb.is_set(*this))                                                                      \
                     mb.at(*this)(lc);                                                                      \
                 return lc;                                                                                 \
             }                                                                                              \
-            void match(MatchBox<Matchable, std::function<void()>> const & mb) const                        \
+            void match(MatchParam const & mb) const                                                        \
             {                                                                                              \
                 if (mb.is_set(*this))                                                                      \
                     mb.at(*this)();                                                                        \
@@ -786,14 +788,14 @@ private:
 
 
 
-#define _create_MergedMatchable_begin(_m0, _m1)                                                            \
+#define _create_MergedMatchable_begin(_m0, _m1, _merge)                                                    \
         class MergedMatchable                                                                              \
         {                                                                                                  \
         public:                                                                                            \
             MergedMatchable() = default;                                                                   \
             ~MergedMatchable() = default;                                                                  \
-            explicit MergedMatchable(_m0::Type m) : m0{m}, m1{} {}                                         \
-            explicit MergedMatchable(_m1::Type m) : m0{}, m1{m} {}                                         \
+            MergedMatchable(_m0::Type m) : m0{m}, m1{} {}                                                  \
+            MergedMatchable(_m1::Type m) : m0{}, m1{m} {}                                                  \
             MergedMatchable(_m0::Type m_0, _m1::Type m_1) : m0{m_0}, m1{m_1} {}                            \
             MergedMatchable(MergedMatchable const & o) = default;                                          \
             MergedMatchable(MergedMatchable &&) = default;                                                 \
@@ -842,7 +844,14 @@ private:
             {                                                                                              \
                 return m0.is_nil() && m1.is_nil();                                                         \
             }                                                                                              \
-            void match(MatchBox<MergedMatchable, std::function<void()>> const & match_box) const           \
+            FlowControl match(_merge::MatchParamWithFlowControl const & mb) const                          \
+            {                                                                                              \
+                FlowControl lc;                                                                            \
+                if (mb.is_set(*this))                                                                      \
+                    mb.at(*this)(lc);                                                                      \
+                return lc;                                                                                 \
+            }                                                                                              \
+            void match(_merge::MatchParam const & match_box) const                                         \
             {                                                                                              \
                 if (match_box.is_set(*this))                                                               \
                     match_box.at(*this)();                                                                 \
@@ -875,7 +884,7 @@ private:
 
 
 
-#define _create_MergedMatchable_end(_m0, _m1) \
+#define _create_MergedMatchable_end(_m0, _m1, _merge)                                                      \
         };
 
 
@@ -909,9 +918,12 @@ private:
 #define MATCHABLES_MERGE_SPREADS(_m0, _m1, _merge, ...)                                                    \
     namespace _merge                                                                                       \
     {                                                                                                      \
-        _create_MergedMatchable_begin(_m0, _m1)                                                            \
+        class MergedMatchable;                                                                             \
+        using MatchParam = MatchBox<MergedMatchable, std::function<void()>>;                               \
+        using MatchParamWithFlowControl = MatchBox<MergedMatchable, std::function<void(FlowControl &)>>;   \
+        _create_MergedMatchable_begin(_m0, _m1, _merge)                                                    \
         _mcv(_MergedMatchable_add_spread, "107", ##__VA_ARGS__)                                            \
-        _create_MergedMatchable_end(_m0, _m1)                                                              \
+        _create_MergedMatchable_end(_m0, _m1, _merge)                                                      \
         using Type = MergedMatchable;                                                                      \
         using Flags = MatchBox<Type, void>;                                                                \
         inline std::vector<Type> const & variants() { return Type::variants(); }                           \
