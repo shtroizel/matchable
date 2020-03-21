@@ -327,7 +327,6 @@ private:
             static std::vector<Type> & private_variants() { static std::vector<Type> v; return v; }
 
 
-
 #define _matchable_declare_end(_t)                                                                         \
         };                                                                                                 \
         class Unmatchable                                                                                  \
@@ -402,11 +401,9 @@ private:
             std::shared_ptr<T> t;
 
 
-
 #define _matchable_create_type_end(_t)                                                                     \
         };                                                                                                 \
     }
-
 
 
 #define _matchable_define(_t)                                                                              \
@@ -446,7 +443,6 @@ private:
     }
 
 
-
 #define _matchable_create_variant_begin(_t, _v)                                                            \
     namespace _t                                                                                           \
     {                                                                                                      \
@@ -463,12 +459,10 @@ private:
             static std::shared_ptr<_v> create() { return std::make_shared<_v>(); }
 
 
-
 #define _matchable_create_variant_end(_t, _v)                                                              \
         };                                                                                                 \
         static bool const register_me_##_t##_v = I##_t::register_variant(_v::grab(), _v::int_member());    \
     }
-
 
 
 #define _matchable_create_variant(_t, _v)                                                                  \
@@ -476,9 +470,7 @@ private:
     _matchable_create_variant_end(_t, _v)
 
 
-
 #define _matchable_concat_variant(_t, _v) _t::_v::grab(),
-
 
 
 // I want my...
@@ -593,7 +585,6 @@ private:
 #define _mcv_108(_m, _t, _v, ...) _m(_t, _v) _mcv_107(_m, _t, __VA_ARGS__)
 
 
-
 #define _nth(                                                                                              \
       _0,   _1,   _2,   _3,   _4,   _5,   _6,   _7,   _8,  _9,                                             \
      _10,  _11,  _12,  _13,  _14,  _15,  _16,  _17,  _18, _19,                                             \
@@ -607,7 +598,6 @@ private:
      _90,  _91,  _92,  _93,  _94,  _95,  _96,  _97,  _98, _99,                                             \
     _100, _101, _102, _103, _104, _105, _106, _107, _108,   N, ...                                         \
 ) N
-
 
 
 #define _mcv(_macro, _t, ...)                                                                              \
@@ -628,7 +618,6 @@ private:
     )(_macro, _t, ##__VA_ARGS__)
 
 
-
 /**
  * Usage: MATCHABLE(type, variant...)
  *
@@ -641,7 +630,6 @@ private:
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
-
 
 
 #define _spread_matchable_amend_type(_s, _t)                                                               \
@@ -661,7 +649,6 @@ private:
         static _s::Type nil_##_s() { static _s::Type ns; return ns; }
 
 
-
 /**
  * Usage: SPREAD_MATCHABLE(spread, type, variant...)
  *
@@ -676,7 +663,6 @@ private:
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
-
 
 
 /**
@@ -695,7 +681,6 @@ private:
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
-
 
 
 /**
@@ -718,12 +703,10 @@ private:
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-
 #define SPREADVARIANT_VARIANTS(_st, _sv, _t, ...)                                                          \
     static bool const SPREADVARIANT_VARIANTS_init_##_st##_##_sv##_t =                                      \
         [](std::vector<_t::Type> t){for (auto v : t) v.set_##_st(_st::_sv::grab()); return true;}          \
             ({_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)});
-
 
 
 #define _spreadvectof_matchable_amend_type(_s, _t)                                                         \
@@ -734,7 +717,6 @@ private:
             { if (nullptr == t) T::nil_##_s##_vect() = s_vect; else t->set_##_s##_vect(s_vect); }
 
 
-
 #define _spreadvectof_matchable_amend_declaration(_s, _t)                                                  \
     public:                                                                                                \
         std::vector<_s::Type> as_##_s##_vect() const { return _s##_vect_mb().at(Type(clone())); }          \
@@ -743,7 +725,6 @@ private:
         static MatchBox<_t::Type, std::vector<_s::Type>> & _s##_vect_mb()                                  \
             { static MatchBox<_t::Type, std::vector<_s::Type>> m; return m; }                              \
         static std::vector<_s::Type> nil_##_s##_vect() { static std::vector<_s::Type> ns; return ns; }
-
 
 
 /**
@@ -760,7 +741,6 @@ private:
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
-
 
 
 #define VARIANT_SPREADVARIANTVECT(_t, _v, _st, ...)                                                        \
@@ -785,7 +765,6 @@ private:
     [](_t::Type const & t, std::vector<_t::Type> const & v)                                                \
         { return std::find(v.begin(), v.end(), t) != v.end(); }                                            \
             (_i, {_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)})
-
 
 
 #define _create_MergedMatchable_begin(_m0, _m1, _merge)                                                    \
@@ -883,10 +862,8 @@ private:
             _m1::Type m1;
 
 
-
 #define _create_MergedMatchable_end(_m0, _m1, _merge)                                                      \
         };
-
 
 
 #define _MergedMatchable_add_spread(_107, _s)                                                              \
@@ -912,7 +889,6 @@ private:
                     m1.set_##_s(s);                                                                        \
                 }                                                                                          \
             }
-
 
 
 #define MATCHABLES_MERGE_SPREADS(_m0, _m1, _merge, ...)                                                    \
@@ -944,7 +920,7 @@ private:
     }
 
 
-
+// FLOW CONTROL MACROS
 #define MATCH_WITH_FLOW_CONTROL { FlowControl fc =
 #define EVAL_FLOW_CONTROL if (fc.brk_requested()) break; if (fc.cont_requested()) continue; }
 #define EVAL_BREAK_ONLY if (fc.brk_requested()) break; }
