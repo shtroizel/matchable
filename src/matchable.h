@@ -298,6 +298,29 @@ private:
 };
 
 
+template<typename M>
+class Unmatchable
+{
+public:
+    explicit Unmatchable(std::vector<M> um)
+    {
+        prev_variants = M::variants();
+        auto i = std::remove_if(
+            M::interface_type::private_variants().begin(),
+            M::interface_type::private_variants().end(),
+            [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
+        );
+        M::interface_type::private_variants().erase(i, M::interface_type::private_variants().end());
+    }
+    ~Unmatchable()
+    {
+        M::interface_type::private_variants() = prev_variants;
+    }
+private:
+    std::vector<M> prev_variants;
+};
+
+
 
 // next come the macros...
 //
@@ -312,7 +335,8 @@ private:
         class I##_t                                                                                        \
         {                                                                                                  \
             friend class Matchable<I##_t>;                                                                 \
-            friend class Unmatchable;                                                                      \
+            using interface_type = I##_t;                                                                  \
+            friend class Unmatchable<Matchable<I##_t>>;                                                    \
         public:                                                                                            \
             I##_t() = default;                                                                             \
             virtual ~I##_t() = default;                                                                    \
@@ -329,23 +353,6 @@ private:
 
 #define _matchable_declare_end(_t)                                                                         \
         };                                                                                                 \
-        class Unmatchable                                                                                  \
-        {                                                                                                  \
-        public:                                                                                            \
-            explicit Unmatchable(std::vector<Type> um)                                                     \
-            {                                                                                              \
-                prev_variants = I##_t::variants();                                                         \
-                auto i = std::remove_if(I##_t::private_variants().begin(), I##_t::private_variants().end(),\
-                    [&](Type t){ return std::find(um.begin(), um.end(), t) != um.end(); });                \
-                I##_t::private_variants().erase(i, I##_t::private_variants().end());                       \
-            }                                                                                              \
-            ~Unmatchable()                                                                                 \
-            {                                                                                              \
-                I##_t::private_variants() = prev_variants;                                                 \
-            }                                                                                              \
-        private:                                                                                           \
-            std::vector<Type> prev_variants;                                                               \
-        };                                                                                                 \
     }
 
 
@@ -356,6 +363,7 @@ private:
         class Matchable                                                                                    \
         {                                                                                                  \
         public:                                                                                            \
+            using interface_type = T;                                                                      \
             using MatchParam = MatchBox<Matchable, std::function<void()>>;                                 \
             using MatchParamWithFlowControl = MatchBox<Matchable, std::function<void(FlowControl &)>>;     \
             Matchable() = default;                                                                         \
@@ -471,6 +479,11 @@ private:
 
 
 #define _matchable_concat_variant(_t, _v) _t::_v::grab(),
+
+
+// This does the same as _matchable_concat_variant() but more slowly,
+// and works for both Matchable and MergedMatchable
+#define _merged_matchable_concat_variant(_t, _v) _t::from_string(#_v),
 
 
 // I want my...
@@ -754,7 +767,16 @@ private:
  * Usage: UNMATCHABLE(type, variant...)
  */
 #define UNMATCHABLE(_t, ...)                                                                               \
-    _t::Unmatchable unmatchable_##_t{{_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)}};
+    Unmatchable<_t::Type> unmatchable_##_t{{_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)}}
+
+
+/**
+ * This can be used for both Matchable and MergedMatchable, but is slower than UNMATCHABLE()
+ * @see UNMATCHABLE()
+ */
+#define MERGED_UNMATCHABLE(_t, ...)                                                                        \
+    Unmatchable<_t::Type> unmatchable_##_t{{_mcv(_merged_matchable_concat_variant, _t, ##__VA_ARGS__)}}
+
 
 
 
@@ -771,6 +793,8 @@ private:
         class MergedMatchable                                                                              \
         {                                                                                                  \
         public:                                                                                            \
+            using interface_type = MergedMatchable;                                                        \
+            friend class Unmatchable<MergedMatchable>;                                                     \
             MergedMatchable() = default;                                                                   \
             ~MergedMatchable() = default;                                                                  \
             MergedMatchable(_m0::Type m) : m0{m}, m1{} {}                                                  \

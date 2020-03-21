@@ -38,10 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 MATCHABLE(TimeUnit, Seconds, Minutes, Hours, Days, Weeks)
-MATCHABLE(Result, Ok, Err)
 
-MATCHABLE(Error, AlreadyDone, CylindricalCubeOutOfRound)
-MATCHABLES_MERGE_SPREADS(Result, Error, MergedResult)
+MATCHABLE(Result, Ok, Err)
 
 // compile time test: possible to create matchable without variants?
 MATCHABLE(NIL)
@@ -210,33 +208,6 @@ int main()
             case Task::Task2: TEST_FAIL(ok);
         }
     }
-
-    // Assign Matchable to MergedMatchable
-    MergedResult::Type merged_result = Error::CylindricalCubeOutOfRound::grab();
-
-    // MergedMatchable::from_index()
-    TEST_EQ(ok, merged_result, MergedResult::from_index(3));
-
-    // * match used on a MergedMatchable within a loop
-    // * MergedMatchable::from_string()
-    do
-    {
-        MATCH_WITH_FLOW_CONTROL merged_result.match({
-            {MergedResult::Type{Result::Err::grab()}, [](FlowControl & lc) { lc.brk(); }},
-            {MergedResult::Type{Error::CylindricalCubeOutOfRound::grab()}, [&](FlowControl & lc)
-                { merged_result = MergedResult::from_string("Err"); lc.cont(); }},
-        }); EVAL_FLOW_CONTROL
-        TEST_FAIL(ok);
-    }
-    while (false);
-    TEST_EQ(ok, merged_result, MergedResult::Type{Result::Err::grab()});
-
-    // simple match on a MergedMatchable
-    merged_result.match({
-        {MergedResult::Type{Result::Ok::grab()}, [&](){ TEST_FAIL(ok); }},
-        {MergedResult::Type{Error::AlreadyDone::grab()}, [&](){ TEST_FAIL(ok); }},
-        {MergedResult::Type{Error::CylindricalCubeOutOfRound::grab()}, [&](){ TEST_FAIL(ok); }},
-    });
 
     // traversal, variants(), operator<<()
     TEST_EQ(ok, TimeUnit::variants().size(), static_cast<size_t>(5));

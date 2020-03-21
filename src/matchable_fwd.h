@@ -41,6 +41,5 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     {                                                                                                      \
         template<typename T> class Matchable;                                                              \
         using Type = Matchable<class I##_t>;                                                               \
-        class Unmatchable;                                                                                 \
         using Flags = MatchBox<Type, void>;                                                                \
     }

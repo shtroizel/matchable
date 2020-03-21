@@ -149,7 +149,7 @@ bool is_weekday_v1(DayOfWeek::Type day)
 void print_weekdays()
 {
     // Remove some DayOfWeek variants for the current scope
-    UNMATCHABLE(DayOfWeek, Sunday, Saturday)
+    UNMATCHABLE(DayOfWeek, Sunday, Saturday);
 
     std::cout << "***** print_weekdays() *****" << std::endl;
     for (DayOfWeek::Type d : DayOfWeek::variants())
