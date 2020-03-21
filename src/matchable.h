@@ -757,7 +757,7 @@ private:
 
 
 #define VARIANT_SPREADVARIANTVECT(_t, _v, _st, ...)                                                        \
-    static bool const VARIANT_SPREADVARIANTVECT_init_##_t_##_v##_##_st =                                   \
+    static bool const VARIANT_SPREADVARIANTVECT_init_##_t##_##_v##_##_st =                                 \
         [](std::vector<_st::Type> sv) { _t::_v::grab().set_##_st##_##vect(sv); return true; }              \
             ({_mcv(_matchable_concat_variant, _st, ##__VA_ARGS__)});
 
