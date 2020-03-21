@@ -43,3 +43,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         using Type = Matchable<class I##_t>;                                                               \
         using Flags = MatchBox<Type, void>;                                                                \
     }
+
+
+#define MATCHABLES_MERGE_SPREADS_FWD(_t)                                                                   \
+    template<typename M, typename T> class MatchBox;                                                       \
+    template<typename M> class MatchBox<M, void>;                                                          \
+    namespace _t                                                                                           \
+    {                                                                                                      \
+        class MergedMatchable;                                                                             \
+        using Type = MergedMatchable;                                                                      \
+        using Flags = MatchBox<Type, void>;                                                                \
+    }
