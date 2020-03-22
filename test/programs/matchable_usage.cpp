@@ -31,146 +31,163 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <iostream>
+#include <iomanip>
+#include <chrono>
+#include <random>
 
 #include "matchable.h"
 
 
 
-MATCHABLE(TimeUnit, Seconds, Minutes, Hours, Days, Weeks)
+MATCHABLE(Actor, Rock, Paper, Scissors, Lizard, Spock)
 
+MATCHABLE(AttackPastTense, covered, crushed, cut, decapitated, disproved, ate, poisoned, smashed, vaporized)
+SPREAD_MATCHABLE(
+    AttackPastTense,
+    Attack,
+    covers,
+    crushes,
+    cuts,
+    decapitates,
+    disproves,
+    eats,
+    poisons,
+    smashes,
+    vaporizes
+)
+SPREADVARIANT_VARIANTS(AttackPastTense, covered, Attack, covers)
+SPREADVARIANT_VARIANTS(AttackPastTense, crushed, Attack, crushes)
+SPREADVARIANT_VARIANTS(AttackPastTense, cut, Attack, cuts)
+SPREADVARIANT_VARIANTS(AttackPastTense, decapitated, Attack, decapitates)
+SPREADVARIANT_VARIANTS(AttackPastTense, disproved, Attack, disproves)
+SPREADVARIANT_VARIANTS(AttackPastTense, ate, Attack, eats)
+SPREADVARIANT_VARIANTS(AttackPastTense, poisoned, Attack, poisons)
+SPREADVARIANT_VARIANTS(AttackPastTense, smashed, Attack, smashes)
+SPREADVARIANT_VARIANTS(AttackPastTense, vaporized, Attack, vaporizes)
+
+static MatchBox<Actor::Type, Attack::Type> const rock_attack({
+    { Actor::Lizard::grab(), Attack::crushes::grab() },
+    { Actor::Scissors::grab(), Attack::crushes::grab() },
+});
+static MatchBox<Actor::Type, Attack::Type> const paper_attack({
+    { Actor::Rock::grab(), Attack::covers::grab() },
+    { Actor::Spock::grab(), Attack::disproves::grab() },
+});
+static MatchBox<Actor::Type, Attack::Type> const scissors_attack({
+    { Actor::Paper::grab(), Attack::cuts::grab() },
+    { Actor::Lizard::grab(), Attack::decapitates::grab() },
+});
+static MatchBox<Actor::Type, Attack::Type> const lizard_attack({
+    { Actor::Spock::grab(), Attack::poisons::grab() },
+    { Actor::Paper::grab(), Attack::eats::grab() },
+});
+static MatchBox<Actor::Type, Attack::Type> const spock_attack({
+    { Actor::Scissors::grab(), Attack::smashes::grab() },
+    { Actor::Rock::grab(), Attack::vaporizes::grab() },
+});
+static MatchBox<Actor::Type, MatchBox<Actor::Type, Attack::Type>> const attack({
+    { Actor::Rock::grab(), rock_attack },
+    { Actor::Paper::grab(), paper_attack },
+    { Actor::Scissors::grab(), scissors_attack },
+    { Actor::Lizard::grab(), lizard_attack },
+    { Actor::Spock::grab(), spock_attack },
+});
+
+
+
+void print_rules()
+{
+    std::cout << "********* Rules *********";
+    for (auto attacker : Actor::variants())
+    {
+        std::cout << "\n" << attacker << ":" << std::endl;
+        for (auto attacked : Actor::variants())
+        {
+            Attack::Type att = attack.at(attacker).at(attacked);
+            if (!att.is_nil())
+                std::cout << "    " << att << " " << attacked << std::endl;
+        }
+    }
+    std::cout << "*************************\n" << std::endl;
+}
+
+
+void choose_actors(Actor::Type & actor_0, Actor::Type & actor_1)
+{
+    static std::mt19937 engine{std::random_device()()};
+    static std::uniform_int_distribution<int> actor_distribution{0, (int) Actor::variants().size() - 1};
+
+    actor_0 = Actor::from_index(actor_distribution(engine));
+    actor_1 = Actor::from_index(actor_distribution(engine));
+}
+
+
+MATCHABLE(compare_actors_Verbosity, Print, Silent)
+Actor::Type compare_actors(Actor::Type actor_0, Actor::Type actor_1, compare_actors_Verbosity::Type print)
+{
+    Attack::Type attack_0 = attack.at(actor_0).at(actor_1);
+    Attack::Type attack_1 = attack.at(actor_1).at(actor_0);
+
+    Actor::Type winner;
+    if (!attack_0.is_nil())
+        winner = actor_0;
+    else if (!attack_1.is_nil())
+        winner = actor_1;
+
+    if (print == compare_actors_Verbosity::Print::grab())
+    {
+        std::cout << "comparing " << actor_0 << " with " << actor_1 << ":\n    ";
+        if (!attack_0.is_nil())
+            std::cout << actor_0 << " " << attack_0.as_AttackPastTense() << " " << actor_1 << std::endl;
+        else if (!attack_1.is_nil())
+            std::cout << actor_1 << " " << attack_1.as_AttackPastTense() << " " << actor_0 << std::endl;
+        else
+            std::cout << "tie!" << std::endl;
+        std::cout << std::endl;
+    }
+
+    return winner;
+}
 
 
 int main()
 {
+    Actor::Type actor_0;
+    Actor::Type actor_1;
+
+    print_rules();
+
+    for (int i = 0; i < 108; ++i)
     {
-        // default construction
-        TimeUnit::Type const default_constructed;
+        choose_actors(actor_0, actor_1);
+        compare_actors(actor_0, actor_1, compare_actors_Verbosity::Print::grab());
     }
 
-    // static functions returning TimeUnit::Type
-    TimeUnit::Seconds::grab();
-    TimeUnit::Minutes::grab();
-    TimeUnit::Hours::grab();
-    TimeUnit::Days::grab();
-    TimeUnit::Weeks::grab();
-
-    // assignment
-    TimeUnit::Type const time_unit = TimeUnit::Minutes::grab();
-
+    int const TRIALS{46656};
+    int const TRIALS_PER_DOT{27};
+    std::cout << "108 trials run, now just start printing one '.' per " << TRIALS_PER_DOT << " trials"
+              << std::flush;
+    MatchBox<Actor::Type, int> win_counts{0};
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < TRIALS; ++i)
     {
-        // copy construction
-        TimeUnit::Type copied{time_unit};
+        if (i % TRIALS_PER_DOT == 0)
+            std::cout << "." << std::flush;
+        choose_actors(actor_0, actor_1);
+        Actor::Type winner = compare_actors(actor_0, actor_1, compare_actors_Verbosity::Silent::grab());
+        win_counts.mut_at(winner) += 1;
     }
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    std::cout << "\ncompleted " << TRIALS << " trials using a single thread in " << duration.count()
+              << " milliseconds" << std::endl;
 
-    {
-        // move construction / assignment
-        TimeUnit::Type tu = TimeUnit::Minutes::grab();
-        TimeUnit::Type move_constructed{std::move(tu)};
-        TimeUnit::Type move_assigned = std::move(move_constructed);
-    }
+    std::string const TITLE{"Summary Win Counts"};
+    int const WIDTH = TITLE.size();
+    std::cout << "\n" << TITLE << ":" << std::endl;
+    for (auto actor : Actor::variants())
+        std::cout << std::setw(WIDTH) << actor << ": " << win_counts.at(actor) << std::endl;
+    std::cout << std::setw(WIDTH) << "TIE" << ": " << win_counts.at(Actor::nil) << std::endl;
 
-    {
-        // same as lt_by_index())
-        bool lt = TimeUnit::Seconds::grab() < time_unit; // lt is true
-        (void) lt;
-
-        // string compare
-        lt = TimeUnit::Seconds::grab().lt_by_string(time_unit); // lt is false
-
-        // enum order compare
-        lt = TimeUnit::Seconds::grab().lt_by_index(time_unit); // lt is true
-    }
-
-    {
-        // equality compare
-        bool eq = TimeUnit::Seconds::grab() == time_unit; // eq is false
-        (void) eq;
-        eq = TimeUnit::Seconds::grab() != time_unit; // eq is true
-    }
-
-    {
-        // as_string()
-        std::string s = time_unit.as_string(); // s is "Minutes"
-        s = TimeUnit::nil.as_string(); // s is "nil"
-        s = TimeUnit::Type().as_string(); // s is "nil"
-    }
-
-    {
-        // from_string()
-        TimeUnit::Type tu = TimeUnit::from_string("107"); // tu is TimeUnit::nil
-        tu = TimeUnit::from_string("nil"); // tu is TimeUnit::nil
-        tu = TimeUnit::from_string("Weeks"); // tu is TimeUnit::Weeks::grab()
-    }
-
-    {
-        // as_index()
-        int index = TimeUnit::Seconds::grab().as_index(); // index is 0
-        (void) index;
-        index = TimeUnit::Days::grab().as_index(); // index is 3
-    }
-
-    {
-        // from_index()
-        TimeUnit::Type tu = TimeUnit::from_index(4); // tu is TimeUnit::Weeks::grab()
-        tu = TimeUnit::from_index(107); // tu is TimeUnit::nil
-    }
-
-    // is_nil()
-    if (time_unit.is_nil())
-        exit(EXIT_FAILURE);
-
-    {
-        // flags
-        TimeUnit::Flags flags;
-        bool b = flags.is_set(TimeUnit::Seconds::grab()); // b is false (all are unset by default)
-        (void) b;
-        flags.set(TimeUnit::Hours::grab());
-        b = flags.is_set(TimeUnit::Hours::grab()); // b is true
-
-        // copy flags
-        TimeUnit::Flags more_flags{flags};
-        b = more_flags.is_set(TimeUnit::Hours::grab()); // b is true
-
-        // clear flags
-        more_flags = TimeUnit::Flags{};
-        b = more_flags.is_set(TimeUnit::Hours::grab()); // b is false
-    }
-
-    {
-        // match()
-        time_unit.match({
-            { TimeUnit::Seconds::grab(), [](){ exit(EXIT_FAILURE); } },
-            { TimeUnit::Minutes::grab(), [](){ std::cout << "match!" << std::endl; } },
-            { TimeUnit::Hours::grab(), [](){ exit(EXIT_FAILURE); } },
-            { TimeUnit::Days::grab(), [](){ exit(EXIT_FAILURE); } },
-            { TimeUnit::Weeks::grab(), [](){ exit(EXIT_FAILURE); } },
-            { TimeUnit::nil, [](){ exit(EXIT_FAILURE); } },
-        }); // tu is TimeUnit::Minutes::grab()
-    }
-
-    // traversal, variants(), operator<<()
-    TimeUnit::variants().size(); // 5
-    std::cout << "Printing some TimeUnit variants..." << std::endl;
-    for (auto variant : TimeUnit::variants())
-        if (MATCHABLE_INSTANCE_IN(TimeUnit, variant, Hours, Days, Weeks))
-            std::cout << "    " << variant << std::endl;
-
-    {
-        // remove Days and Weeks
-        UNMATCHABLE(TimeUnit, Days, Weeks);
-        std::cout << "Traversing TimeUnit variants with Days and Weeks removed..." << std::endl;
-        for (auto variant : TimeUnit::variants())
-            std::cout << "    " << variant << std::endl;
-    }
-
-    std::cout << "Traversing TimeUnit variants with Days and Weeks restored..." << std::endl;
-    for (auto variant : TimeUnit::variants())
-        std::cout << "    " << variant << std::endl;
-
-    // return success
-    [](int magic){ if (magic == 107) return TimeUnit::Weeks::grab(); return TimeUnit::nil; }(107).match({
-        { TimeUnit::Weeks::grab(), [](){ exit(EXIT_SUCCESS); } },
-    });
-
-    return EXIT_FAILURE;
+    return 0;
 }

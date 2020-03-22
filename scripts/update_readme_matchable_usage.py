@@ -9,7 +9,7 @@ matchable_usage_filename = repo_root + 'test/programs/matchable_usage.cpp'
 with open(readme_filename) as f:
     orig_content = f.readlines()
 
-getting_started = '## Matchable API'
+complete_example = '## Complete Example'
 new_content = []
 
 # skip to getting started heading
@@ -18,14 +18,14 @@ found = False
 for line in orig_content:
     readme_index += 1
     new_content.append(line)
-    if line.startswith(getting_started):
+    if line.startswith(complete_example):
         found = True
         break
 if not found:
-    print('failed to find line \'' + getting_started + '\'')
+    print('failed to find line \'' + complete_example + '\'')
     exit(-1)
-    
-    
+
+
 # skip to ```
 found = False
 while readme_index < len(orig_content) - 1:
