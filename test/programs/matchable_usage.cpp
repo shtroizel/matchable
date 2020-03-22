@@ -41,7 +41,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 MATCHABLE(Actor, Rock, Paper, Scissors, Lizard, Spock)
 
-MATCHABLE(AttackPastTense, covered, crushed, cut, decapitated, disproved, ate, poisoned, smashed, vaporized)
+MATCHABLE(
+    AttackPastTense,
+    covered,
+    crushed,
+    cut,
+    decapitated,
+    disproved,
+    ate,
+    poisoned,
+    smashed,
+    vaporized
+)
 SPREAD_MATCHABLE(
     AttackPastTense,
     Attack,

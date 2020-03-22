@@ -25,7 +25,18 @@ The following program can be found at: test/programs/matchable_usage.cpp
 
 MATCHABLE(Actor, Rock, Paper, Scissors, Lizard, Spock)
 
-MATCHABLE(AttackPastTense, covered, crushed, cut, decapitated, disproved, ate, poisoned, smashed, vaporized)
+MATCHABLE(
+    AttackPastTense,
+    covered,
+    crushed,
+    cut,
+    decapitated,
+    disproved,
+    ate,
+    poisoned,
+    smashed,
+    vaporized
+)
 SPREAD_MATCHABLE(
     AttackPastTense,
     Attack,
