@@ -13,7 +13,7 @@ MATCHABLE is implemented by:<br/>
 * src/matchable_fwd.h
 ## Complete Example
 The following program can be found at: test/programs/matchable_usage.cpp
-```
+```cpp
 #include <iostream>
 #include <iomanip>
 #include <chrono>
