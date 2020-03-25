@@ -115,7 +115,7 @@ int main()
     stable_algorithms_by_space_complexity.resize(
         std::distance(stable_algorithms_by_space_complexity.begin(), it)
     );
-    std::sort(
+    std::stable_sort(
         stable_algorithms_by_space_complexity.begin(),
         stable_algorithms_by_space_complexity.end(),
         [](auto a, auto b) { return a.as_SpaceComplexity() < b.as_SpaceComplexity(); }
