@@ -213,9 +213,9 @@ void print_holidays_v1()
 }
 
 
-void print_friday_thirteenth_2007()
+void print_friday_july_thirteenth_2007()
 {
-    std::cout << "***** print_friday_thirteenth_2007() *****" << std::endl;
+    std::cout << "***** print_friday_july_thirteenth_2007() *****" << std::endl;
 
     DayOfWeek::Type dow = DayOfWeek::from_string("Friday");
     DayOfMonth::Type dom = DayOfMonth::_13th::grab();
@@ -233,6 +233,6 @@ int main()
     print_day_of_month_holidays();
     print_holidays_v0();
     print_holidays_v1();
-    print_friday_thirteenth_2007();
+    print_friday_july_thirteenth_2007();
     return 0;
 }
