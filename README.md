@@ -7,11 +7,11 @@ that can spread forming relationships<br/>
 as a compile-time tool<br/>
 for inconspicuous efficiency<br/>
 
-## Getting Started
+# Getting Started
 MATCHABLE is implemented by:<br/>
 * src/matchable.h<br/>
 * src/matchable_fwd.h
-## Complete Example
+# Complete Example
 The following program can be found at: test/programs/matchable_usage.cpp
 ```cpp
 #include <iostream>
@@ -188,99 +188,133 @@ int main()
 }
 
 ```
-## Macro-API<a name="macro_api"></a>
-macro names<br/>
-mirror their parameters<br/>
-respectively<br/>
-<br/>
-where a MATCHABLE is a type followed by its variants
-<br/>
-<br/>
-for documention here note that backticks are used to notate parameter substitution
-### Macros for creating new types
-#### Create a new type and its variants with:
-```
-MATCHABLE(type, variant...)
-```
-Where: variant... is: in [0..108] comma separated variants<br/>
-Example: test/programs/matchable.cpp
-#### Create a new type and its variants having a matchable property with:
-```
-SPREAD_MATCHABLE(spread, type, variant...)
-```
-Where: spread is: a type defined by MATCHABLE() or SPREAD\*\_MATCHABLE()<br/>
+# Macro-API<a name="macro_api"></a>
+## Macros for creating new types
+#### MATCHABLE(type, variant...)
+Params:
+* **type** The new "matchable" to be created<br/>
+* **variant...** 0..108 comma separated variants of the new matchable type
+
+#### SPREAD_MATCHABLE(spread, type, variant...)
+Params:
+* **spread** Existing matchable type (must be at least forward declared)<br/>
+* **type** The new "matchable" to be created<br/>
+* **variant...** 0..108 comma separated variants of the new matchable type<br/>
+Same as MATCHABLE(), but with the added ability to have a setter and accessor created for some matchable
+type "spread".<br/>
+
 Injects:
 ```
 void set_`spread`(`spread`::Type)
 `spread`::Type as_`spread`() const
 ```
-as member functions of \`type\`::Type<br/>
+as member functions of the new type.<br/>
 Example: test/programs/spread_matchable.cpp
-#### Create a new type and its variants having 2 matchable properties with:
-```
-SPREADx2_MATCHABLE(spread0, spread1, type, variant...)
-```
-Where: spreads are: independent types defined by MATCHABLE() or SPREAD\*\_MATCHABLE()<br/>
-Injects:
-```
-void set_`spread0`(`spread`::Type)
-`spread0`::Type as_`spread0`() const
-void set_`spread1`(`spread1`::Type)
-`spread1`::Type as_`spread1`() const
-```
-as member functions of \`type\`::Type<br/>
-Example: test/programs/spreadx2matchable.cpp
-#### Create a new type and its variants having a "vector of matchable" property with:
-```
-SPREADVECTOF_MATCHABLE(spread, type, variant...)
-```
-Where: spread is: a type defined by MATCHABLE() or SPREAD\*\_MATCHABLE()<br/>
+
+#### SPREADx2_MATCHABLE(spread0, spread1, type, variant...)
+Similar to SPREAD_MATCHABLE(), but with ability to specify 2 spread types
+Example: test/programs/spread2x_matchable.cpp
+
+#### SPREADx3_MATCHABLE(spread0, spread1, spread2, type, variant...)
+Similar to SPREAD_MATCHABLE(), but with ability to specify 3 spread types
+Example: test/programs/relationships.cpp
+
+#### SPREADVECTOF_MATCHABLE(spread, type, variant...)
+Similar to SPREAD_MATCHABLE(), but the injected functions work on vectors of the given **spread**.
+
 Injects:
 ```
 void set_`spread`_vect(std::vector<`spread`::Type>)
 std::vector<`spread`::Type> as_`spread`_vect() const
 ```
-as member functions of \`type\`::Type<br/>
+as member functions of the new type.<br/>
 Example: test/programs/spreadvectof_matchable.cpp
-### Macros manipulating existing types
-#### Call set_\`spread_type\`(\`spread_type\`::\`spread_variant\`::grab()) with each \`variant...\` of \`type\` at link-time with:
-```
-SPREADVARIANT_VARIANTS(spread_type, spread_variant, type, variant...)
-```
+
+#### MATCHABLES_MERGE_SPREADS(type0, type1, merge, spread...)
+Params:
+* **type0** Existing matchable type<br/>
+* **type1** Existing matchable type<br/>
+* **merge** New matchable type to be created<br/>
+* **spreads...** 0..108 common spreads of **type0** and **type1** to be available to **merge**<br/>
+
+Create new type, **merge**, with variants from **type0** and **type1** concatenated<br/>
+Example: test/programs/matchables_merge_spreads.cpp
+
+## Macros for setting spreads at link-time
+
+#### SPREADVARIANT_VARIANTS(spread_type, spread_variant, type, variant...)
+Params:
+* **spread_type** A spread type available to **type**.
+* **spread_variant** A variant of **spread_type** as the new value to be set
+* **type** A matchable type with spread, **spread_type**.
+* **variant...** up to 108 variants to have their spread set to **spread_variant**
+
+Call set_**spread_type**(**spread_type**::**spread_variant**::grab()) with each **variant...** of **type** at link-time.<br/>
 Example: test/programs/spread_matchable.cpp
-#### Call \`type\`::\`variant\`::grab().set_\`spread_type\`_vect() with a vector formed by the given \`spread_variants...\` of \`spread_type\` at link-time with:
-```
-VARIANT_SPREADVARIANTVECT(type, variant, spread_type, spread_variant...)
-```
+
+#### VARIANT_SPREADVARIANTVECT(type, variant, spread_type, spread_variant...)
+Params:
+* **type** A matchable type with vector of **spread_type**
+* **variant** A variant of **type** to have its vector of **spread_type** set
+* **spread_type** A matchable type available to **type** as a vector.
+* **spread_variant..** up to 108 variants of **spread_type** forming the vector (the new value to be set)
+
+Call **type**::**variant**::grab().set_**spread_type**_vect() with a vector formed by the given **spread_variants...** of **spread_type** at link-time<br/>
 Example: test/programs/spreadvectof_matchable.cpp
-#### Remove variants for the current scope with:
-```
-UNMATCHABLE(type, variant...)
-```
-when the scope exits the removed variants are restored<br/>
+
+## Removing matchables run-time for the current scope
+
+#### UNMATCHABLE(type, variant...)
+Removes variants for the current scope. When the scope exits the removed variants are restored. Note that
+types created by MATCHABLES_MERGE_SPREADS() should use MERGED_UNMATCHABLE() instead.<br/>
+
 Example: test/programs/unmatchable.cpp
-### Macros for working with matchable instances
-#### Test if a matchable instance matches one of some given variants
-```
-MATCHABLE_INSTANCE_IN(type, instance, variant...) -> bool
-```
+
+#### MERGED_UNMATCHABLE(type, variant...)
+Similar to UNMATCHABLE(), but works on types created by MATCHABLES_MERGE_SPREADS() as well. Note that all
+types whether merged or not will work with MERGED_UNMATCHABLE(), but that UNMATCHABLE() performs faster.
+Use MERGED_UNMATCHABLE() for merged types or for when it is unknown if the type was merged or not. For
+cases where the matchable is known to not be merged prefer UNMATCHABLE() instead.<br/>
+
+Example: test/programs/matchables_merge_spreads.cpp
+
+## Function-like macros
+
+#### MATCHABLE_INSTANCE_IN(type, instance, variant...) -> bool
 returns true if instance is one of the given variants or false otherwise
-### Forward declare a MATCHABLE type - TimeUnit for example:
+
+Example:
 ```
-#include "matchable_fwd.h"
-MATCHABLE_FWD(TimeUnit)
+bool is_weekday(DayOfWeek::Type day)
+{
+    return MATCHABLE_INSTANCE_IN(DayOfWeek, day, Monday, Tuesday, Wednesday, Thursday, Friday);
+}
 ```
-To understand why MATCHABLE_FWD exists run:
+Example: test/programs/relationships.cpp
+## Macros for forward declaring types
+To benchmark compile time performace with and without forward declarations run:
 ```
 scripts/test_buildtimes.py
 ```
-### Prerequisites
+
+#### MATCHABLE_FWD(type)
+Forward declare a normal (unmerged) matchable<br/>
+Example:
+```
+#include "matchable_fwd.h"
+MATCHABLE_FWD(DayOfWeek)
+```
+
+#### MATCHABLES_MERGE_SPREADS_FWD(type)
+Same as MATCHABLE_FWD() but for matchables created by MATCHABLES_MERGE_SPREADS()<br/>
+
+# Prerequisites
 
 clang >= 7.0.1<br/>
 or<br/>
 g++ >= 8.3.0
 
-### Building, Installing and Running Tests In One Step
+# Building, Installing and Running Tests
 ```
 scripts/setup.sh
 ```
@@ -295,11 +329,11 @@ install/test/bin/run_all.sh again_quietly
 ```
 to specify custom build or install directories or to force use of clang see:
 ```
-scripts/setup.sh --help
+scripts/setup.sh -h
 ```
 * use of setup.sh is of course optional and serves as a reference or example workflow
 * setup.sh will remove the build and install directories before starting!
-### Running Tests / Examples
+# Running Tests / Examples
 Assuming workflow above with install directory under the project root (modify paths accordingly for your workflow).
 <br/>
 <br/>
@@ -325,22 +359,22 @@ Run All Tests Quietly
 install/test/bin/run_all.sh quietly
 ```
 
-### Example Source Code
+# Example Source Code
 Example code can be found under:
 ```
 test/programs
 ```
 
-## Versioning
+# Versioning
 
 For the versions available, see the [tags on this repository](https://github.com/shtroizel/matchable/tags).
 
-## Authors
+# Authors
 
 * **Eric Hyer**
 
 See also the list of [contributors](https://github.com/shtroizel/matchable/contributors) who participated in this project.
 
-## License
+# License
 
 This project is licensed under the "BSD 3-Clause License" - see the [LICENSE](LICENSE) file for details
