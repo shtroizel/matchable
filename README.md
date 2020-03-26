@@ -212,11 +212,11 @@ as member functions of the new type.<br/>
 Example: test/programs/spread_matchable.cpp
 
 #### SPREADx2_MATCHABLE(spread0, spread1, type, variant...)
-Similar to SPREAD_MATCHABLE(), but with ability to specify 2 spread types
+Similar to SPREAD_MATCHABLE(), but with ability to specify 2 spread types<br/>
 Example: test/programs/spread2x_matchable.cpp
 
 #### SPREADx3_MATCHABLE(spread0, spread1, spread2, type, variant...)
-Similar to SPREAD_MATCHABLE(), but with ability to specify 3 spread types
+Similar to SPREAD_MATCHABLE(), but with ability to specify 3 spread types<br/>
 Example: test/programs/relationships.cpp
 
 #### SPREADVECTOF_MATCHABLE(spread, type, variant...)
@@ -259,7 +259,7 @@ Params:
 * **spread_type** A matchable type available to **type** as a vector.
 * **spread_variant..** up to 108 variants of **spread_type** forming the vector (the new value to be set)
 
-Call **type**::**variant**::grab().set_**spread_type**_vect() with a vector formed by the given **spread_variants...** of **spread_type** at link-time<br/>
+Call **type**::**variant**::grab().set_**spread_type**_vect() with a vector formed by the given **spread_variants...** of **spread_type** at link-time.<br/>
 Example: test/programs/spreadvectof_matchable.cpp
 
 ## Removing matchables run-time for the current scope
