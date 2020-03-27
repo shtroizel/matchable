@@ -316,9 +316,9 @@ g++ >= 8.3.0
 
 # Building, Installing and Running Tests
 ```
-scripts/setup.sh
+scripts/setup.py
 ```
-setup.sh without arguments will from the project root do:
+setup.py without arguments will from the project root do:
 ```
 mkdir build
 cd build
@@ -329,12 +329,13 @@ install/test/bin/run_all.sh again_quietly
 ```
 to specify custom build or install directories or to force use of clang see:
 ```
-scripts/setup.sh -h
+scripts/setup.py -h
 ```
-* use of setup.sh is of course optional and serves as a reference or example workflow
-* setup.sh will remove the build and install directories before starting!
+* use of setup.py is of course optional and serves as a reference or example workflow
+* setup.py will remove the build and install directories before starting!
 # Running Tests / Examples
-Assuming workflow above with install directory under the project root (modify paths accordingly for your workflow).
+Assuming workflow above with install directory under the project root (modify paths accordingly for your
+workflow).
 <br/>
 <br/>
 
