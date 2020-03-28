@@ -962,6 +962,9 @@ private:
     }
 
 
+#define MATCHABLE_GROW(_t, ...) _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
+
+
 // FLOW CONTROL MACROS
 #define MATCH_WITH_FLOW_CONTROL { FlowControl fc =
 #define EVAL_FLOW_CONTROL if (fc.brk_requested()) break; if (fc.cont_requested()) continue; }

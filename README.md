@@ -240,6 +240,18 @@ Params:
 Create new type, **merge**, with variants from **type0** and **type1** concatenated<br/>
 Example: test/programs/matchables_merge_spreads.cpp
 
+## Going beyond 108 variants
+* "Normal" unmerged matchables may grow as needed to achieve variant counts higher than 108.
+* Merged matchables created by MATCHABLES_MERGE_SPREADS() only have the variants of the respective
+matchables used to create the merge, and have no direct variants of their own.
+  - Instead of growing a merge the following options are available:
+    - Grow one of the matchables used to create the merge.
+    - Merge the merge with a new type containing the new variants (see matchables_merge_spreads.cpp).
+#### MATCHABLE_GROW(type, variant...)
+Add up to 108 new variants to **type**.<br/>
+This may be repeated as needed...<br/>
+Example: test/programs/max_variants.cpp
+
 ## Macros for setting spreads at link-time
 
 #### SPREADVARIANT_VARIANTS(spread_type, spread_variant, type, variant...)
@@ -291,6 +303,7 @@ bool is_weekday(DayOfWeek::Type day)
 }
 ```
 Example: test/programs/relationships.cpp
+
 ## Macros for forward declaring types
 To benchmark compile time performace with and without forward declarations run:
 ```

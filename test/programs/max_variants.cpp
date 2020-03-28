@@ -150,16 +150,38 @@ MATCHABLE(
 );
 
 
+// grow beyond 108 variants...
+MATCHABLE_GROW(
+    Number,
+    one_hundred_eight,
+    one_hundred_nine,
+    one_hundred_ten
+)
+
+
 
 int main()
 {
     test_ok ok;
-    std::cout << "Test traversal of 108 max supported number of variants..." << std::endl;
+
+    TEST_EQ(ok, Number::variants().size(), static_cast<size_t>(111));
+
+    int grown_variant_count{0};
     Number::Type n;
     for (auto number : Number::variants())
     {
         n = Number::from_string(number.as_string());
         TEST_EQ(ok, n, number);
+        n = Number::from_index(number.as_index());
+        TEST_EQ(ok, n, number);
+
+        if (n.as_index() > 107)
+        {
+            ++grown_variant_count;
+            std::cout << "index " << n.as_index() << ": " << n << std::endl;
+        }
     }
+    TEST_EQ(ok, grown_variant_count, 3);
+
     return ok();
 }
