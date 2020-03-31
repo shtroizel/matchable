@@ -24,7 +24,6 @@ endfunction()
 
 add_matchable_test(max_variants)
 add_matchable_test(matchable)
-add_matchable_test(matchables_merge_spreads)
 add_matchable_test(matchable_usage)
 add_matchable_test(matchbox)
 add_matchable_test(relationships)

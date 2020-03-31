@@ -44,13 +44,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 MATCHABLE(Color, Black, Red)
 
 // create new MATCHABLE called Suit with set_Color() and as_Color()
-SPREAD_MATCHABLE(Color, Suit, Clubs, Diamonds, Hearts, Spades)
+SPREADx1_MATCHABLE(Color, Suit, Clubs, Diamonds, Hearts, Spades)
 
-// Set the spread for one or more Suit variants...
-// There are two syntaxes for this. The SPREADVARIANT_VARIANTS() macro is used here for the black suits.
+// There are two syntaxes for this. The VARIANT_SPREADVARIANT() macro is used here for the black suits.
 // To demonstrate the other syntax we use the run-time interface within main() to set the red suits.
-// Note that the macro syntax here is link-time.
-SPREADVARIANT_VARIANTS(Color, Black, Suit, Clubs, Spades)
+VARIANT_SPREADVARIANT(Suit, Clubs, Color, Black)
+VARIANT_SPREADVARIANT(Suit, Spades, Color, Black)
 
 MATCHABLE(Rank, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace)
 

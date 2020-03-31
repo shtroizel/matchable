@@ -37,7 +37,7 @@ MATCHABLE(
     smashed,
     vaporized
 )
-SPREAD_MATCHABLE(
+SPREADx1_MATCHABLE(
     AttackPastTense,
     Attack,
     covers,
@@ -50,15 +50,15 @@ SPREAD_MATCHABLE(
     smashes,
     vaporizes
 )
-SPREADVARIANT_VARIANTS(AttackPastTense, covered, Attack, covers)
-SPREADVARIANT_VARIANTS(AttackPastTense, crushed, Attack, crushes)
-SPREADVARIANT_VARIANTS(AttackPastTense, cut, Attack, cuts)
-SPREADVARIANT_VARIANTS(AttackPastTense, decapitated, Attack, decapitates)
-SPREADVARIANT_VARIANTS(AttackPastTense, disproved, Attack, disproves)
-SPREADVARIANT_VARIANTS(AttackPastTense, ate, Attack, eats)
-SPREADVARIANT_VARIANTS(AttackPastTense, poisoned, Attack, poisons)
-SPREADVARIANT_VARIANTS(AttackPastTense, smashed, Attack, smashes)
-SPREADVARIANT_VARIANTS(AttackPastTense, vaporized, Attack, vaporizes)
+VARIANT_SPREADVARIANT(Attack, covers, AttackPastTense, covered)
+VARIANT_SPREADVARIANT(Attack, crushes, AttackPastTense, crushed)
+VARIANT_SPREADVARIANT(Attack, cuts, AttackPastTense, cut)
+VARIANT_SPREADVARIANT(Attack, decapitates, AttackPastTense, decapitated)
+VARIANT_SPREADVARIANT(Attack, disproves, AttackPastTense, disproved)
+VARIANT_SPREADVARIANT(Attack, eats, AttackPastTense, ate)
+VARIANT_SPREADVARIANT(Attack, poisons, AttackPastTense, poisoned)
+VARIANT_SPREADVARIANT(Attack, smashes, AttackPastTense, smashed)
+VARIANT_SPREADVARIANT(Attack, vaporizes, AttackPastTense, vaporized)
 
 static MatchBox<Actor::Type, Attack::Type> const rock_attack({
     { Actor::Lizard::grab(), Attack::crushes::grab() },
@@ -195,7 +195,7 @@ Params:
 * **type** The new "matchable" to be created<br/>
 * **variant...** 0..108 comma separated variants of the new matchable type
 
-#### SPREAD_MATCHABLE(spread, type, variant...)
+#### SPREADx1_MATCHABLE(spread, type, variant...)
 Params:
 * **spread** Existing matchable type (must be at least forward declared)<br/>
 * **type** The new "matchable" to be created<br/>
@@ -212,15 +212,19 @@ as member functions of the new type.<br/>
 Example: test/programs/spread_matchable.cpp
 
 #### SPREADx2_MATCHABLE(spread0, spread1, type, variant...)
-Similar to SPREAD_MATCHABLE(), but with ability to specify 2 spread types<br/>
+Similar to SPREADx1_MATCHABLE(), but with ability to specify 2 spread types<br/>
 Example: test/programs/spread2x_matchable.cpp
 
 #### SPREADx3_MATCHABLE(spread0, spread1, spread2, type, variant...)
-Similar to SPREAD_MATCHABLE(), but with ability to specify 3 spread types<br/>
+Similar to SPREADx1_MATCHABLE(), but with ability to specify 3 spread types<br/>
+Example: test/programs/relationships.cpp
+
+#### SPREADx4_MATCHABLE(spread0, spread1, spread2, spread3, type, variant...)
+Similar to SPREADx1_MATCHABLE(), but with ability to specify 4 spread types<br/>
 Example: test/programs/relationships.cpp
 
 #### SPREADVECTOF_MATCHABLE(spread, type, variant...)
-Similar to SPREAD_MATCHABLE(), but the injected functions work on vectors of the given **spread**.
+Similar to SPREADx1_MATCHABLE(), but the injected functions work on vectors of the given **spread**.
 
 Injects:
 ```
@@ -230,23 +234,9 @@ std::vector<`spread`::Type> as_`spread`_vect() const
 as member functions of the new type.<br/>
 Example: test/programs/spreadvectof_matchable.cpp
 
-#### MATCHABLES_MERGE_SPREADS(type0, type1, merge, spread...)
-Params:
-* **type0** Existing matchable type<br/>
-* **type1** Existing matchable type<br/>
-* **merge** New matchable type to be created<br/>
-* **spreads...** 0..108 common spreads of **type0** and **type1** to be available to **merge**<br/>
-
-Create new type, **merge**, with variants from **type0** and **type1** concatenated<br/>
-Example: test/programs/matchables_merge_spreads.cpp
-
 ## Going beyond 108 variants
-* "Normal" unmerged matchables may grow as needed to achieve variant counts higher than 108.
-* Merged matchables created by MATCHABLES_MERGE_SPREADS() only have the variants of the respective
-matchables used to create the merge, and have no direct variants of their own.
-  - Instead of growing a merge the following options are available:
-    - Grow one of the matchables used to create the merge.
-    - Merge the merge with a new type containing the new variants (see matchables_merge_spreads.cpp).
+Although a matchable is initially defined with up to 108 variants, it may grow as needed to achieve variant
+counts higher than 108.
 #### MATCHABLE_GROW(type, variant...)
 Add up to 108 new variants to **type**.<br/>
 This may be repeated as needed...<br/>
@@ -254,14 +244,14 @@ Example: test/programs/max_variants.cpp
 
 ## Macros for setting spreads at link-time
 
-#### SPREADVARIANT_VARIANTS(spread_type, spread_variant, type, variant...)
+#### VARIANT_SPREADVARIANT(type, variant, spread_type, spread_variant)
 Params:
+* **type** A matchable type with spread, **spread_type**.
+* **variant** A variant of **type** to have its **spread_type** set to **spread_variant**
 * **spread_type** A spread type available to **type**.
 * **spread_variant** A variant of **spread_type** as the new value to be set
-* **type** A matchable type with spread, **spread_type**.
-* **variant...** up to 108 variants to have their spread set to **spread_variant**
 
-Call set_**spread_type**(**spread_type**::**spread_variant**::grab()) with each **variant...** of **type** at link-time.<br/>
+Call **type**::**variant**::grab().set_**spread_type**(**spread_type**::**spread_variant**::grab()) at link-time.<br/>
 Example: test/programs/spread_matchable.cpp
 
 #### VARIANT_SPREADVARIANTVECT(type, variant, spread_type, spread_variant...)
@@ -272,29 +262,16 @@ Params:
 * **spread_variant..** up to 108 variants of **spread_type** forming the vector (the new value to be set)
 
 Call **type**::**variant**::grab().set_**spread_type**_vect() with a vector formed by the given **spread_variants...** of **spread_type** at link-time.<br/>
-Example: test/programs/spreadvectof_matchable.cpp
+Example: test/programs/spreadvectof_matchable.cpp<br/>
 
-## Removing matchables run-time for the current scope
+## Run-time macros
 
 #### UNMATCHABLE(type, variant...)
-Removes variants for the current scope. When the scope exits the removed variants are restored. Note that
-types created by MATCHABLES_MERGE_SPREADS() should use MERGED_UNMATCHABLE() instead.<br/>
-
-Example: test/programs/unmatchable.cpp
-
-#### MERGED_UNMATCHABLE(type, variant...)
-Similar to UNMATCHABLE(), but works on types created by MATCHABLES_MERGE_SPREADS() as well. Note that all
-types whether merged or not will work with MERGED_UNMATCHABLE(), but that UNMATCHABLE() performs faster.
-Use MERGED_UNMATCHABLE() for merged types or for when it is unknown if the type was merged or not. For
-cases where the matchable is known to not be merged prefer UNMATCHABLE() instead.<br/>
-
-Example: test/programs/matchables_merge_spreads.cpp
-
-## Function-like macros
+Removes variants for the current scope. When the scope exits the removed variants are restored.<br/>
+Example: test/programs/unmatchable.cpp<br/>
 
 #### MATCHABLE_INSTANCE_IN(type, instance, variant...) -> bool
-returns true if instance is one of the given variants or false otherwise
-
+returns true if instance is one of the given variants or false otherwise<br/>
 Example:
 ```
 bool is_weekday(DayOfWeek::Type day)
@@ -302,24 +279,21 @@ bool is_weekday(DayOfWeek::Type day)
     return MATCHABLE_INSTANCE_IN(DayOfWeek, day, Monday, Tuesday, Wednesday, Thursday, Friday);
 }
 ```
-Example: test/programs/relationships.cpp
+Example: test/programs/relationships.cpp<br/>
 
-## Macros for forward declaring types
+## Forward Declaring Matchables
 To benchmark compile time performace with and without forward declarations run:
 ```
 scripts/test_buildtimes.py
 ```
 
 #### MATCHABLE_FWD(type)
-Forward declare a normal (unmerged) matchable<br/>
+Forward declare a matchable<br/>
 Example:
 ```
 #include "matchable_fwd.h"
 MATCHABLE_FWD(DayOfWeek)
 ```
-
-#### MATCHABLES_MERGE_SPREADS_FWD(type)
-Same as MATCHABLE_FWD() but for matchables created by MATCHABLES_MERGE_SPREADS()<br/>
 
 # Prerequisites
 

@@ -53,7 +53,7 @@ MATCHABLE(
     smashed,
     vaporized
 )
-SPREAD_MATCHABLE(
+SPREADx1_MATCHABLE(
     AttackPastTense,
     Attack,
     covers,
@@ -66,15 +66,15 @@ SPREAD_MATCHABLE(
     smashes,
     vaporizes
 )
-SPREADVARIANT_VARIANTS(AttackPastTense, covered, Attack, covers)
-SPREADVARIANT_VARIANTS(AttackPastTense, crushed, Attack, crushes)
-SPREADVARIANT_VARIANTS(AttackPastTense, cut, Attack, cuts)
-SPREADVARIANT_VARIANTS(AttackPastTense, decapitated, Attack, decapitates)
-SPREADVARIANT_VARIANTS(AttackPastTense, disproved, Attack, disproves)
-SPREADVARIANT_VARIANTS(AttackPastTense, ate, Attack, eats)
-SPREADVARIANT_VARIANTS(AttackPastTense, poisoned, Attack, poisons)
-SPREADVARIANT_VARIANTS(AttackPastTense, smashed, Attack, smashes)
-SPREADVARIANT_VARIANTS(AttackPastTense, vaporized, Attack, vaporizes)
+VARIANT_SPREADVARIANT(Attack, covers, AttackPastTense, covered)
+VARIANT_SPREADVARIANT(Attack, crushes, AttackPastTense, crushed)
+VARIANT_SPREADVARIANT(Attack, cuts, AttackPastTense, cut)
+VARIANT_SPREADVARIANT(Attack, decapitates, AttackPastTense, decapitated)
+VARIANT_SPREADVARIANT(Attack, disproves, AttackPastTense, disproved)
+VARIANT_SPREADVARIANT(Attack, eats, AttackPastTense, ate)
+VARIANT_SPREADVARIANT(Attack, poisons, AttackPastTense, poisoned)
+VARIANT_SPREADVARIANT(Attack, smashes, AttackPastTense, smashed)
+VARIANT_SPREADVARIANT(Attack, vaporizes, AttackPastTense, vaporized)
 
 static MatchBox<Actor::Type, Attack::Type> const rock_attack({
     { Actor::Lizard::grab(), Attack::crushes::grab() },
