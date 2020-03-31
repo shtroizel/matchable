@@ -77,9 +77,3 @@ namespace TimeUnit
         return as_sibling.at(out_unit).at(in_unit)(in_val);
     }
 }
-
-
-
-// test fwd declare and linkage of MergedMatchable...
-MATCHABLE(DistanceUnit, Meters, Feet)
-MATCHABLES_MERGE_SPREADS(TimeUnit, DistanceUnit, Unit)
