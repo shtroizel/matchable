@@ -1,7 +1,9 @@
 #pragma once
-#include "TimeUnit.h"
+#include "matchables.h"
 class IncludedAllOverThePlace
 {
 public:
-    TimeUnit::Type foo();
+    Color::Type f0();
+    single_ns::TimeUnit::Type f1();
+    outer_ns::inner_ns::number::Type f2();
 };

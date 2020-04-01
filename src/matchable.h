@@ -302,7 +302,7 @@ template<typename M>
 class Unmatchable
 {
 public:
-    explicit Unmatchable(std::vector<M> um)
+    Unmatchable(std::initializer_list<M> um)
     {
         prev_variants = M::variants();
         auto i = std::remove_if(
@@ -762,6 +762,30 @@ private:
  */
 #define UNMATCHABLE(_t, ...)                                                                               \
     Unmatchable<_t::Type> unmatchable_##_t{{_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)}}
+
+
+#define NAMESPACEx1_UNMATCHABLE(_n0, _t, ...)                                                              \
+    Unmatchable<_n0::_t::Type> unm_##_n0##_##_t{{_mcv(_matchable_concat_variant, _n0::_t, ##__VA_ARGS__)}}
+
+
+#define NAMESPACEx2_UNMATCHABLE(_n0, _n1, _t, ...)                                                         \
+    Unmatchable<_n0::_n1::_t::Type> unm_##_n0##_##_n1##_##_t                                               \
+        {{_mcv(_matchable_concat_variant, _n0::_n1::_t, ##__VA_ARGS__)}}
+
+
+#define NAMESPACEx3_UNMATCHABLE(_n0, _n1, _n2, _t, ...)                                                    \
+    Unmatchable<_n0::_n1::_n2::_t::Type> unm_##_n0##_##_n1##_##_n2##_##_t                                  \
+        {{_mcv(_matchable_concat_variant, _n0::_n1::_n2::_t, ##__VA_ARGS__)}}
+
+
+#define NAMESPACEx4_UNMATCHABLE(_n0, _n1, _n2, _n3, _t, ...)                                               \
+    Unmatchable<_n0::_n1::_n2::_n3::_t::Type> unm_##_n0##_##_n1##_##_n2##_##_n3##_##_t                     \
+        {{_mcv(_matchable_concat_variant, _n0::_n1::_n2::_n3::_t, ##__VA_ARGS__)}}
+
+
+#define NAMESPACEx5_UNMATCHABLE(_n0, _n1, _n2, _n3, _n4, _t, ...)                                          \
+    Unmatchable<_n0::_n1::_n2::_n3::_n4::_t::Type> unm_##_n0##_##_n1##_##_n2##_##_n3##_##_n4##_##_t        \
+        {{_mcv(_matchable_concat_variant, _n0::_n1::_n2::_n3::_n4::_t, ##__VA_ARGS__)}}
 
 
 

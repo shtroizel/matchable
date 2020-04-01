@@ -34,11 +34,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#define MATCHABLE_FWD(_t)                                                                                  \
-    template<typename M, typename T> class MatchBox;                                                       \
-    template<typename M> class MatchBox<M, void>;                                                          \
-    namespace _t                                                                                           \
-    {                                                                                                      \
-        template<typename T> class Matchable;                                                              \
-        using Type = Matchable<class I##_t>;                                                               \
-    }
+#include "matchable.h"
+
+
+MATCHABLE(Color, Red, Green, Blue)
+namespace single_ns { MATCHABLE(TimeUnit, Seconds, Minutes, Hours) }
+namespace outer_ns { namespace inner_ns { MATCHABLE(number, seventeen, hundredseven) } }

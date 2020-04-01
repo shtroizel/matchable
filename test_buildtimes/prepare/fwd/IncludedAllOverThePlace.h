@@ -2,10 +2,14 @@
 
 #include "matchable_fwd.h"
 
-MATCHABLE_FWD(TimeUnit)
+MATCHABLE_FWD(Color)
+namespace single_ns { MATCHABLE_FWD(TimeUnit) }
+namespace outer_ns { namespace inner_ns { MATCHABLE_FWD(number) } }
 
 class IncludedAllOverThePlace
 {
 public:
-    TimeUnit::Type foo();
+    Color::Type f0();
+    single_ns::TimeUnit::Type f1();
+    outer_ns::inner_ns::number::Type f2();
 };
