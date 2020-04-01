@@ -95,12 +95,15 @@ def run_test(mode, clang):
 
     # run make and track how much time it needs
     start = time.time()
-    subprocess.run(['make', '-j' + str(multiprocessing.cpu_count())])
+    return_code = subprocess.run(['make', '-j' + str(multiprocessing.cpu_count())]).returncode
     end = time.time()
 
     os.remove(prep_dir + '/../CMakeLists.txt')
     shutil.rmtree(src_dir + '/../build')
     shutil.rmtree(src_dir)
+
+    if (return_code != 0):
+        raise Exception
 
     return end - start
 
@@ -123,12 +126,15 @@ def main():
         else:
             assert False, "unhandled option"
 
-    fwd_time = run_test("fwd", clang)
-    full_time = run_test("full", clang)
+    try:
+        fwd_time = run_test("fwd", clang)
+        full_time = run_test("full", clang)
 
-    print('\n\n******* Build Time Performance Summary *******\n')
-    print('  using full definititions: ' + str(full_time))
-    print('using forward declarations: ' + str(fwd_time))
+        print('\n\n******* Build Time Performance Summary *******\n')
+        print('  using full definititions: ' + str(full_time))
+        print('using forward declarations: ' + str(fwd_time))
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":
