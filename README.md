@@ -268,6 +268,14 @@ Example: test/programs/spreadvectof_matchable.cpp<br/>
 
 #### UNMATCHABLE(type, variant...)
 Removes variants for the current scope. When the scope exits the removed variants are restored.<br/>
+For matchables defined within namespaces the following macros are available:<br/>
+* NAMESPACEx1_UNMATCHABLE()
+* NAMESPACEx2_UNMATCHABLE()
+* NAMESPACEx3_UNMATCHABLE()
+* NAMESPACEx4_UNMATCHABLE()
+* NAMESPACEx5_UNMATCHABLE()
+
+Further namespace nesting beyond 5 is supported by using the Unmatchable template directly (see unmatchable.cpp)
 Example: test/programs/unmatchable.cpp<br/>
 
 #### MATCHABLE_INSTANCE_IN(type, instance, variant...) -> bool
