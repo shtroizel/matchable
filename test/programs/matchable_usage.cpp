@@ -76,27 +76,27 @@ VARIANT_SPREADVARIANT(Attack, poisons, AttackPastTense, poisoned)
 VARIANT_SPREADVARIANT(Attack, smashes, AttackPastTense, smashed)
 VARIANT_SPREADVARIANT(Attack, vaporizes, AttackPastTense, vaporized)
 
-static MatchBox<Actor::Type, Attack::Type> const rock_attack({
+static matchable::MatchBox<Actor::Type, Attack::Type> const rock_attack({
     { Actor::Lizard::grab(), Attack::crushes::grab() },
     { Actor::Scissors::grab(), Attack::crushes::grab() },
 });
-static MatchBox<Actor::Type, Attack::Type> const paper_attack({
+static matchable::MatchBox<Actor::Type, Attack::Type> const paper_attack({
     { Actor::Rock::grab(), Attack::covers::grab() },
     { Actor::Spock::grab(), Attack::disproves::grab() },
 });
-static MatchBox<Actor::Type, Attack::Type> const scissors_attack({
+static matchable::MatchBox<Actor::Type, Attack::Type> const scissors_attack({
     { Actor::Paper::grab(), Attack::cuts::grab() },
     { Actor::Lizard::grab(), Attack::decapitates::grab() },
 });
-static MatchBox<Actor::Type, Attack::Type> const lizard_attack({
+static matchable::MatchBox<Actor::Type, Attack::Type> const lizard_attack({
     { Actor::Spock::grab(), Attack::poisons::grab() },
     { Actor::Paper::grab(), Attack::eats::grab() },
 });
-static MatchBox<Actor::Type, Attack::Type> const spock_attack({
+static matchable::MatchBox<Actor::Type, Attack::Type> const spock_attack({
     { Actor::Scissors::grab(), Attack::smashes::grab() },
     { Actor::Rock::grab(), Attack::vaporizes::grab() },
 });
-static MatchBox<Actor::Type, MatchBox<Actor::Type, Attack::Type>> const attack({
+static matchable::MatchBox<Actor::Type, matchable::MatchBox<Actor::Type, Attack::Type>> const attack({
     { Actor::Rock::grab(), rock_attack },
     { Actor::Paper::grab(), paper_attack },
     { Actor::Scissors::grab(), scissors_attack },
@@ -178,7 +178,7 @@ int main()
     int const TRIALS_PER_DOT{27};
     std::cout << "108 trials run, now just start printing one '.' per " << TRIALS_PER_DOT << " trials"
               << std::flush;
-    MatchBox<Actor::Type, int> win_counts{0};
+    matchable::MatchBox<Actor::Type, int> win_counts{0};
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < TRIALS; ++i)
     {

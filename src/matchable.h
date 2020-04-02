@@ -45,280 +45,284 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-/**
- * Associative array of Matchable variants to T.
- *
- * Example: // MatchBoxUsage.cpp
- *          #include <iostream>
- *          #include "matchable.h"
- *
- *          MATCHABLE(ReturnCode, Zero, MinusOne, MinusTwo)
- *          MATCHABLE(ReturnCodeAsValue, Success, InvalidInput, CalculationFailed)
- *
- *          MatchBox<ReturnCode::Type, ReturnCodeAsValue::Type> code_value_matcher{
- *              { ReturnCode::Zero::grab(), ReturnCodeAsValue::Success::grab() },
- *              { ReturnCode::MinusOne::grab(), ReturnCodeAsValue::InvalidInput::grab() },
- *              { ReturnCode::MinusTwo::grab(), ReturnCodeAsValue::CalculationFailed::grab() }
- *          };
- *
- *          int main()
- *          {
- *              for (auto const & return_code : ReturnCode::variants())
- *                  std::cout << "code: " << return_code << ", as value: "
- *                                        << code_value_matcher.at(return_code) << std::endl;
- *              return 0;
- *          }
- *
- */
-template<typename M, typename T>
-class MatchBox
+namespace matchable
 {
-public:
-    using match_t = M;
-    using target_t = T;
-
-    MatchBox() : MatchBox(T{}) {}
-    explicit MatchBox(T const & fill);
-    MatchBox(std::initializer_list<std::pair<M, T>> init_list);
-    T const & at(M const &) const;
-    T & mut_at(M const &);
-    void set(M const &, T const &);
-    void unset(M const &);
-    bool is_set(M const &) const;
-    std::vector<M> currently_set() const;
-
-private:
-    T nil_target;
-    bool nil_target_init_flag;
-    T default_t;
-    std::vector<T> targets;
-    std::vector<bool> init_flags;
-};
-
-
-template<typename M, typename T>
-MatchBox<M, T>::MatchBox(T const & fill)
-    : nil_target{}
-    , nil_target_init_flag{false}
-    , default_t{fill}
-{
-    targets.reserve(M::variants().size());
-    init_flags.reserve(M::variants().size());
-
-    for (size_t i = 0; i < M::variants().size(); ++i)
+    /**
+     * Associative array of Matchable variants to T.
+     *
+     * Example: // MatchBoxUsage.cpp
+     *          #include <iostream>
+     *          #include "matchable.h"
+     *
+     *          MATCHABLE(ReturnCode, Zero, MinusOne, MinusTwo)
+     *          MATCHABLE(ReturnCodeAsValue, Success, InvalidInput, CalculationFailed)
+     *
+     *          MatchBox<ReturnCode::Type, ReturnCodeAsValue::Type> code_value_matcher{
+     *              { ReturnCode::Zero::grab(), ReturnCodeAsValue::Success::grab() },
+     *              { ReturnCode::MinusOne::grab(), ReturnCodeAsValue::InvalidInput::grab() },
+     *              { ReturnCode::MinusTwo::grab(), ReturnCodeAsValue::CalculationFailed::grab() }
+     *          };
+     *
+     *          int main()
+     *          {
+     *              for (auto const & return_code : ReturnCode::variants())
+     *                  std::cout << "code: " << return_code << ", as value: "
+     *                                        << code_value_matcher.at(return_code) << std::endl;
+     *              return 0;
+     *          }
+     *
+     */
+    template<typename M, typename T>
+    class MatchBox
     {
-        targets.push_back(default_t);
-        init_flags.push_back(false);
-    }
-}
+    public:
+        using match_t = M;
+        using target_t = T;
+
+        MatchBox() : MatchBox(T{}) {}
+        explicit MatchBox(T const & fill);
+        MatchBox(std::initializer_list<std::pair<M, T>> init_list);
+        T const & at(M const &) const;
+        T & mut_at(M const &);
+        void set(M const &, T const &);
+        void unset(M const &);
+        bool is_set(M const &) const;
+        std::vector<M> currently_set() const;
+
+    private:
+        T nil_target;
+        bool nil_target_init_flag;
+        T default_t;
+        std::vector<T> targets;
+        std::vector<bool> init_flags;
+    };
 
 
-template<typename M, typename T>
-MatchBox<M, T>::MatchBox(std::initializer_list<std::pair<M, T>> init_list)
-    : MatchBox()
-{
-    for (auto const & elem : init_list)
-        set(elem.first, elem.second);
-}
-
-
-template<typename M, typename T>
-T const & MatchBox<M, T>::at(M const & match) const
-{
-    return match.is_nil() ? nil_target : targets[static_cast<size_t>(match.as_index())];
-}
-
-
-template<typename M, typename T>
-T & MatchBox<M, T>::mut_at(M const & match)
-{
-    return match.is_nil() ? nil_target : targets[static_cast<size_t>(match.as_index())];
-}
-
-
-template<typename M, typename T>
-void MatchBox<M, T>::set(M const & match, T const & target)
-{
-    if (match.is_nil())
+    template<typename M, typename T>
+    MatchBox<M, T>::MatchBox(T const & fill)
+        : nil_target{}
+        , nil_target_init_flag{false}
+        , default_t{fill}
     {
-        nil_target = target;
-        nil_target_init_flag = true;
-    }
-    else
-    {
-        size_t index = static_cast<size_t>(match.as_index());
-        targets[index] = target;
-        init_flags[index] = true;
-    }
-}
+        targets.reserve(M::variants().size());
+        init_flags.reserve(M::variants().size());
 
-
-template<typename M, typename T>
-void MatchBox<M, T>::unset(M const & match)
-{
-    if (match.is_nil())
-    {
-        nil_target = default_t;
-        nil_target_init_flag = false;
-    }
-    else
-    {
-        size_t index = static_cast<size_t>(match.as_index());
-        targets[index] = default_t;
-        init_flags[index] = false;
-    }
-}
-
-
-template<typename M, typename T>
-bool MatchBox<M, T>::is_set(const M & match) const
-{
-    if (match.is_nil())
-        return nil_target_init_flag;
-
-    return init_flags[static_cast<size_t>(match.as_index())];
-}
-
-
-template<typename M, typename T>
-std::vector<M> MatchBox<M, T>::currently_set() const
-{
-    std::vector<M> ret;
-    for (auto const & m : M::variants())
-        if (is_set(m))
-            ret.push_back(m);
-    return ret;
-}
-
-
-/**
- * MatchBox stores a bool for each element anyway for tracking explicit setting, so MatchBox<M, bool>
- * would yield 2 bools per element. To avoid the extra bool use this MatchBox<M, void> specialization
- * instead.
- */
-template<typename M>
-class MatchBox<M, void>
-{
-public:
-    using match_t = M;
-
-    MatchBox();
-    void set(M const &);
-    void unset(M const &);
-    bool is_set(M const &) const;
-    std::vector<M> currently_set() const;
-    bool operator==(MatchBox const &) const;
-    bool operator!=(MatchBox const &) const;
-    friend std::ostream & operator<<(std::ostream & o, MatchBox<M, void> const & m)
-    {
-        for (auto v : M::variants())
-            o << v << ": " << m.is_set(v) << ", ";
-        return o << M() << ": " << m.is_set(M());
+        for (size_t i = 0; i < M::variants().size(); ++i)
+        {
+            targets.push_back(default_t);
+            init_flags.push_back(false);
+        }
     }
 
-private:
-    bool nil_init_flag;
-    std::vector<bool> init_flags;
-};
 
-template<typename M>
-MatchBox<M, void>::MatchBox() : nil_init_flag{false}
-{
-    init_flags.reserve(M::variants().size());
-    for (size_t i = 0; i < M::variants().size(); ++i)
-        init_flags.push_back(false);
-}
-
-
-template<typename M>
-void MatchBox<M, void>::set(M const & match)
-{
-    if (match.is_nil())
-        nil_init_flag = true;
-    else
-        init_flags[static_cast<size_t>(match.as_index())] = true;
-}
-
-
-template<typename M>
-void MatchBox<M, void>::unset(M const & match)
-{
-    if (match.is_nil())
-        nil_init_flag = false;
-    else
-        init_flags[static_cast<size_t>(match.as_index())] = false;
-}
-
-
-template<typename M>
-bool MatchBox<M, void>::is_set(M const & match) const
-{
-    if (match.is_nil())
-        return nil_init_flag;
-
-    return init_flags[static_cast<size_t>(match.as_index())];
-}
-
-
-template<typename M>
-std::vector<M> MatchBox<M, void>::currently_set() const
-{
-    std::vector<M> ret;
-    for (auto const & m : M::variants())
-        if (is_set(m))
-            ret.push_back(m);
-    return ret;
-}
-
-
-template<typename M>
-bool MatchBox<M, void>::operator==(MatchBox<M, void> const & other) const
-{
-    return init_flags == other.init_flags;
-}
-
-
-template<typename M>
-bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
-{
-    return !operator==(other);
-}
-
-
-class FlowControl
-{
-public:
-    void cont() { c = true; }
-    void brk() { b = true; }
-    bool cont_requested() const { return c; }
-    bool brk_requested() const { return b; }
-private:
-    bool c{false};
-    bool b{false};
-};
-
-
-template<typename M>
-class Unmatchable
-{
-public:
-    Unmatchable(std::initializer_list<M> um)
+    template<typename M, typename T>
+    MatchBox<M, T>::MatchBox(std::initializer_list<std::pair<M, T>> init_list)
+        : MatchBox()
     {
-        prev_variants = M::variants();
-        auto i = std::remove_if(
-            M::interface_type::private_variants().begin(),
-            M::interface_type::private_variants().end(),
-            [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
-        );
-        M::interface_type::private_variants().erase(i, M::interface_type::private_variants().end());
+        for (auto const & elem : init_list)
+            set(elem.first, elem.second);
     }
-    ~Unmatchable()
+
+
+    template<typename M, typename T>
+    T const & MatchBox<M, T>::at(M const & match) const
     {
-        M::interface_type::private_variants() = prev_variants;
+        return match.is_nil() ? nil_target : targets[static_cast<size_t>(match.as_index())];
     }
-private:
-    std::vector<M> prev_variants;
-};
+
+
+    template<typename M, typename T>
+    T & MatchBox<M, T>::mut_at(M const & match)
+    {
+        return match.is_nil() ? nil_target : targets[static_cast<size_t>(match.as_index())];
+    }
+
+
+    template<typename M, typename T>
+    void MatchBox<M, T>::set(M const & match, T const & target)
+    {
+        if (match.is_nil())
+        {
+            nil_target = target;
+            nil_target_init_flag = true;
+        }
+        else
+        {
+            size_t index = static_cast<size_t>(match.as_index());
+            targets[index] = target;
+            init_flags[index] = true;
+        }
+    }
+
+
+    template<typename M, typename T>
+    void MatchBox<M, T>::unset(M const & match)
+    {
+        if (match.is_nil())
+        {
+            nil_target = default_t;
+            nil_target_init_flag = false;
+        }
+        else
+        {
+            size_t index = static_cast<size_t>(match.as_index());
+            targets[index] = default_t;
+            init_flags[index] = false;
+        }
+    }
+
+
+    template<typename M, typename T>
+    bool MatchBox<M, T>::is_set(const M & match) const
+    {
+        if (match.is_nil())
+            return nil_target_init_flag;
+
+        return init_flags[static_cast<size_t>(match.as_index())];
+    }
+
+
+    template<typename M, typename T>
+    std::vector<M> MatchBox<M, T>::currently_set() const
+    {
+        std::vector<M> ret;
+        for (auto const & m : M::variants())
+            if (is_set(m))
+                ret.push_back(m);
+        return ret;
+    }
+
+
+    /**
+     * MatchBox stores a bool for each element anyway for tracking explicit setting, so MatchBox<M, bool>
+     * would yield 2 bools per element. To avoid the extra bool use this MatchBox<M, void> specialization
+     * instead.
+     */
+    template<typename M>
+    class MatchBox<M, void>
+    {
+    public:
+        using match_t = M;
+
+        MatchBox();
+        void set(M const &);
+        void unset(M const &);
+        bool is_set(M const &) const;
+        std::vector<M> currently_set() const;
+        bool operator==(MatchBox const &) const;
+        bool operator!=(MatchBox const &) const;
+        friend std::ostream & operator<<(std::ostream & o, MatchBox<M, void> const & m)
+        {
+            for (auto v : M::variants())
+                o << v << ": " << m.is_set(v) << ", ";
+            return o << M() << ": " << m.is_set(M());
+        }
+
+    private:
+        bool nil_init_flag;
+        std::vector<bool> init_flags;
+    };
+
+    template<typename M>
+    MatchBox<M, void>::MatchBox() : nil_init_flag{false}
+    {
+        init_flags.reserve(M::variants().size());
+        for (size_t i = 0; i < M::variants().size(); ++i)
+            init_flags.push_back(false);
+    }
+
+
+    template<typename M>
+    void MatchBox<M, void>::set(M const & match)
+    {
+        if (match.is_nil())
+            nil_init_flag = true;
+        else
+            init_flags[static_cast<size_t>(match.as_index())] = true;
+    }
+
+
+    template<typename M>
+    void MatchBox<M, void>::unset(M const & match)
+    {
+        if (match.is_nil())
+            nil_init_flag = false;
+        else
+            init_flags[static_cast<size_t>(match.as_index())] = false;
+    }
+
+
+    template<typename M>
+    bool MatchBox<M, void>::is_set(M const & match) const
+    {
+        if (match.is_nil())
+            return nil_init_flag;
+
+        return init_flags[static_cast<size_t>(match.as_index())];
+    }
+
+
+    template<typename M>
+    std::vector<M> MatchBox<M, void>::currently_set() const
+    {
+        std::vector<M> ret;
+        for (auto const & m : M::variants())
+            if (is_set(m))
+                ret.push_back(m);
+        return ret;
+    }
+
+
+    template<typename M>
+    bool MatchBox<M, void>::operator==(MatchBox<M, void> const & other) const
+    {
+        return init_flags == other.init_flags;
+    }
+
+
+    template<typename M>
+    bool MatchBox<M, void>::operator!=(MatchBox<M, void> const & other) const
+    {
+        return !operator==(other);
+    }
+
+
+    class FlowControl
+    {
+    public:
+        void cont() { c = true; }
+        void brk() { b = true; }
+        bool cont_requested() const { return c; }
+        bool brk_requested() const { return b; }
+    private:
+        bool c{false};
+        bool b{false};
+    };
+
+
+    template<typename M>
+    class Unmatchable
+    {
+    public:
+        Unmatchable(std::initializer_list<M> um)
+        {
+            prev_variants = M::variants();
+            auto i = std::remove_if(
+                M::interface_type::private_variants().begin(),
+                M::interface_type::private_variants().end(),
+                [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
+            );
+            M::interface_type::private_variants().erase(i, M::interface_type::private_variants().end());
+        }
+        ~Unmatchable()
+        {
+            M::interface_type::private_variants() = prev_variants;
+        }
+    private:
+        std::vector<M> prev_variants;
+    };
+
+} // namespace matchable
 
 
 
@@ -336,7 +340,7 @@ private:
         {                                                                                                  \
             friend class Matchable<I##_t>;                                                                 \
             using interface_type = I##_t;                                                                  \
-            friend class Unmatchable<Matchable<I##_t>>;                                                    \
+            friend class ::matchable::Unmatchable<Matchable<I##_t>>;                                       \
         public:                                                                                            \
             I##_t() = default;                                                                             \
             virtual ~I##_t() = default;                                                                    \
@@ -364,11 +368,12 @@ private:
         {                                                                                                  \
         public:                                                                                            \
             using interface_type = T;                                                                      \
-            using MatchParam = MatchBox<Matchable, std::function<void()>>;                                 \
-            using MatchParamWithFlowControl = MatchBox<Matchable, std::function<void(FlowControl &)>>;     \
+            using MatchParam = ::matchable::MatchBox<Matchable, std::function<void()>>;                    \
+            using MatchParamWithFlowControl =                                                              \
+                    ::matchable::MatchBox<Matchable, std::function<void(matchable::FlowControl &)>>;       \
             Matchable() = default;                                                                         \
             ~Matchable() = default;                                                                        \
-            explicit Matchable(std::shared_ptr<T> m) : t{m} {}                                             \
+            Matchable(std::shared_ptr<T> m) : t{m} {}                                                      \
             Matchable(Matchable const & o) : t{nullptr == o.t ? nullptr : o.t->clone()} {}                 \
             Matchable(Matchable &&) = default;                                                             \
             Matchable & operator=(Matchable const & other)                                                 \
@@ -387,9 +392,9 @@ private:
                 { std::string s{as_string()}; std::replace(s.begin(), s.end(), '_', ' '); return s; }      \
             int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
             bool is_nil() const { return nullptr == t; }                                                   \
-            FlowControl match(MatchParamWithFlowControl const & mb) const                                  \
+            matchable::FlowControl match(MatchParamWithFlowControl const & mb) const                       \
             {                                                                                              \
-                FlowControl lc;                                                                            \
+                matchable::FlowControl lc;                                                                 \
                 if (mb.is_set(*this))                                                                      \
                     mb.at(*this)(lc);                                                                      \
                 return lc;                                                                                 \
@@ -421,7 +426,7 @@ private:
 #define _matchable_define(_t)                                                                              \
     namespace _t                                                                                           \
     {                                                                                                      \
-        using Flags = MatchBox<Type, void>;                                                                \
+        using Flags = matchable::MatchBox<Type, void>;                                                     \
         inline std::vector<Type> const & variants() { return I##_t::variants(); }                          \
         static const Type nil{};                                                                           \
         inline Type from_index(int index)                                                                  \
@@ -650,8 +655,8 @@ private:
         _s::Type as_##_s() const { return _s##_mb().at(Type(clone())); }                                   \
         void set_##_s(_s::Type s) { _s##_mb().set(Type(clone()), s); }                                     \
     private:                                                                                               \
-        static MatchBox<_t::Type, _s::Type> & _s##_mb()                                                    \
-            { static MatchBox<_t::Type, _s::Type> m; return m; }                                           \
+        static matchable::MatchBox<_t::Type, _s::Type> & _s##_mb()                                         \
+            { static matchable::MatchBox<_t::Type, _s::Type> m; return m; }                                \
         static _s::Type nil_##_s() { static _s::Type ns; return ns; }
 
 
@@ -729,8 +734,8 @@ private:
         std::vector<_s::Type> as_##_s##_vect() const { return _s##_vect_mb().at(Type(clone())); }          \
         void set_##_s##_vect(std::vector<_s::Type> s_vect) { _s##_vect_mb().set(Type(clone()), s_vect); }  \
     private:                                                                                               \
-        static MatchBox<_t::Type, std::vector<_s::Type>> & _s##_vect_mb()                                  \
-            { static MatchBox<_t::Type, std::vector<_s::Type>> m; return m; }                              \
+        static matchable::MatchBox<_t::Type, std::vector<_s::Type>> & _s##_vect_mb()                       \
+            { static matchable::MatchBox<_t::Type, std::vector<_s::Type>> m; return m; }                   \
         static std::vector<_s::Type> nil_##_s##_vect() { static std::vector<_s::Type> ns; return ns; }
 
 
@@ -761,31 +766,33 @@ private:
  * Usage: UNMATCHABLE(type, variant...)
  */
 #define UNMATCHABLE(_t, ...)                                                                               \
-    Unmatchable<_t::Type> unmatchable_##_t{{_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)}}
+    matchable::Unmatchable<_t::Type> unm_##_t{{_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)}}
 
 
 #define NAMESPACEx1_UNMATCHABLE(_n0, _t, ...)                                                              \
-    Unmatchable<_n0::_t::Type> unm_##_n0##_##_t{{_mcv(_matchable_concat_variant, _n0::_t, ##__VA_ARGS__)}}
+    matchable::Unmatchable<_n0::_t::Type> unm_##_n0##_##_t                                                 \
+        {{_mcv(_matchable_concat_variant, _n0::_t, ##__VA_ARGS__)}}
 
 
 #define NAMESPACEx2_UNMATCHABLE(_n0, _n1, _t, ...)                                                         \
-    Unmatchable<_n0::_n1::_t::Type> unm_##_n0##_##_n1##_##_t                                               \
+    matchable::Unmatchable<_n0::_n1::_t::Type> unm_##_n0##_##_n1##_##_t                                    \
         {{_mcv(_matchable_concat_variant, _n0::_n1::_t, ##__VA_ARGS__)}}
 
 
 #define NAMESPACEx3_UNMATCHABLE(_n0, _n1, _n2, _t, ...)                                                    \
-    Unmatchable<_n0::_n1::_n2::_t::Type> unm_##_n0##_##_n1##_##_n2##_##_t                                  \
+    matchable::Unmatchable<_n0::_n1::_n2::_t::Type> unm_##_n0##_##_n1##_##_n2##_##_t                       \
         {{_mcv(_matchable_concat_variant, _n0::_n1::_n2::_t, ##__VA_ARGS__)}}
 
 
 #define NAMESPACEx4_UNMATCHABLE(_n0, _n1, _n2, _n3, _t, ...)                                               \
-    Unmatchable<_n0::_n1::_n2::_n3::_t::Type> unm_##_n0##_##_n1##_##_n2##_##_n3##_##_t                     \
+    matchable::Unmatchable<_n0::_n1::_n2::_n3::_t::Type> unm_##_n0##_##_n1##_##_n2##_##_n3##_##_t          \
         {{_mcv(_matchable_concat_variant, _n0::_n1::_n2::_n3::_t, ##__VA_ARGS__)}}
 
 
 #define NAMESPACEx5_UNMATCHABLE(_n0, _n1, _n2, _n3, _n4, _t, ...)                                          \
-    Unmatchable<_n0::_n1::_n2::_n3::_n4::_t::Type> unm_##_n0##_##_n1##_##_n2##_##_n3##_##_n4##_##_t        \
-        {{_mcv(_matchable_concat_variant, _n0::_n1::_n2::_n3::_n4::_t, ##__VA_ARGS__)}}
+    matchable::Unmatchable<_n0::_n1::_n2::_n3::_n4::_t::Type>                                              \
+        unm_##_n0##_##_n1##_##_n2##_##_n3##_##_n4##_##_t                                                   \
+            {{_mcv(_matchable_concat_variant, _n0::_n1::_n2::_n3::_n4::_t, ##__VA_ARGS__)}}
 
 
 
@@ -803,6 +810,6 @@ private:
 
 
 // FLOW CONTROL MACROS
-#define MATCH_WITH_FLOW_CONTROL { FlowControl fc =
+#define MATCH_WITH_FLOW_CONTROL { matchable::FlowControl fc =
 #define EVAL_FLOW_CONTROL if (fc.brk_requested()) break; if (fc.cont_requested()) continue; }
 #define EVAL_BREAK_ONLY if (fc.brk_requested()) break; }

@@ -162,8 +162,8 @@ int main()
     {
         magic++;
         MATCH_WITH_FLOW_CONTROL foo(magic).match({
-            {Result::Ok::grab(),  [](FlowControl & lc){ lc.brk();}}, // break
-            {Result::Err::grab(), [&](FlowControl & lc)
+            {Result::Ok::grab(),  [](matchable::FlowControl & lc){ lc.brk();}}, // break
+            {Result::Err::grab(), [&](matchable::FlowControl & lc)
                                   {
                                       if (magic < 105)
                                       {
@@ -183,7 +183,7 @@ int main()
     switch (task)
     {
         case Task::Task0: MATCH_WITH_FLOW_CONTROL foo(107).match({
-                              {Result::Ok::grab(), [](FlowControl & lc) { lc.brk(); }},
+                              {Result::Ok::grab(), [](matchable::FlowControl & lc) { lc.brk(); }},
                           }); EVAL_BREAK_ONLY // not in loop here so continue is invalid - eval break only
                           [[fallthrough]];
         case Task::Task1: TEST_FAIL(ok); break;
@@ -197,12 +197,12 @@ int main()
         switch (task)
         {
             case Task::Task0: MATCH_WITH_FLOW_CONTROL foo(magic).match({
-                                  {Result::Ok::grab(), [](FlowControl & lc) { lc.brk(); }},
-                                  {Result::Err::grab(), [](FlowControl & lc) { lc.cont(); }},
+                                  {Result::Ok::grab(), [](matchable::FlowControl & lc) { lc.brk(); }},
+                                  {Result::Err::grab(), [](matchable::FlowControl & lc) { lc.cont(); }},
                               }); EVAL_FLOW_CONTROL
                               [[fallthrough]];
             case Task::Task1: MATCH_WITH_FLOW_CONTROL foo(107).match({
-                                  {Result::Ok::grab(), [](FlowControl & lc) { lc.cont(); }},
+                                  {Result::Ok::grab(), [](matchable::FlowControl & lc) { lc.cont(); }},
                               }); EVAL_FLOW_CONTROL
                               [[fallthrough]];
             case Task::Task2: TEST_FAIL(ok);

@@ -108,13 +108,13 @@ int main()
     // Using Unmatchable directly, no macros, no namespaces
     TEST_EQ(ok, NoNameSpace::variants().size(), (size_t) 2);
     {
-        Unmatchable<NoNameSpace::Type> unmatchable{
+        matchable::Unmatchable<NoNameSpace::Type> unmatchable{
             {NoNameSpace::zero::grab()},
         };
         TEST_EQ(ok, NoNameSpace::variants().size(), (size_t) 1);
         TEST_EQ(ok, NoNameSpace::variants()[0], NoNameSpace::one::grab());
         {
-            Unmatchable<NoNameSpace::Type> unmatchable{
+            matchable::Unmatchable<NoNameSpace::Type> unmatchable{
                 {NoNameSpace::one::grab()},
             };
             TEST_EQ(ok, NoNameSpace::variants().size(), (size_t) 0);
@@ -383,7 +383,7 @@ int main()
     // so just use Unmatchable directly
     TEST_EQ(ok, outer_ns::middle_outer_ns::MiddleOuterMatchable::variants().size(), (size_t) 2);
     {
-        Unmatchable<
+        matchable::Unmatchable<
             outer_ns::middle_outer_ns::middle_ns::middle_inner_ns::inner_ns::core_ns::CoreMatchable::Type
         > unmatchable{
             {outer_ns::middle_outer_ns::middle_ns::middle_inner_ns
@@ -403,7 +403,7 @@ int main()
                     ::inner_ns::core_ns::CoreMatchable::thirteen::grab()
         );
         {
-            Unmatchable<
+            matchable::Unmatchable<
                 outer_ns::middle_outer_ns::middle_ns::middle_inner_ns
                         ::inner_ns::core_ns::CoreMatchable::Type
             > unmatchable{

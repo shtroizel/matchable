@@ -42,33 +42,34 @@ MATCHABLE(TimeUnit, Seconds, Minutes, Hours)
 
 namespace TimeUnit
 {
-    static MatchBox<Type, std::function<double(double const &)>> const as_seconds({
+    static matchable::MatchBox<Type, std::function<double(double const &)>> const as_seconds({
         { nil,             [](double const &)  { return 0.0; } },
         { Seconds::grab(), [](double const & d){ return d; } },
         { Minutes::grab(), [](double const & d){ return d * 60.0; } },
         { Hours::grab(),   [](double const & d){ return d * 60.0 * 60.0; } },
     });
 
-    static MatchBox<Type, std::function<double(double const &)>> const as_minutes({
+    static matchable::MatchBox<Type, std::function<double(double const &)>> const as_minutes({
         { nil,             [](double const &)  { return 0.0; } },
         { Seconds::grab(), [](double const & d){ return 0.0 == d ? 0.0 : d / 60.0; } },
         { Minutes::grab(), [](double const & d){ return d;} },
         { Hours::grab(),   [](double const & d){ return d * 60.0; } }
     });
 
-    static MatchBox<Type, std::function<double(double const &)>> const as_hours({
+    static matchable::MatchBox<Type, std::function<double(double const &)>> const as_hours({
         { nil,             [](double const &)  { return 0.0; } },
         { Seconds::grab(), [](double const & d){ return 0.0 == d ? 0.0 : d / (60.0 * 60.0);} },
         { Minutes::grab(), [](double const & d){ return 0.0 == d ? 0.0 : d / 60.0; } },
         { Hours::grab(),   [](double const & d){ return d; } }
     });
 
-    static MatchBox<Type, MatchBox<Type, std::function<double(double const &)>>> const as_sibling({
-        { nil,             {} },
-        { Seconds::grab(), as_seconds },
-        { Minutes::grab(), as_minutes },
-        { Hours::grab(),   as_hours },
-    });
+    static matchable::MatchBox<Type, matchable::MatchBox<Type, std::function<double(double const &)>>> const
+        as_sibling({
+            { nil,             {} },
+            { Seconds::grab(), as_seconds },
+            { Minutes::grab(), as_minutes },
+            { Hours::grab(),   as_hours },
+        });
 
     inline double convert(Type const & in_unit, double const & in_val, Type const & out_unit)
     {
