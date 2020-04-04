@@ -175,7 +175,7 @@ For matchables defined within namespaces the following macros are available:<br/
 * NAMESPACEx4_UNMATCHABLE()
 * NAMESPACEx5_UNMATCHABLE()
 
-Further namespace nesting beyond 5 is supported by using the Unmatchable template directly (see unmatchable.cpp)
+Further namespace nesting beyond 5 is supported by using the Unmatchable template directly (see example)<br/>
 Example: test/programs/unmatchable.cpp<br/>
 
 #### MATCHABLE_INSTANCE_IN(type, instance, variant...) -> bool
