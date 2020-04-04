@@ -81,7 +81,7 @@ int main()
         std::cout << "match: " << status::nil.as_string() << "!" << std::endl;
     }
 
-    // operator<<() is provided, so as_string() can be ommitted...
+    // operator<<() is provided, so as_string() can be omitted...
     std::cout << foo_status << std::endl;
 
     return foo_status.as_index();
