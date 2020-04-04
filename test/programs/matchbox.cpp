@@ -31,80 +31,174 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <iostream>
+#include <iomanip>
+#include <chrono>
+#include <random>
 
 #include "matchable.h"
-#include "test_ok.h"
 
 
 
-// ************ normally save such content to something like TimeUnit.h ************************************
-MATCHABLE(TimeUnit, Seconds, Minutes, Hours)
+MATCHABLE(Actor, Rock, Paper, Scissors, Lizard, Spock)
 
-namespace TimeUnit
+MATCHABLE(
+    AttackPastTense,
+    covered,
+    crushed,
+    cut,
+    decapitated,
+    disproved,
+    ate,
+    poisoned,
+    smashed,
+    vaporized
+)
+SPREADx1_MATCHABLE(
+    AttackPastTense,
+    Attack,
+    covers,
+    crushes,
+    cuts,
+    decapitates,
+    disproves,
+    eats,
+    poisons,
+    smashes,
+    vaporizes
+)
+VARIANT_SPREADVARIANT(Attack, covers, AttackPastTense, covered)
+VARIANT_SPREADVARIANT(Attack, crushes, AttackPastTense, crushed)
+VARIANT_SPREADVARIANT(Attack, cuts, AttackPastTense, cut)
+VARIANT_SPREADVARIANT(Attack, decapitates, AttackPastTense, decapitated)
+VARIANT_SPREADVARIANT(Attack, disproves, AttackPastTense, disproved)
+VARIANT_SPREADVARIANT(Attack, eats, AttackPastTense, ate)
+VARIANT_SPREADVARIANT(Attack, poisons, AttackPastTense, poisoned)
+VARIANT_SPREADVARIANT(Attack, smashes, AttackPastTense, smashed)
+VARIANT_SPREADVARIANT(Attack, vaporizes, AttackPastTense, vaporized)
+
+static matchable::MatchBox<Actor::Type, Attack::Type> const rock_attack({
+    { Actor::Lizard::grab(), Attack::crushes::grab() },
+    { Actor::Scissors::grab(), Attack::crushes::grab() },
+});
+static matchable::MatchBox<Actor::Type, Attack::Type> const paper_attack({
+    { Actor::Rock::grab(), Attack::covers::grab() },
+    { Actor::Spock::grab(), Attack::disproves::grab() },
+});
+static matchable::MatchBox<Actor::Type, Attack::Type> const scissors_attack({
+    { Actor::Paper::grab(), Attack::cuts::grab() },
+    { Actor::Lizard::grab(), Attack::decapitates::grab() },
+});
+static matchable::MatchBox<Actor::Type, Attack::Type> const lizard_attack({
+    { Actor::Spock::grab(), Attack::poisons::grab() },
+    { Actor::Paper::grab(), Attack::eats::grab() },
+});
+static matchable::MatchBox<Actor::Type, Attack::Type> const spock_attack({
+    { Actor::Scissors::grab(), Attack::smashes::grab() },
+    { Actor::Rock::grab(), Attack::vaporizes::grab() },
+});
+static matchable::MatchBox<Actor::Type, matchable::MatchBox<Actor::Type, Attack::Type>> const attack({
+    { Actor::Rock::grab(), rock_attack },
+    { Actor::Paper::grab(), paper_attack },
+    { Actor::Scissors::grab(), scissors_attack },
+    { Actor::Lizard::grab(), lizard_attack },
+    { Actor::Spock::grab(), spock_attack },
+});
+
+
+
+void print_rules()
 {
-    static matchable::MatchBox<Type, std::function<double(double const &)>> const as_seconds({
-        { nil,             [](double const &)  { return 0.0; } },
-        { Seconds::grab(), [](double const & d){ return d; } },
-        { Minutes::grab(), [](double const & d){ return d * 60.0; } },
-        { Hours::grab(),   [](double const & d){ return d * 60.0 * 60.0; } },
-    });
-
-    static matchable::MatchBox<Type, std::function<double(double const &)>> const as_minutes({
-        { nil,             [](double const &)  { return 0.0; } },
-        { Seconds::grab(), [](double const & d){ return 0.0 == d ? 0.0 : d / 60.0; } },
-        { Minutes::grab(), [](double const & d){ return d;} },
-        { Hours::grab(),   [](double const & d){ return d * 60.0; } }
-    });
-
-    static matchable::MatchBox<Type, std::function<double(double const &)>> const as_hours({
-        { nil,             [](double const &)  { return 0.0; } },
-        { Seconds::grab(), [](double const & d){ return 0.0 == d ? 0.0 : d / (60.0 * 60.0);} },
-        { Minutes::grab(), [](double const & d){ return 0.0 == d ? 0.0 : d / 60.0; } },
-        { Hours::grab(),   [](double const & d){ return d; } }
-    });
-
-    static matchable::MatchBox<Type, matchable::MatchBox<Type, std::function<double(double const &)>>> const
-        as_sibling({
-            { nil,             {} },
-            { Seconds::grab(), as_seconds },
-            { Minutes::grab(), as_minutes },
-            { Hours::grab(),   as_hours },
-        });
-
-    inline double convert(Type const & in_unit, double const & in_val, Type const & out_unit)
+    std::cout << "********* Rules *********";
+    for (auto attacker : Actor::variants())
     {
-        return as_sibling.at(out_unit).at(in_unit)(in_val);
+        std::cout << "\n" << attacker << ":" << std::endl;
+        for (auto attacked : Actor::variants())
+        {
+            Attack::Type att = attack.at(attacker).at(attacked);
+            if (!att.is_nil())
+                std::cout << "    " << att << " " << attacked << std::endl;
+        }
     }
+    std::cout << "*************************\n" << std::endl;
 }
-// *********************************************************************************************************
 
+
+void choose_actors(Actor::Type & actor_0, Actor::Type & actor_1)
+{
+    static std::mt19937 engine{std::random_device()()};
+    static std::uniform_int_distribution<int> actor_distribution{0, (int) Actor::variants().size() - 1};
+
+    actor_0 = Actor::from_index(actor_distribution(engine));
+    actor_1 = Actor::from_index(actor_distribution(engine));
+}
+
+
+MATCHABLE(compare_actors_Verbosity, Print, Silent)
+Actor::Type compare_actors(Actor::Type actor_0, Actor::Type actor_1, compare_actors_Verbosity::Type print)
+{
+    Attack::Type attack_0 = attack.at(actor_0).at(actor_1);
+    Attack::Type attack_1 = attack.at(actor_1).at(actor_0);
+
+    Actor::Type winner;
+    if (!attack_0.is_nil())
+        winner = actor_0;
+    else if (!attack_1.is_nil())
+        winner = actor_1;
+
+    if (print == compare_actors_Verbosity::Print::grab())
+    {
+        std::cout << "comparing " << actor_0 << " with " << actor_1 << ":\n    ";
+        if (!attack_0.is_nil())
+            std::cout << actor_0 << " " << attack_0.as_AttackPastTense() << " " << actor_1 << std::endl;
+        else if (!attack_1.is_nil())
+            std::cout << actor_1 << " " << attack_1.as_AttackPastTense() << " " << actor_0 << std::endl;
+        else
+            std::cout << "tie!" << std::endl;
+        std::cout << std::endl;
+    }
+
+    return winner;
+}
 
 
 int main()
 {
-    test_ok ok;
+    Actor::Type actor_0;
+    Actor::Type actor_1;
 
-    // just print conversions [0..107] for fun...
+    print_rules();
+
     for (int i = 0; i < 108; ++i)
     {
-        for (auto const & unit_from : TimeUnit::variants())
-        {
-            std::cout << i << " " << unit_from << " ---> ";
-            for (auto const & unit_to : TimeUnit::variants())
-                std::cout << TimeUnit::convert(unit_from, i, unit_to) << " " << unit_to << ", ";
-            std::cout << std::endl;
-        }
+        choose_actors(actor_0, actor_1);
+        compare_actors(actor_0, actor_1, compare_actors_Verbosity::Print::grab());
     }
 
-    // but actually test 108
-    TEST_EQ(ok, TimeUnit::convert(TimeUnit::Minutes::grab(), 1.8, TimeUnit::Hours::grab()), 0.03);
-    TEST_EQ(ok, TimeUnit::convert(TimeUnit::Hours::grab(), 0.03, TimeUnit::Minutes::grab()), 1.8);
+    int const TRIALS{46656};
+    int const TRIALS_PER_DOT{27};
+    std::cout << "108 trials run, now just start printing one '.' per " << TRIALS_PER_DOT << " trials"
+              << std::flush;
+    matchable::MatchBox<Actor::Type, int> win_counts{0};
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < TRIALS; ++i)
+    {
+        if (i % TRIALS_PER_DOT == 0)
+            std::cout << "." << std::flush;
+        choose_actors(actor_0, actor_1);
+        Actor::Type winner = compare_actors(actor_0, actor_1, compare_actors_Verbosity::Silent::grab());
+        win_counts.mut_at(winner) += 1;
+    }
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    std::cout << "\ncompleted " << TRIALS << " trials using a single thread in " << duration.count()
+              << " milliseconds" << std::endl;
 
-    TEST_EQ(ok, TimeUnit::convert(TimeUnit::Seconds::grab(), 6480.0, TimeUnit::Hours::grab()), 1.8);
-    TEST_EQ(ok, TimeUnit::convert(TimeUnit::Hours::grab(), 1.8, TimeUnit::Seconds::grab()), 6480.0);
+    std::string const TITLE{"Summary Win Counts"};
+    int const WIDTH = TITLE.size();
+    std::cout << "\n" << TITLE << ":" << std::endl;
+    for (auto actor : Actor::variants())
+        std::cout << std::setw(WIDTH) << actor << ": " << win_counts.at(actor) << std::endl;
+    std::cout << std::setw(WIDTH) << "TIE" << ": " << win_counts.at(Actor::nil) << std::endl;
 
-    TEST_EQ(ok, TimeUnit::convert(TimeUnit::Seconds::grab(), 388800.0, TimeUnit::Minutes::grab()), 6480.0);
-    TEST_EQ(ok, TimeUnit::convert(TimeUnit::Minutes::grab(), 6480.0, TimeUnit::Seconds::grab()), 388800.0);
-
-    return ok();
+    return 0;
 }
