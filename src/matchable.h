@@ -468,9 +468,9 @@ namespace matchable
         public:                                                                                            \
             _v() = default;                                                                                \
             std::string const & as_string() const override { static std::string const s{#_v}; return s; }  \
-            int as_index() const override { return *int_member(); }                                        \
+            int as_index() const override { return *m_index(); }                                           \
             static Type grab() { return Type(create()); }                                                  \
-            static int * int_member() { static int i{-1}; return &i; }                                     \
+            static int * m_index() { static int i{-1}; return &i; }                                        \
         private:                                                                                           \
             std::shared_ptr<I##_t> clone() const  override { return create(); }                            \
             static std::shared_ptr<_v> create() { return std::make_shared<_v>(); }
@@ -478,7 +478,7 @@ namespace matchable
 
 #define _matchable_create_variant_end(_t, _v)                                                              \
         };                                                                                                 \
-        static bool const register_me_##_t##_v = I##_t::register_variant(_v::grab(), _v::int_member());    \
+        static bool const register_me_##_t##_v = I##_t::register_variant(_v::grab(), _v::m_index());       \
     }
 
 
