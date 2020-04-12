@@ -308,15 +308,15 @@ namespace matchable
         {
             prev_variants = M::variants();
             auto i = std::remove_if(
-                M::interface_type::private_variants().begin(),
-                M::interface_type::private_variants().end(),
+                M::interface_type::by_index().begin(),
+                M::interface_type::by_index().end(),
                 [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
             );
-            M::interface_type::private_variants().erase(i, M::interface_type::private_variants().end());
+            M::interface_type::by_index().erase(i, M::interface_type::by_index().end());
         }
         ~Unmatchable()
         {
-            M::interface_type::private_variants() = prev_variants;
+            M::interface_type::by_index() = prev_variants;
         }
     private:
         std::vector<M> prev_variants;
@@ -346,13 +346,16 @@ namespace matchable
             virtual ~I##_t() = default;                                                                    \
             virtual std::string const & as_string() const = 0;                                             \
             virtual int as_index() const = 0;                                                              \
-            static std::vector<Type> const & variants() { return private_variants(); }                     \
+            static std::vector<Type> const & variants() { return variants_by_index(); }                    \
+            static std::vector<Type> const & variants_by_index() { return by_index(); }                    \
+            static std::vector<Type> const & variants_by_string() { return by_string(); }                  \
             static bool register_variant(Type const & variant, int * i);                                   \
         protected:                                                                                         \
         private:                                                                                           \
             virtual std::shared_ptr<I##_t> clone() const = 0;                                              \
             static bool & nil_flag() { static bool nf{false}; return nf; }                                 \
-            static std::vector<Type> & private_variants() { static std::vector<Type> v; return v; }
+            static std::vector<Type> & by_index() { static std::vector<Type> v; return v; }                \
+            static std::vector<Type> & by_string() { static std::vector<Type> v; return v; }
 
 
 #define _matchable_declare_end(_t)                                                                         \
@@ -437,23 +440,31 @@ namespace matchable
         }                                                                                                  \
         inline Type from_string(std::string const & str)                                                   \
         {                                                                                                  \
-            for (auto const & v : I##_t::variants())                                                       \
-                if (v.as_string() == str)                                                                  \
-                    return v;                                                                              \
+            auto it = std::lower_bound(                                                                    \
+                I##_t::variants_by_string().begin(),                                                       \
+                I##_t::variants_by_string().end(),                                                         \
+                str,                                                                                       \
+                [](_t::Type const & v, std::string const & s){ return v.as_string() < s; }                 \
+            );                                                                                             \
+            if (it != I##_t::variants_by_string().end() && str == it->as_string())                         \
+                return *it;                                                                                \
             return nil;                                                                                    \
         }                                                                                                  \
         static bool const register_##_t = I##_t::register_variant(nil, nullptr);                           \
-        inline bool I##_t::register_variant(Type const & variant, int * i)                                 \
+        inline bool I##_t::register_variant(Type const & variant, int * index)                             \
         {                                                                                                  \
             if (variant.is_nil())                                                                          \
             {                                                                                              \
-                private_variants().clear();                                                                \
+                by_index().clear();                                                                        \
             }                                                                                              \
             else                                                                                           \
             {                                                                                              \
-                if (nullptr != i)                                                                          \
-                    *i = static_cast<int>(variants().size());                                              \
-                private_variants().push_back(variant);                                                     \
+                if (nullptr != index)                                                                      \
+                    *index = static_cast<int>(variants().size());                                          \
+                by_index().push_back(variant);                                                             \
+                by_string() = by_index();                                                                  \
+                std::sort(by_string().begin(), by_string().end(),                                          \
+                    [](auto a, auto b) { return a.lt_by_string(b); });                                     \
             }                                                                                              \
             return true;                                                                                   \
         }                                                                                                  \

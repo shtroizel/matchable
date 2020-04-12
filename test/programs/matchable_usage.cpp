@@ -44,10 +44,10 @@ status::Type foo()
 {
     static int magic;
     magic++;
-    if (magic % 107 == 0) // get variant by grabbing
+    if (magic % 107 == 0) // get variant by grabbing (constant complexity)
         return status::success::grab();
 
-    if (magic % 42 == 0) // get variant from string
+    if (magic % 42 == 0) // get variant from string (log2(n) complexity)
         return status::from_string("invalid_input");
 
     static std::mt19937 engine{std::random_device()()};
@@ -59,7 +59,7 @@ status::Type foo()
         static_cast<int>(status::variants().size()) - 1
     };
 
-    // get variant from index
+    // get variant from index (constant complexity)
     status::Type ret{status::from_index(status_distribution(engine))};
     assert(!ret.is_nil()); // index out of range would mean bug creating status_distribution
 
