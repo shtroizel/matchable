@@ -80,7 +80,7 @@ int main()
         MATCH_WITH_FLOW_CONTROL foo_status.match({
             {status::nil,
                 [](auto &){
-                    std::cout << "nil!" << std::endl;
+                    std::cout << status::nil.as_string() << "!" << std::endl;
                 }},
             {status::success::grab(),
                 [](matchable::FlowControl & fc){ // explicit type instead of auto for FlowControl
@@ -94,10 +94,10 @@ int main()
         }); EVAL_FLOW_CONTROL
 
         // only happens if foo_status == status::nil, which is never
-        std::cout << "match: " << status::nil.as_string() << "!" << std::endl;
+        // operator<<() is provided, so as_string() can be omitted...
+        std::cout << "match: " << status::nil << "!" << std::endl;
     }
 
-    // operator<<() is provided, so as_string() can be omitted...
     std::cout << foo_status << std::endl;
 
     return foo_status.as_index();
