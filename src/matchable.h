@@ -339,7 +339,6 @@ namespace matchable
         class I##_t                                                                                        \
         {                                                                                                  \
             friend class Matchable<I##_t>;                                                                 \
-            using interface_type = I##_t;                                                                  \
             friend class ::matchable::Unmatchable<Matchable<I##_t>>;                                       \
         public:                                                                                            \
             I##_t() = default;                                                                             \
