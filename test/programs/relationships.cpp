@@ -159,9 +159,7 @@ void print_weekdays()
 void print_holidays()
 {
     std::cout << "***** print_holidays() *****" << std::endl;
-    auto holidays = Holiday::variants();
-    std::sort(holidays.begin(), holidays.end(), [](auto a, auto b) { return a.lt_by_string(b); });
-    for (Holiday::Type h : holidays)
+    for (Holiday::Type h : Holiday::variants_by_string())
     {
         if (h.as_DayOfWeekOccurence().is_nil())
             std::cout << "    " << h.as_text() << " is celebrated on " << h.as_Month()

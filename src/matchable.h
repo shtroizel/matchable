@@ -407,7 +407,9 @@ namespace matchable
                 if (mb.is_set(*this))                                                                      \
                     mb.at(*this)();                                                                        \
             }                                                                                              \
-            static std::vector<Matchable> const & variants() { return T::variants(); }                     \
+            static std::vector<Matchable> const & variants() { return variants_by_index(); }               \
+            static std::vector<Matchable> const & variants_by_index() { return T::variants_by_index(); }   \
+            static std::vector<Matchable> const & variants_by_string() { return T::variants_by_string(); } \
             bool operator==(Matchable const & m) const { return as_string() == m.as_string(); }            \
             bool operator!=(Matchable const & m) const { return as_string() != m.as_string(); }            \
             bool operator<(Matchable const & m) const { return as_index() < m.as_index(); }                \
@@ -430,13 +432,15 @@ namespace matchable
     namespace _t                                                                                           \
     {                                                                                                      \
         using Flags = matchable::MatchBox<Type, void>;                                                     \
-        inline std::vector<Type> const & variants() { return I##_t::variants(); }                          \
+        inline std::vector<Type> const & variants_by_index() { return I##_t::variants_by_index(); }        \
+        inline std::vector<Type> const & variants_by_string() { return I##_t::variants_by_string(); }      \
+        inline std::vector<Type> const & variants() { return variants_by_index(); }                        \
         static const Type nil{};                                                                           \
         inline Type from_index(int index)                                                                  \
         {                                                                                                  \
             if (index < 0 || index >= (int) I##_t::variants().size())                                      \
                 return nil;                                                                                \
-            return I##_t::variants().at(index);                                                            \
+            return I##_t::variants_by_index().at(index);                                                   \
         }                                                                                                  \
         inline Type from_string(std::string const & str)                                                   \
         {                                                                                                  \
