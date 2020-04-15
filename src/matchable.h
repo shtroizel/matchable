@@ -459,15 +459,18 @@ namespace matchable
             if (variant.is_nil())                                                                          \
             {                                                                                              \
                 by_index().clear();                                                                        \
+                by_string().clear();                                                                       \
             }                                                                                              \
             else                                                                                           \
             {                                                                                              \
                 if (nullptr != index)                                                                      \
                     *index = static_cast<int>(variants().size());                                          \
                 by_index().push_back(variant);                                                             \
-                by_string() = by_index();                                                                  \
-                std::sort(by_string().begin(), by_string().end(),                                          \
-                    [](auto a, auto b) { return a.lt_by_string(b); });                                     \
+                static auto pred = [](auto a, auto b) { return a.lt_by_string(b); };                       \
+                by_string().insert(                                                                        \
+                    std::upper_bound(by_string().begin(), by_string().end(), variant, pred),               \
+                    variant                                                                                \
+                );                                                                                         \
             }                                                                                              \
             return true;                                                                                   \
         }                                                                                                  \
