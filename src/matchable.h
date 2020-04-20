@@ -1037,7 +1037,7 @@ namespace matchable
 
         inline std::string escape_all(std::string const & input)
         {
-            std::string escaped{};
+            std::string escaped;
             escapable::Type escapable;
             std::string char_as_str;
             for (size_t i = 0; i < input.size(); ++i)
