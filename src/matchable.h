@@ -364,7 +364,6 @@ namespace matchable
         protected:                                                                                         \
         private:                                                                                           \
             virtual std::shared_ptr<I##_t> clone() const = 0;                                              \
-            static bool & nil_flag() { static bool nf{false}; return nf; }                                 \
             static std::vector<Type> & by_index() { static std::vector<Type> v; return v; }                \
             static std::vector<Type> & by_string() { static std::vector<Type> v; return v; }
 
