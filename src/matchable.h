@@ -963,18 +963,18 @@ namespace matchable
         {
             std::string unescaped{input};
             size_t index = 0;
-            for (auto escapable : escapable::variants_by_index())
+            for (auto escapable_variant : escapable::variants_by_index())
             {
                 index = 0;
                 while (true)
                 {
-                    index = unescaped.find(escapable.as_string(), index);
+                    index = unescaped.find(escapable_variant.as_string(), index);
                     if (index == std::string::npos)
                         break;
 
-                    auto replacement = unescape(escapable);
+                    auto replacement = unescape(escapable_variant);
                     assert(replacement != "");
-                    unescaped.erase(index, escapable.as_string().size());
+                    unescaped.erase(index, escapable_variant.as_string().size());
                     unescaped.insert(index, replacement);
                     index += replacement.size();
                 }
