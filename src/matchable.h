@@ -353,8 +353,9 @@ namespace matchable
         public:                                                                                            \
             I##_t() = default;                                                                             \
             virtual ~I##_t() = default;                                                                    \
-            virtual std::string const & as_string() const = 0;                                             \
             virtual int as_index() const = 0;                                                              \
+            virtual std::string const & as_string() const = 0;                                             \
+            virtual std::string const & as_identifier_string() const = 0;                                  \
             static std::vector<Type> const & variants() { return variants_by_index(); }                    \
             static std::vector<Type> const & variants_by_index() { return by_index(); }                    \
             static std::vector<Type> const & variants_by_string() { return by_string(); }                  \
@@ -400,8 +401,11 @@ namespace matchable
                 static std::string const nil_str{"nil"};                                                   \
                 return nullptr == t ? nil_str : t->as_string();                                            \
             }                                                                                              \
-            std::string as_text() const                                                                    \
-                { std::string s{as_string()}; std::replace(s.begin(), s.end(), '_', ' '); return s; }      \
+            std::string as_identifier_string() const                                                       \
+            {                                                                                              \
+                static std::string const nil_str{"nil"};                                                   \
+                return nullptr == t ? nil_str : t->as_identifier_string();                                 \
+            }                                                                                              \
             int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
             bool is_nil() const { return nullptr == t; }                                                   \
             matchable::FlowControl match(MatchParamWithFlowControl const & mb) const                       \
@@ -422,8 +426,8 @@ namespace matchable
             bool operator==(Matchable const & m) const { return as_string() == m.as_string(); }            \
             bool operator!=(Matchable const & m) const { return as_string() != m.as_string(); }            \
             bool operator<(Matchable const & m) const { return as_index() < m.as_index(); }                \
-            bool lt_by_string(Matchable const & m) const { return as_string() < m.as_string(); }           \
             bool lt_by_index(Matchable const & m) const { return as_index() < m.as_index(); }              \
+            bool lt_by_string(Matchable const & m) const { return as_string() < m.as_string(); }           \
             friend std::ostream & operator<<(std::ostream & o, Matchable const & m)                        \
             {                                                                                              \
                 return o << m.as_string();                                                                 \
@@ -444,7 +448,8 @@ namespace matchable
         inline std::vector<Type> const & variants_by_index() { return I##_t::variants_by_index(); }        \
         inline std::vector<Type> const & variants_by_string() { return I##_t::variants_by_string(); }      \
         inline std::vector<Type> const & variants() { return variants_by_index(); }                        \
-        static const Type nil{};                                                                           \
+        static std::string const name{#_t};                                                                \
+        static Type const nil{};                                                                           \
         inline Type from_index(int index)                                                                  \
         {                                                                                                  \
             if (index < 0 || index >= (int) I##_t::variants().size())                                      \
@@ -462,6 +467,13 @@ namespace matchable
             if (it != I##_t::variants_by_string().end() && str == it->as_string())                         \
                 return *it;                                                                                \
             return nil;                                                                                    \
+        }                                                                                                  \
+        inline Type from_identifier_string(std::string const & str)                                        \
+        {                                                                                                  \
+            for (auto v : variants_by_index())                                                             \
+                if (v.as_identifier_string() == str)                                                       \
+                    return v;                                                                              \
+            return Type{};                                                                                 \
         }                                                                                                  \
         static bool const register_##_t = I##_t::register_variant(nil, nullptr);                           \
         inline bool I##_t::register_variant(Type const & variant, int * index)                             \
@@ -494,8 +506,22 @@ namespace matchable
         {                                                                                                  \
         public:                                                                                            \
             _v() = default;                                                                                \
-            std::string const & as_string() const override { static std::string const s{#_v}; return s; }  \
             int as_index() const override { return *m_index(); }                                           \
+            std::string const & as_string() const override                                                 \
+            {                                                                                              \
+                static std::string const s =                                                               \
+                    [&](){                                                                                 \
+                        std::string s{#_v};                                                                \
+                        if (_t::name == "escapable")                                                       \
+                            return s;                                                                      \
+                        if (s.substr(0, 4) == "esc_")                                                      \
+                            s.erase(0, 4);                                                                 \
+                        return matchable::escapable::unescape_all(s);                                      \
+                    }();                                                                                   \
+                return s;                                                                                  \
+            }                                                                                              \
+            std::string const & as_identifier_string() const override                                      \
+                { static std::string const s{#_v}; return s; }                                             \
             static Type grab() { return Type(create()); }                                                  \
             static int * m_index() { static int i{-1}; return &i; }                                        \
         private:                                                                                           \
@@ -840,3 +866,187 @@ namespace matchable
 #define MATCH_WITH_FLOW_CONTROL { matchable::FlowControl fc =
 #define EVAL_FLOW_CONTROL if (fc.brk_requested()) break; if (fc.cont_requested()) continue; }
 #define EVAL_BREAK_ONLY if (fc.brk_requested()) break; }
+
+
+namespace matchable
+{
+    namespace escapable
+    {
+        inline std::string unescape_all(std::string const & input);
+        inline std::string escape_all(std::string const & input);
+    }
+
+    MATCHABLE(
+        escapable,
+        _spc_,
+        _bng_,
+        _qt_,
+        _hsh_,
+        _dol_,
+        _pct_,
+        _amp_,
+        _sqt_,
+        _pl_,
+        _pr_,
+        _ast_,
+        _pls_,
+        _cma_,
+        _mns_,
+        _dot_,
+        _slsh_,
+        _cln_,
+        _scln_,
+        _lt_,
+        _eq_,
+        _gt_,
+        _q_,
+        _at_,
+        _sbl_,
+        _bslsh_,
+        _sbr_,
+        _crt_,
+        _bqt_,
+        _cbl_,
+        _pip_,
+        _cbr_,
+        _tld_
+    )
+
+    namespace escapable
+    {
+        inline std::string unescape(escapable::Type esc)
+        {
+            if (esc.is_nil())
+                return "";
+
+            static const MatchBox<escapable::Type, std::string> u({
+                {escapable::_spc_::grab(), " "},
+                {escapable::_bng_::grab(), "!"},
+                {escapable::_qt_::grab(), "\""},
+                {escapable::_hsh_::grab(), "#"},
+                {escapable::_dol_::grab(), "$"},
+                {escapable::_pct_::grab(), "$"},
+                {escapable::_amp_::grab(), "&"},
+                {escapable::_sqt_::grab(), "'"},
+                {escapable::_pl_::grab(), "("},
+                {escapable::_pr_::grab(), ")"},
+                {escapable::_ast_::grab(), "*"},
+                {escapable::_pls_::grab(), "+"},
+                {escapable::_cma_::grab(), ","},
+                {escapable::_mns_::grab(), "-"},
+                {escapable::_dot_::grab(), "."},
+                {escapable::_slsh_::grab(), "/"},
+                {escapable::_cln_::grab(), ":"},
+                {escapable::_scln_::grab(), ";"},
+                {escapable::_lt_::grab(), "<"},
+                {escapable::_eq_::grab(), "="},
+                {escapable::_gt_::grab(), ">"},
+                {escapable::_q_::grab(), "?"},
+                {escapable::_at_::grab(), "@"},
+                {escapable::_sbl_::grab(), "["},
+                {escapable::_bslsh_::grab(), "\\"},
+                {escapable::_sbr_::grab(), "]"},
+                {escapable::_crt_::grab(), "^"},
+                {escapable::_bqt_::grab(), "`"},
+                {escapable::_cbl_::grab(), "{"},
+                {escapable::_pip_::grab(), "|"},
+                {escapable::_cbr_::grab(), "}"},
+                {escapable::_tld_::grab(), "~"},
+            });
+
+            assert(u.at(esc) != "");
+            return u.at(esc);
+        }
+
+
+        inline std::string unescape_all(std::string const & input)
+        {
+            std::string unescaped{input};
+            size_t index = 0;
+            for (auto escapable : escapable::variants_by_index())
+            {
+                index = 0;
+                while (true)
+                {
+                    index = unescaped.find(escapable.as_string(), index);
+                    if (index == std::string::npos)
+                        break;
+
+                    auto replacement = unescape(escapable);
+                    assert(replacement != "");
+                    unescaped.erase(index, escapable.as_string().size());
+                    unescaped.insert(index, replacement);
+                    index += replacement.size();
+                }
+            }
+            return unescaped;
+        }
+
+
+        inline Type escape(std::string const & str)
+        {
+            if (str.size() != 1)
+                return escapable::nil;
+
+            static int const offset{32};
+            static std::array<escapable::Type, 128 - offset> const escapables =
+                [&](){
+                    std::array<escapable::Type, 128 - offset> e;
+                    e[(int) ' ' - offset] = escapable::_spc_::grab();
+                    e[(int) '!' - offset] = escapable::_bng_::grab();
+                    e[(int) '"' - offset] = escapable::_qt_::grab();
+                    e[(int) '#' - offset] = escapable::_hsh_::grab();
+                    e[(int) '$' - offset] = escapable::_dol_::grab();
+                    e[(int) '%' - offset] = escapable::_pct_::grab();
+                    e[(int) '&' - offset] = escapable::_amp_::grab();
+                    e[(int) '\'' - offset] = escapable::_sqt_::grab();
+                    e[(int) '(' - offset] = escapable::_pl_::grab();
+                    e[(int) ')' - offset] = escapable::_pr_::grab();
+                    e[(int) '*' - offset] = escapable::_ast_::grab();
+                    e[(int) '+' - offset] = escapable::_pls_::grab();
+                    e[(int) ',' - offset] = escapable::_cma_::grab();
+                    e[(int) '-' - offset] = escapable::_mns_::grab();
+                    e[(int) '.' - offset] = escapable::_dot_::grab();
+                    e[(int) '/' - offset] = escapable::_slsh_::grab();
+                    e[(int) ':' - offset] = escapable::_cln_::grab();
+                    e[(int) ';' - offset] = escapable::_scln_::grab();
+                    e[(int) '<' - offset] = escapable::_lt_::grab();
+                    e[(int) '=' - offset] = escapable::_eq_::grab();
+                    e[(int) '>' - offset] = escapable::_gt_::grab();
+                    e[(int) '?' - offset] = escapable::_q_::grab();
+                    e[(int) '@' - offset] = escapable::_at_::grab();
+                    e[(int) '[' - offset] = escapable::_sbl_::grab();
+                    e[(int) '\\' - offset] = escapable::_bslsh_::grab();
+                    e[(int) ']' - offset] = escapable::_sbr_::grab();
+                    e[(int) '^' - offset] = escapable::_crt_::grab();
+                    e[(int) '`' - offset] = escapable::_bqt_::grab();
+                    e[(int) '{' - offset] = escapable::_cbl_::grab();
+                    e[(int) '|' - offset] = escapable::_pip_::grab();
+                    e[(int) '}' - offset] = escapable::_cbr_::grab();
+                    e[(int) '~' - offset] = escapable::_tld_::grab();
+                    return e;
+                }();
+
+            int const & ch = str[0];
+            if (ch >= offset && ch < 127)
+                return escapables[ch - offset];
+
+            return escapable::nil;
+        }
+
+
+        inline std::string escape_all(std::string const & input)
+        {
+            std::string escaped{};
+            escapable::Type escapable;
+            std::string char_as_str;
+            for (size_t i = 0; i < input.size(); ++i)
+            {
+                char_as_str = std::string(1, input[i]);
+                escapable = escapable::escape(char_as_str);
+                escaped += escapable.is_nil() ? char_as_str : escapable.as_string();
+            }
+            return escaped;
+        }
+    }
+}

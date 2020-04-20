@@ -45,9 +45,10 @@ VARIANT_SPREADVARIANTVECT(Days, Weekend, DayOfWeek, Sunday, Saturday)
 
 MATCHABLE(
     DayOfMonth,
-    _1st, _2nd, _3rd, _4th, _5th, _6th, _7th, _8th, _9th, _10th, _11th,
-    _12th, _13th, _14th, _15th, _16th, _17th, _18th, _19th, _20th, _21st,
-    _22nd, _23rd, _24th, _25th, _26th, _27th, _28th, _29th, _30th, _31st
+               esc_1st,  esc_2nd,  esc_3rd,  esc_4th,  esc_5th,  esc_6th,  esc_7th,  esc_8th,  esc_9th,
+    esc_10th, esc_11th, esc_12th, esc_13th, esc_14th, esc_15th, esc_16th, esc_17th, esc_18th, esc_19th,
+    esc_20th, esc_21st, esc_22nd, esc_23rd, esc_24th, esc_25th, esc_26th, esc_27th, esc_28th, esc_29th,
+    esc_30th, esc_31st
 )
 
 MATCHABLE(
@@ -72,62 +73,62 @@ SPREADx4_MATCHABLE(
     DayOfMonth,
     Month,
     Holiday,
-    Martin_Luther_King_Jr_Day,
-    Lincoln_Washington_Day,
-    Mothers_Day,
-    Memorial_Day,
-    Fathers_Day,
-    Labor_Day,
-    Columbus_Day,
-    Thanksgiving_Day,
-    New_Years_Day,
-    Independence_Day,
-    Veterans_Day,
-    Christmas_Day
+    Martin_spc_Luther_spc_King_spc_Jr_spc_Day,
+    Lincoln_spc_Washington_spc_Day,
+    Mothers_spc_Day,
+    Memorial_spc_Day,
+    Fathers_spc_Day,
+    Labor_spc_Day,
+    Columbus_spc_Day,
+    Thanksgiving_spc_Day,
+    New_spc_Years_spc_Day,
+    Independence_spc_Day,
+    Veterans_spc_Day,
+    Christmas_spc_Day
 )
-VARIANT_SPREADVARIANT(Holiday, Mothers_Day, DayOfWeek, Sunday)
-VARIANT_SPREADVARIANT(Holiday, Mothers_Day, DayOfWeekOccurence, second)
-VARIANT_SPREADVARIANT(Holiday, Mothers_Day, Month, May)
+VARIANT_SPREADVARIANT(Holiday, Mothers_spc_Day, DayOfWeek, Sunday)
+VARIANT_SPREADVARIANT(Holiday, Mothers_spc_Day, DayOfWeekOccurence, second)
+VARIANT_SPREADVARIANT(Holiday, Mothers_spc_Day, Month, May)
 
-VARIANT_SPREADVARIANT(Holiday, Fathers_Day, DayOfWeek, Sunday)
-VARIANT_SPREADVARIANT(Holiday, Fathers_Day, DayOfWeekOccurence, third)
-VARIANT_SPREADVARIANT(Holiday, Fathers_Day, Month, June)
+VARIANT_SPREADVARIANT(Holiday, Fathers_spc_Day, DayOfWeek, Sunday)
+VARIANT_SPREADVARIANT(Holiday, Fathers_spc_Day, DayOfWeekOccurence, third)
+VARIANT_SPREADVARIANT(Holiday, Fathers_spc_Day, Month, June)
 
-VARIANT_SPREADVARIANT(Holiday, Martin_Luther_King_Jr_Day, DayOfWeek, Monday)
-VARIANT_SPREADVARIANT(Holiday, Martin_Luther_King_Jr_Day, DayOfWeekOccurence, third)
-VARIANT_SPREADVARIANT(Holiday, Martin_Luther_King_Jr_Day, Month, January)
+VARIANT_SPREADVARIANT(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, DayOfWeek, Monday)
+VARIANT_SPREADVARIANT(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, DayOfWeekOccurence, third)
+VARIANT_SPREADVARIANT(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, Month, January)
 
-VARIANT_SPREADVARIANT(Holiday, Lincoln_Washington_Day, DayOfWeek, Monday)
-VARIANT_SPREADVARIANT(Holiday, Lincoln_Washington_Day, DayOfWeekOccurence, third)
-VARIANT_SPREADVARIANT(Holiday, Lincoln_Washington_Day, Month, Februrary)
+VARIANT_SPREADVARIANT(Holiday, Lincoln_spc_Washington_spc_Day, DayOfWeek, Monday)
+VARIANT_SPREADVARIANT(Holiday, Lincoln_spc_Washington_spc_Day, DayOfWeekOccurence, third)
+VARIANT_SPREADVARIANT(Holiday, Lincoln_spc_Washington_spc_Day, Month, Februrary)
 
-VARIANT_SPREADVARIANT(Holiday, Memorial_Day, DayOfWeek, Monday)
-VARIANT_SPREADVARIANT(Holiday, Memorial_Day, DayOfWeekOccurence, last)
-VARIANT_SPREADVARIANT(Holiday, Memorial_Day, Month, May)
+VARIANT_SPREADVARIANT(Holiday, Memorial_spc_Day, DayOfWeek, Monday)
+VARIANT_SPREADVARIANT(Holiday, Memorial_spc_Day, DayOfWeekOccurence, last)
+VARIANT_SPREADVARIANT(Holiday, Memorial_spc_Day, Month, May)
 
-VARIANT_SPREADVARIANT(Holiday, Labor_Day, DayOfWeek, Monday)
-VARIANT_SPREADVARIANT(Holiday, Labor_Day, DayOfWeekOccurence, first)
-VARIANT_SPREADVARIANT(Holiday, Labor_Day, Month, September)
+VARIANT_SPREADVARIANT(Holiday, Labor_spc_Day, DayOfWeek, Monday)
+VARIANT_SPREADVARIANT(Holiday, Labor_spc_Day, DayOfWeekOccurence, first)
+VARIANT_SPREADVARIANT(Holiday, Labor_spc_Day, Month, September)
 
-VARIANT_SPREADVARIANT(Holiday, Columbus_Day, DayOfWeek, Monday)
-VARIANT_SPREADVARIANT(Holiday, Columbus_Day, DayOfWeekOccurence, second)
-VARIANT_SPREADVARIANT(Holiday, Columbus_Day, Month, October)
+VARIANT_SPREADVARIANT(Holiday, Columbus_spc_Day, DayOfWeek, Monday)
+VARIANT_SPREADVARIANT(Holiday, Columbus_spc_Day, DayOfWeekOccurence, second)
+VARIANT_SPREADVARIANT(Holiday, Columbus_spc_Day, Month, October)
 
-VARIANT_SPREADVARIANT(Holiday, Thanksgiving_Day, DayOfWeek, Thursday)
-VARIANT_SPREADVARIANT(Holiday, Thanksgiving_Day, DayOfWeekOccurence, fourth)
-VARIANT_SPREADVARIANT(Holiday, Thanksgiving_Day, Month, November)
+VARIANT_SPREADVARIANT(Holiday, Thanksgiving_spc_Day, DayOfWeek, Thursday)
+VARIANT_SPREADVARIANT(Holiday, Thanksgiving_spc_Day, DayOfWeekOccurence, fourth)
+VARIANT_SPREADVARIANT(Holiday, Thanksgiving_spc_Day, Month, November)
 
-VARIANT_SPREADVARIANT(Holiday, New_Years_Day, DayOfMonth, _1st)
-VARIANT_SPREADVARIANT(Holiday, New_Years_Day, Month, January)
+VARIANT_SPREADVARIANT(Holiday, New_spc_Years_spc_Day, DayOfMonth, esc_1st)
+VARIANT_SPREADVARIANT(Holiday, New_spc_Years_spc_Day, Month, January)
 
-VARIANT_SPREADVARIANT(Holiday, Independence_Day, DayOfMonth, _4th)
-VARIANT_SPREADVARIANT(Holiday, Independence_Day, Month, July)
+VARIANT_SPREADVARIANT(Holiday, Independence_spc_Day, DayOfMonth, esc_4th)
+VARIANT_SPREADVARIANT(Holiday, Independence_spc_Day, Month, July)
 
-VARIANT_SPREADVARIANT(Holiday, Veterans_Day, DayOfMonth, _11th)
-VARIANT_SPREADVARIANT(Holiday, Veterans_Day, Month, November)
+VARIANT_SPREADVARIANT(Holiday, Veterans_spc_Day, DayOfMonth, esc_11th)
+VARIANT_SPREADVARIANT(Holiday, Veterans_spc_Day, Month, November)
 
-VARIANT_SPREADVARIANT(Holiday, Christmas_Day, DayOfMonth, _25th)
-VARIANT_SPREADVARIANT(Holiday, Christmas_Day, Month, December)
+VARIANT_SPREADVARIANT(Holiday, Christmas_spc_Day, DayOfMonth, esc_25th)
+VARIANT_SPREADVARIANT(Holiday, Christmas_spc_Day, Month, December)
 
 
 
@@ -162,11 +163,11 @@ void print_holidays()
     for (Holiday::Type h : Holiday::variants_by_string())
     {
         if (h.as_DayOfWeekOccurence().is_nil())
-            std::cout << "    " << h.as_text() << " is celebrated on " << h.as_Month()
-                    << h.as_DayOfMonth().as_text() << std::endl;
+            std::cout << "    " << h << " is celebrated on " << h.as_Month()
+                      << " " << h.as_DayOfMonth() << std::endl;
         else
-            std::cout << "    " << h.as_text() << " is celebrated on the " << h.as_DayOfWeekOccurence() << " "
-                    << h.as_DayOfWeek() << " in " << h.as_Month() << std::endl;
+            std::cout << "    " << h << " is celebrated on the " << h.as_DayOfWeekOccurence()
+                      << " " << h.as_DayOfWeek() << " of " << h.as_Month() << std::endl;
     }
     std::cout << std::endl;
 }
@@ -176,12 +177,12 @@ void print_friday_july_thirteenth_2007()
 {
     std::cout << "***** print_friday_july_thirteenth_2007() *****" << std::endl;
 
-    DayOfWeek::Type dow = DayOfWeek::from_string("Friday");
-    DayOfMonth::Type dom = DayOfMonth::_13th::grab();
+    DayOfWeek::Type dow = DayOfWeek::Friday::grab();
+    DayOfMonth::Type dom = DayOfMonth::from_string("13th");
     Month::Type month = Month::from_index(6);
 
     std::cout << dow << ", " << month << " " << dom.as_index() + 1 << ", 2007" << std::endl;
-    std::cout << dow << " the" << dom.as_text() << ", " << month << " 2007" << std::endl;
+    std::cout << dow << " the " << dom << ", " << month << " 2007" << std::endl;
 }
 
 

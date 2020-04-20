@@ -60,102 +60,102 @@ MATCHABLE(
     , eighteen
     , nineteen
     , twenty
-    , twentyone
-    , twentytwo
-    , twentythree
-    , twentyfour
-    , twentyfive
-    , twentysix
-    , twentyseven
-    , twentyeight
-    , twentynine
+    , twenty_mns_one
+    , twenty_mns_two
+    , twenty_mns_three
+    , twenty_mns_four
+    , twenty_mns_five
+    , twenty_mns_six
+    , twenty_mns_seven
+    , twenty_mns_eight
+    , twenty_mns_nine
     , thirty
-    , thirtyone
-    , thirtytwo
-    , thirtythree
-    , thirtyfour
-    , thirtyfive
-    , thirtysix
-    , thirtyseven
-    , thirtyeight
-    , thirtynine
+    , thirty_mns_one
+    , thirty_mns_two
+    , thirty_mns_three
+    , thirty_mns_four
+    , thirty_mns_five
+    , thirty_mns_six
+    , thirty_mns_seven
+    , thirty_mns_eight
+    , thirty_mns_nine
     , fourty
-    , fourtyone
-    , fourtytwo
-    , fourtythree
-    , fourtyfour
-    , fourtyfive
-    , fourtysix
-    , fourtyseven
-    , fourtyeight
-    , fourtynine
+    , fourty_mns_one
+    , fourty_mns_two
+    , fourty_mns_three
+    , fourty_mns_four
+    , fourty_mns_five
+    , fourty_mns_six
+    , fourty_mns_seven
+    , fourty_mns_eight
+    , fourty_mns_nine
     , fifty
-    , fiftyone
-    , fiftytwo
-    , fiftythree
-    , fiftyfour
-    , fiftyfive
-    , fiftysix
-    , fiftyseven
-    , fiftyeight
-    , fiftynine
+    , fifty_mns_one
+    , fifty_mns_two
+    , fifty_mns_three
+    , fifty_mns_four
+    , fifty_mns_five
+    , fifty_mns_six
+    , fifty_mns_seven
+    , fifty_mns_eight
+    , fifty_mns_nine
     , sixty
-    , sixtyone
-    , sixtytwo
-    , sixtythree
-    , sixtyfour
-    , sixtyfive
-    , sixtysix
-    , sixtyseven
-    , sixtyeight
-    , sixtynine
+    , sixty_mns_one
+    , sixty_mns_two
+    , sixty_mns_three
+    , sixty_mns_four
+    , sixty_mns_five
+    , sixty_mns_six
+    , sixty_mns_seven
+    , sixty_mns_eight
+    , sixty_mns_nine
     , seventy
-    , seventyone
-    , seventytwo
-    , seventythree
-    , seventyfour
-    , seventyfive
-    , seventysix
-    , seventyseven
-    , seventyeight
-    , seventynine
+    , seventy_mns_one
+    , seventy_mns_two
+    , seventy_mns_three
+    , seventy_mns_four
+    , seventy_mns_five
+    , seventy_mns_six
+    , seventy_mns_seven
+    , seventy_mns_eight
+    , seventy_mns_nine
     , eighty
-    , eightyone
-    , eightytwo
-    , eightythree
-    , eightyfour
-    , eightyfive
-    , eightysix
-    , eightyseven
-    , eightyeight
-    , eightynine
+    , eighty_mns_one
+    , eighty_mns_two
+    , eighty_mns_three
+    , eighty_mns_four
+    , eighty_mns_five
+    , eighty_mns_six
+    , eighty_mns_seven
+    , eighty_mns_eight
+    , eighty_mns_nine
     , ninety
-    , ninetyone
-    , ninetytwo
-    , ninetythree
-    , ninetyfour
-    , ninetyfive
-    , ninetysix
-    , ninetyseven
-    , ninetyeight
-    , ninetynine
-    , one_hundred
-    , one_hundred_one
-    , one_hundred_two
-    , one_hundred_three
-    , one_hundred_four
-    , one_hundred_five
-    , one_hundred_six
-    , one_hundred_seven
+    , ninety_mns_one
+    , ninety_mns_two
+    , ninety_mns_three
+    , ninety_mns_four
+    , ninety_mns_five
+    , ninety_mns_six
+    , ninety_mns_seven
+    , ninety_mns_eight
+    , ninety_mns_nine
+    , one_spc_hundred
+    , one_spc_hundred_spc_and_spc_one
+    , one_spc_hundred_spc_and_spc_two
+    , one_spc_hundred_spc_and_spc_three
+    , one_spc_hundred_spc_and_spc_four
+    , one_spc_hundred_spc_and_spc_five
+    , one_spc_hundred_spc_and_spc_six
+    , one_spc_hundred_spc_and_spc_seven
 );
 
 
 // grow beyond 108 variants...
 MATCHABLE_GROW(
     Number,
-    one_hundred_eight,
-    one_hundred_nine,
-    one_hundred_ten
+    one_spc_hundred_spc_and_spc_eight,
+    one_spc_hundred_spc_and_spc_nine,
+    one_spc_hundred_spc_and_spc_ten
 )
 
 
@@ -166,7 +166,6 @@ int main()
 
     TEST_EQ(ok, Number::variants().size(), static_cast<size_t>(111));
 
-    int grown_variant_count{0};
     Number::Type n;
     for (auto number : Number::variants())
     {
@@ -175,13 +174,8 @@ int main()
         n = Number::from_index(number.as_index());
         TEST_EQ(ok, n, number);
 
-        if (n.as_index() > 107)
-        {
-            ++grown_variant_count;
-            std::cout << "index " << n.as_index() << ": " << n << std::endl;
-        }
+        std::cout << "index " << n.as_index() << ": " << n << std::endl;
     }
-    TEST_EQ(ok, grown_variant_count, 3);
 
     return ok();
 }
