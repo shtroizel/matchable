@@ -205,6 +205,7 @@ namespace matchable
         using match_t = M;
 
         MatchBox();
+        void clear();
         void set(M const &);
         void unset(M const &);
         bool is_set(M const &) const;
@@ -229,6 +230,15 @@ namespace matchable
         init_flags.reserve(M::variants().size());
         for (size_t i = 0; i < M::variants().size(); ++i)
             init_flags.push_back(false);
+    }
+
+
+    template<typename M>
+    void MatchBox<M, void>::clear()
+    {
+        nil_init_flag = false;
+        for (size_t i = 0; i < init_flags.size(); ++i)
+            init_flags[i] = false;
     }
 
 
