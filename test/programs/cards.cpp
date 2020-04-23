@@ -89,7 +89,7 @@ int main()
 {
     test_ok ok;
 
-    // accomplishes the same as SPREADVARIANT_VARIANTS() above, but at run-time...
+    // accomplishes the same as SET_SPREAD() above, but at run-time...
     Suit::Diamonds::grab().set_color(Color::Red::grab());
     Suit::Hearts::grab().set_color(Color::Red::grab());
 
