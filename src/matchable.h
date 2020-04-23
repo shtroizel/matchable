@@ -696,122 +696,160 @@ namespace matchable
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define _spread_matchable_amend_type(_s, _t)                                                               \
+#define _spread_matchable_amend_type(_st, _s, _t)                                                          \
     public:                                                                                                \
-        _s::Type as_##_s() const { return nullptr == t ? T::nil_##_s() : t->as_##_s(); }                   \
-        void set_##_s(_s::Type s) { if (nullptr == t) T::nil_##_s() = s; else t->set_##_s(s); }
-
-
-
-#define _spread_matchable_amend_declaration(_s, _t)                                                        \
-    public:                                                                                                \
-        _s::Type as_##_s() const { return _s##_mb().at(Type(clone())); }                                   \
-        void set_##_s(_s::Type s) { _s##_mb().set(Type(clone()), s); }                                     \
-    private:                                                                                               \
-        static matchable::MatchBox<_t::Type, _s::Type> & _s##_mb()                                         \
-            { static matchable::MatchBox<_t::Type, _s::Type> m; return m; }                                \
-        static _s::Type nil_##_s() { static _s::Type ns; return ns; }
-
-
-#define SPREADx1_MATCHABLE(_s0, _t, ...)                                                                   \
-    _matchable_create_type_begin(_t)                                                                       \
-    _spread_matchable_amend_type(_s0, _t)                                                                  \
-    _matchable_create_type_end(_t)                                                                         \
-    _matchable_declare_begin(_t)                                                                           \
-    _spread_matchable_amend_declaration(_s0, _t)                                                           \
-    _matchable_declare_end(_t)                                                                             \
-    _matchable_define(_t)                                                                                  \
-    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
-
-
-#define SPREADx2_MATCHABLE(_s0, _s1, _t, ...)                                                              \
-    _matchable_create_type_begin(_t)                                                                       \
-    _spread_matchable_amend_type(_s0, _t)                                                                  \
-    _spread_matchable_amend_type(_s1, _t)                                                                  \
-    _matchable_create_type_end(_t)                                                                         \
-    _matchable_declare_begin(_t)                                                                           \
-    _spread_matchable_amend_declaration(_s0, _t)                                                           \
-    _spread_matchable_amend_declaration(_s1, _t)                                                           \
-    _matchable_declare_end(_t)                                                                             \
-    _matchable_define(_t)                                                                                  \
-    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
-
-
-#define SPREADx3_MATCHABLE(_s0, _s1, _s2, _t, ...)                                                         \
-    _matchable_create_type_begin(_t)                                                                       \
-    _spread_matchable_amend_type(_s0, _t)                                                                  \
-    _spread_matchable_amend_type(_s1, _t)                                                                  \
-    _spread_matchable_amend_type(_s2, _t)                                                                  \
-    _matchable_create_type_end(_t)                                                                         \
-    _matchable_declare_begin(_t)                                                                           \
-    _spread_matchable_amend_declaration(_s0, _t)                                                           \
-    _spread_matchable_amend_declaration(_s1, _t)                                                           \
-    _spread_matchable_amend_declaration(_s2, _t)                                                           \
-    _matchable_declare_end(_t)                                                                             \
-    _matchable_define(_t)                                                                                  \
-    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
-
-
-#define SPREADx4_MATCHABLE(_s0, _s1, _s2, _s3, _t, ...)                                                    \
-    _matchable_create_type_begin(_t)                                                                       \
-    _spread_matchable_amend_type(_s0, _t)                                                                  \
-    _spread_matchable_amend_type(_s1, _t)                                                                  \
-    _spread_matchable_amend_type(_s2, _t)                                                                  \
-    _spread_matchable_amend_type(_s3, _t)                                                                  \
-    _matchable_create_type_end(_t)                                                                         \
-    _matchable_declare_begin(_t)                                                                           \
-    _spread_matchable_amend_declaration(_s0, _t)                                                           \
-    _spread_matchable_amend_declaration(_s1, _t)                                                           \
-    _spread_matchable_amend_declaration(_s2, _t)                                                           \
-    _spread_matchable_amend_declaration(_s3, _t)                                                           \
-    _matchable_declare_end(_t)                                                                             \
-    _matchable_define(_t)                                                                                  \
-    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
-
-
-#define VARIANT_SPREADVARIANT(_t, _v, _st, _sv)                                                            \
-    static bool const VARIANT_SPREADVARIANT_init_##_t##_##_v##_##_st##_##_sv =                             \
-        [](){_t::_v::grab().set_##_st(_st::_sv::grab()); return true;}();
-
-
-#define _spreadvectof_matchable_amend_type(_s, _t)                                                         \
-    public:                                                                                                \
-        std::vector<_s::Type> as_##_s##_vect() const                                                       \
+        std::vector<_st> const & as_##_s##_vect() const                                                    \
             { return nullptr == t ? T::nil_##_s##_vect() : t->as_##_s##_vect(); }                          \
-        void set_##_s##_vect(std::vector<_s::Type> s_vect)                                                 \
-            { if (nullptr == t) T::nil_##_s##_vect() = s_vect; else t->set_##_s##_vect(s_vect); }
+        void set_##_s##_vect(std::vector<_st> const & v)                                                   \
+            { if (nullptr == t) T::nil_##_s##_vect() = v; else t->set_##_s##_vect(v); }                    \
+        _st const & as_##_s() const { return nullptr == t ? T::nil_##_s() : t->as_##_s(); }                \
+        void set_##_s(_st const & s) { if (nullptr == t) T::nil_##_s() = s; else t->set_##_s(s); }
 
 
-#define _spreadvectof_matchable_amend_declaration(_s, _t)                                                  \
+#define _spread_matchable_amend_declaration(_st, _s, _t)                                                   \
     public:                                                                                                \
-        std::vector<_s::Type> as_##_s##_vect() const { return _s##_vect_mb().at(Type(clone())); }          \
-        void set_##_s##_vect(std::vector<_s::Type> s_vect) { _s##_vect_mb().set(Type(clone()), s_vect); }  \
+        std::vector<_st> const & as_##_s##_vect() const { return _s##_vect_mb().at(Type(clone())); }       \
+        void set_##_s##_vect(std::vector<_st> const & v) { _s##_vect_mb().set(Type(clone()), v); }         \
+        _st const & as_##_s() const { return _s##_mb().at(Type(clone())); }                                \
+        void set_##_s(_st const & s) { _s##_mb().set(Type(clone()), s); }                                  \
     private:                                                                                               \
-        static matchable::MatchBox<_t::Type, std::vector<_s::Type>> & _s##_vect_mb()                       \
-            { static matchable::MatchBox<_t::Type, std::vector<_s::Type>> m; return m; }                   \
-        static std::vector<_s::Type> nil_##_s##_vect() { static std::vector<_s::Type> ns; return ns; }
+        static matchable::MatchBox<_t::Type, std::vector<_st>> & _s##_vect_mb()                            \
+            { static matchable::MatchBox<_t::Type, std::vector<_st>> mb; return mb; }                      \
+        static std::vector<_st> & nil_##_s##_vect() { static std::vector<_st> v; return v; }               \
+        static matchable::MatchBox<_t::Type, _st> & _s##_mb()                                              \
+            { static matchable::MatchBox<_t::Type, _st> mb; return mb; }                                   \
+        static _st & nil_##_s() { static _st s; return s; }
 
 
-/**
- * Usage: SPREADVECTOF_MATCHABLE(spread, type, variant...)
- *
- * Where: spread is: a type defined by MATCHABLE() or SPREAD*_MATCHABLE()
- */
-#define SPREADVECTOF_MATCHABLE(_s, _t, ...)                                                                \
+#define SPREADx1_MATCHABLE(_st0, _s0, _t, ...)                                                             \
     _matchable_create_type_begin(_t)                                                                       \
-    _spreadvectof_matchable_amend_type(_s, _t)                                                             \
+    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
     _matchable_create_type_end(_t)                                                                         \
     _matchable_declare_begin(_t)                                                                           \
-    _spreadvectof_matchable_amend_declaration(_s, _t)                                                      \
+    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define VARIANT_SPREADVARIANTVECT(_t, _v, _st, ...)                                                        \
-    static bool const VARIANT_SPREADVARIANTVECT_init_##_t##_##_v##_##_st =                                 \
-        [](std::vector<_st::Type> sv) { _t::_v::grab().set_##_st##_##vect(sv); return true; }              \
-            ({_mcv(_matchable_concat_variant, _st, ##__VA_ARGS__)});
+#define SPREADx2_MATCHABLE(_st0, _s0, _st1, _s1, _t, ...)                                                  \
+    _matchable_create_type_begin(_t)                                                                       \
+    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
+    _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
+    _matchable_create_type_end(_t)                                                                         \
+    _matchable_declare_begin(_t)                                                                           \
+    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
+    _spread_matchable_amend_declaration(_st1, _s1, _t)                                                     \
+    _matchable_declare_end(_t)                                                                             \
+    _matchable_define(_t)                                                                                  \
+    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
+
+
+#define SPREADx3_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _t, ...)                                                             \
+    _matchable_create_type_begin(_t)                                                                       \
+    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
+    _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
+    _spread_matchable_amend_type(_st2, _s2, _t)                                                            \
+    _matchable_create_type_end(_t)                                                                         \
+    _matchable_declare_begin(_t)                                                                           \
+    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
+    _spread_matchable_amend_declaration(_st1, _s1, _t)                                                     \
+    _spread_matchable_amend_declaration(_st2, _s2, _t)                                                     \
+    _matchable_declare_end(_t)                                                                             \
+    _matchable_define(_t)                                                                                  \
+    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
+
+
+#define SPREADx4_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _t, ...)                                                             \
+    _matchable_create_type_begin(_t)                                                                       \
+    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
+    _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
+    _spread_matchable_amend_type(_st2, _s2, _t)                                                            \
+    _spread_matchable_amend_type(_st3, _s3, _t)                                                            \
+    _matchable_create_type_end(_t)                                                                         \
+    _matchable_declare_begin(_t)                                                                           \
+    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
+    _spread_matchable_amend_declaration(_st1, _s1, _t)                                                     \
+    _spread_matchable_amend_declaration(_st2, _s2, _t)                                                     \
+    _spread_matchable_amend_declaration(_st3, _s3, _t)                                                     \
+    _matchable_declare_end(_t)                                                                             \
+    _matchable_define(_t)                                                                                  \
+    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
+
+
+#define SPREADx5_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _st4, _s4, _t, ...)                                                             \
+    _matchable_create_type_begin(_t)                                                                       \
+    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
+    _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
+    _spread_matchable_amend_type(_st2, _s2, _t)                                                            \
+    _spread_matchable_amend_type(_st3, _s3, _t)                                                            \
+    _spread_matchable_amend_type(_st4, _s4, _t)                                                            \
+    _matchable_create_type_end(_t)                                                                         \
+    _matchable_declare_begin(_t)                                                                           \
+    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
+    _spread_matchable_amend_declaration(_st1, _s1, _t)                                                     \
+    _spread_matchable_amend_declaration(_st2, _s2, _t)                                                     \
+    _spread_matchable_amend_declaration(_st3, _s3, _t)                                                     \
+    _spread_matchable_amend_declaration(_st4, _s4, _t)                                                     \
+    _matchable_declare_end(_t)                                                                             \
+    _matchable_define(_t)                                                                                  \
+    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
+
+
+#define SPREADx6_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _st4, _s4, _st5, _s5, _t, ...)                                                             \
+    _matchable_create_type_begin(_t)                                                                       \
+    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
+    _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
+    _spread_matchable_amend_type(_st2, _s2, _t)                                                            \
+    _spread_matchable_amend_type(_st3, _s3, _t)                                                            \
+    _spread_matchable_amend_type(_st4, _s4, _t)                                                            \
+    _spread_matchable_amend_type(_st5, _s5, _t)                                                            \
+    _matchable_create_type_end(_t)                                                                         \
+    _matchable_declare_begin(_t)                                                                           \
+    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
+    _spread_matchable_amend_declaration(_st1, _s1, _t)                                                     \
+    _spread_matchable_amend_declaration(_st2, _s2, _t)                                                     \
+    _spread_matchable_amend_declaration(_st3, _s3, _t)                                                     \
+    _spread_matchable_amend_declaration(_st4, _s4, _t)                                                     \
+    _spread_matchable_amend_declaration(_st5, _s5, _t)                                                     \
+    _matchable_declare_end(_t)                                                                             \
+    _matchable_define(_t)                                                                                  \
+    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
+
+
+#define SPREADx7_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _st4, _s4, _st5, _s5,               \
+                           _st6, _s6, _t, ...)                                                             \
+    _matchable_create_type_begin(_t)                                                                       \
+    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
+    _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
+    _spread_matchable_amend_type(_st2, _s2, _t)                                                            \
+    _spread_matchable_amend_type(_st3, _s3, _t)                                                            \
+    _spread_matchable_amend_type(_st4, _s4, _t)                                                            \
+    _spread_matchable_amend_type(_st5, _s5, _t)                                                            \
+    _spread_matchable_amend_type(_st6, _s6, _t)                                                            \
+    _matchable_create_type_end(_t)                                                                         \
+    _matchable_declare_begin(_t)                                                                           \
+    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
+    _spread_matchable_amend_declaration(_st1, _s1, _t)                                                     \
+    _spread_matchable_amend_declaration(_st2, _s2, _t)                                                     \
+    _spread_matchable_amend_declaration(_st3, _s3, _t)                                                     \
+    _spread_matchable_amend_declaration(_st4, _s4, _t)                                                     \
+    _spread_matchable_amend_declaration(_st5, _s5, _t)                                                     \
+    _spread_matchable_amend_declaration(_st6, _s6, _t)                                                     \
+    _matchable_declare_end(_t)                                                                             \
+    _matchable_define(_t)                                                                                  \
+    _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
+
+
+#define SET_SPREAD(_t, _v, _s, _sv)                                                                        \
+    static bool const SET_SPREAD_init_##_t##_##_v##_##_s =                                                 \
+        [](){_t::_v::grab().set_##_s(_sv); return true;}();
+
+
+#define SET_SPREAD_VECT(_t, _v, _s, ...)                                                                   \
+    static bool const SET_SPREAD_VECT_init_##_t##_##_v##_##_s =                                            \
+        [](decltype(_t::_v::grab().as_##_s##_vect()) sv)                                                   \
+            { _t::_v::grab().set_##_s##_##vect(sv); return true; }({__VA_ARGS__});
 
 
 /**

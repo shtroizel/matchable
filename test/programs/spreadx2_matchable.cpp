@@ -49,7 +49,9 @@ MATCHABLE(
     O_pl_n_pls_k_pr_
 )
 SPREADx2_MATCHABLE(
+    Stability::Type,
     Stability,
+    SpaceComplexity::Type,
     SpaceComplexity,
     SortingAlgorithm,
     BubbleSort,

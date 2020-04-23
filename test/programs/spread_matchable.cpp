@@ -42,14 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 MATCHABLE(Color, Black, Red)
+SPREADx1_MATCHABLE(Color::Type, color, Suit, Clubs, Diamonds, Hearts, Spades)
 
-// create new MATCHABLE called Suit with set_Color() and as_Color()
-SPREADx1_MATCHABLE(Color, Suit, Clubs, Diamonds, Hearts, Spades)
-
-// There are two syntaxes for this. The VARIANT_SPREADVARIANT() macro is used here for the black suits.
+// There are two syntaxes for this. The SET_SPREAD() macro is used here for the black suits.
 // To demonstrate the other syntax we use the run-time interface within main() to set the red suits.
-VARIANT_SPREADVARIANT(Suit, Clubs, Color, Black)
-VARIANT_SPREADVARIANT(Suit, Spades, Color, Black)
+SET_SPREAD(Suit, Clubs, color, Color::Black::grab())
+SET_SPREAD(Suit, Spades, color, Color::Black::grab())
 
 MATCHABLE(Rank, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace)
 
@@ -92,8 +90,8 @@ int main()
     test_ok ok;
 
     // accomplishes the same as SPREADVARIANT_VARIANTS() above, but at run-time...
-    Suit::Diamonds::grab().set_Color(Color::Red::grab());
-    Suit::Hearts::grab().set_Color(Color::Red::grab());
+    Suit::Diamonds::grab().set_color(Color::Red::grab());
+    Suit::Hearts::grab().set_color(Color::Red::grab());
 
     auto cards = deal();
     int black_count{0};
@@ -102,14 +100,14 @@ int main()
     {
         std::cout << card.rank << " of " << card.suit << std::endl;
 
-        if (card.suit.as_Color() == Color::Black::grab())
+        if (card.suit.as_color() == Color::Black::grab())
             ++black_count;
 
         card.suit.match({
-            { Suit::Clubs::grab(),    [&](){ TEST_EQ(ok, card.suit.as_Color(), Color::Black::grab()); } },
-            { Suit::Diamonds::grab(), [&](){ TEST_EQ(ok, card.suit.as_Color(), Color::Red::grab()); } },
-            { Suit::Hearts::grab(),   [&](){ TEST_EQ(ok, card.suit.as_Color(), Color::Red::grab()); } },
-            { Suit::Spades::grab(),   [&](){ TEST_EQ(ok, card.suit.as_Color(), Color::Black::grab()); } },
+            { Suit::Clubs::grab(),    [&](){ TEST_EQ(ok, card.suit.as_color(), Color::Black::grab()); } },
+            { Suit::Diamonds::grab(), [&](){ TEST_EQ(ok, card.suit.as_color(), Color::Red::grab()); } },
+            { Suit::Hearts::grab(),   [&](){ TEST_EQ(ok, card.suit.as_color(), Color::Red::grab()); } },
+            { Suit::Spades::grab(),   [&](){ TEST_EQ(ok, card.suit.as_color(), Color::Black::grab()); } },
             { Suit::nil,              [&](){ TEST_FAIL(ok); } }
         });
     }

@@ -88,6 +88,7 @@ int main()
 }
 
 ```
+
 # Macro-API<a name="macro_api"></a>
 ## Macros for creating new types
 #### MATCHABLE(type, variant...)
@@ -95,44 +96,39 @@ Params:
 * **type** The new "matchable" to be created<br/>
 * **variant...** 0..108 comma separated variants of the new matchable type
 
-#### SPREADx1_MATCHABLE(spread, type, variant...)
+#### SPREADx1_MATCHABLE(spread_type, spread_name, type, variant...)
+Same as MATCHABLE(), but injects a property called **spread_name** of type **spread_type**<br/>
 Params:
-* **spread** Existing matchable type (must be at least forward declared)<br/>
-* **type** The new "matchable" to be created<br/>
-* **variant...** 0..108 comma separated variants of the new matchable type<br/>
-Same as MATCHABLE(), but with the added ability to have a setter and accessor created for some matchable
-type "spread".<br/>
+* **spread_type** type of injected property<br/>
+* **spread_name** name of injected property<br/>
+* **type** name of the new "matchable" to be created<br/>
+* **variant...** 0..108 comma separated variants of the new matchable<br/>
+<br/>
+The property is available both as a single value and as a vector with:<br/>
 
-Injects:
-```
-void set_`spread`(`spread`::Type)
-`spread`::Type as_`spread`() const
-```
-as member functions of the new type.<br/>
-Example: test/programs/spread_matchable.cpp
+**spread_type** const & as_**spread_name**()<br/>
+std::vector<**spread_type**> const & as_**spread_name**_vect()<br/>
 
-#### SPREADx2_MATCHABLE(spread0, spread1, type, variant...)
-Similar to SPREADx1_MATCHABLE(), but with ability to specify 2 spread types<br/>
-Example: test/programs/spread2x_matchable.cpp
+void set_**spread_name**(**spread_type** const &)<br/>
+void set_**spread_name**_vect(std::vector<**spread_type**> const &)<br/>
 
-#### SPREADx3_MATCHABLE(spread0, spread1, spread2, type, variant...)
-Similar to SPREADx1_MATCHABLE(), but with ability to specify 3 spread types<br/>
+
+Examples:<br>
+test/programs/cards.cpp<br/>
+test/programs/matchbox.cpp<br/>
+test/programs/sorting.cpp<br/>
+
+#### SPREADx*_MATCHABLE()
+Similar to SPREADx1_MATCHABLE(), the following macros exist for injecting multiple properties when creating matchables.<br/>
+
+SPREADx2_MATCHABLE()<br/>
+SPREADx3_MATCHABLE()<br/>
+SPREADx4_MATCHABLE()<br/>
+SPREADx5_MATCHABLE()<br/>
+SPREADx6_MATCHABLE()<br/>
+SPREADx7_MATCHABLE()<br/>
+
 Example: test/programs/relationships.cpp
-
-#### SPREADx4_MATCHABLE(spread0, spread1, spread2, spread3, type, variant...)
-Similar to SPREADx1_MATCHABLE(), but with ability to specify 4 spread types<br/>
-Example: test/programs/relationships.cpp
-
-#### SPREADVECTOF_MATCHABLE(spread, type, variant...)
-Similar to SPREADx1_MATCHABLE(), but the injected functions work on vectors of the given **spread**.
-
-Injects:
-```
-void set_`spread`_vect(std::vector<`spread`::Type>)
-std::vector<`spread`::Type> as_`spread`_vect() const
-```
-as member functions of the new type.<br/>
-Example: test/programs/spreadvectof_matchable.cpp
 
 ## Going beyond 108 variants
 Although a matchable is initially defined with up to 108 variants, it may grow as needed to achieve variant
@@ -144,25 +140,27 @@ Example: test/programs/max_variants.cpp
 
 ## Macros for setting spreads at link-time
 
-#### VARIANT_SPREADVARIANT(type, variant, spread_type, spread_variant)
+#### SET_SPREAD(type, variant, spread_name, spread_value)
 Params:
-* **type** A matchable type with spread, **spread_type**.
-* **variant** A variant of **type** to have its **spread_type** set to **spread_variant**
-* **spread_type** A spread type available to **type**.
-* **spread_variant** A variant of **spread_type** as the new value to be set
+* **type** A matchable type
+* **variant** A variant of **type**
+* **spread_name** A spread available to **type**.
+* **spread_value** The new value to be set
 
-Call **type**::**variant**::grab().set_**spread_type**(**spread_type**::**spread_variant**::grab()) at link-time.<br/>
-Example: test/programs/spread_matchable.cpp
+Calls **type**::**variant**::grab().set_**spread_name**(**spread_value**) at link-time.<br/>
+Examples:<br/>
+test/programs/cards.cpp<br/>
+test/programs/relationships.cpp<br/>
 
-#### VARIANT_SPREADVARIANTVECT(type, variant, spread_type, spread_variant...)
+#### SET_SPREAD_VECT(type, variant, spread_name, spread_values...)
 Params:
-* **type** A matchable type with vector of **spread_type**
-* **variant** A variant of **type** to have its vector of **spread_type** set
-* **spread_type** A matchable type available to **type** as a vector.
-* **spread_variant..** up to 108 variants of **spread_type** forming the vector (the new value to be set)
+* **type** A matchable type
+* **variant** A variant of **type**
+* **spread_name** A spread available to **type**
+* **spread_values...** The new values to be set
 
-Call **type**::**variant**::grab().set_**spread_type**_vect() with a vector formed by the given **spread_variants...** of **spread_type** at link-time.<br/>
-Example: test/programs/spreadvectof_matchable.cpp<br/>
+Calls **type**::**variant**::grab().set_**spread_name**_vect() with a vector formed by the given **spread_values...**<br/>
+Example: test/programs/relationships.cpp<br/>
 
 ## Run-time macros
 

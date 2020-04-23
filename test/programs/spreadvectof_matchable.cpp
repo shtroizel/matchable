@@ -40,36 +40,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 MATCHABLE(Day, Sun, Mon, Tue, Wed, Thu, Fri, Sat)
 
-// create new MATCHABLE called Days with set_Day_vect() and as_Day_vect()
-SPREADVECTOF_MATCHABLE(Day, Days, Weekdays, Weekend)
+SPREADx1_MATCHABLE(Day::Type, day, Days, Weekdays, Weekend)
 
-// set a Days variant's vector of Day...
-// Note there are two syntaxes for this. The VARIANT_SPREADVARIANTVECT macro is used here for Weekdays.
+// Note there are two syntaxes for this. The SET_SPREAD_VECT() macro is used here for Weekdays.
 // To demonstrate the other syntax we use the run-time interface within main() to set the Days::Weekend
-// variant. Note that the macro syntax here is link-time.
-VARIANT_SPREADVARIANTVECT(Days, Weekdays, Day, Mon, Tue, Wed, Thu, Fri)
+// variant.
+SET_SPREAD_VECT(
+    Days,
+    Weekdays,
+    day,
+    Day::Mon::grab(),
+    Day::Tue::grab(),
+    Day::Wed::grab(),
+    Day::Thu::grab(),
+    Day::Fri::grab()
+)
 
 int main()
 {
     test_ok ok;
 
     // accomplishes the same as VARIANT_SPREADVARIANTVECT() above, but at run-time...
-    Days::Weekend::grab().set_Day_vect({Day::Sat::grab(), Day::Sun::grab()});
+    Days::Weekend::grab().set_day_vect({Day::Sat::grab(), Day::Sun::grab()});
 
-    for (auto days : Days::variants())
+    for (auto days : Days::variants_by_index())
     {
         std::cout << days << ": ";
-        for (auto d : days.as_Day_vect())
+        for (auto d : days.as_day_vect())
             std::cout << d << " ";
         std::cout << std::endl;
     }
 
-    TEST_EQ(ok, Days::Weekend::grab().as_Day_vect().size(), static_cast<size_t>(2));
-    TEST_EQ(ok, Days::Weekdays::grab().as_Day_vect().size(), static_cast<size_t>(5));
+    TEST_EQ(ok, Days::Weekend::grab().as_day_vect().size(), static_cast<size_t>(2));
+    TEST_EQ(ok, Days::Weekdays::grab().as_day_vect().size(), static_cast<size_t>(5));
 
     {
         std::vector<Day::Type> const TRUTH{Day::Sat::grab(), Day::Sun::grab()};
-        if (Days::Weekend::grab().as_Day_vect() != TRUTH)
+        if (Days::Weekend::grab().as_day_vect() != TRUTH)
             TEST_FAIL(ok);
     }
     {
@@ -80,7 +87,7 @@ int main()
             Day::Thu::grab(),
             Day::Fri::grab(),
         };
-        if (Days::Weekdays::grab().as_Day_vect() != TRUTH)
+        if (Days::Weekdays::grab().as_day_vect() != TRUTH)
             TEST_FAIL(ok);
     }
 
