@@ -148,6 +148,8 @@ int main()
     flags.set(TimeUnit::Seconds::grab());
     more_flags.set(TimeUnit::Hours::grab());
     TEST_EQ(ok, flags, more_flags);
+    more_flags.clear();
+    TEST_EQ(ok, more_flags, TimeUnit::Flags{});
 
     // match() by its self - not used within switch or loop...
     int magic{107};
