@@ -47,31 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace matchable
 {
-    /**
-     * Associative array of Matchable variants to T.
-     *
-     * Example: // MatchBoxUsage.cpp
-     *          #include <iostream>
-     *          #include "matchable.h"
-     *
-     *          MATCHABLE(ReturnCode, Zero, MinusOne, MinusTwo)
-     *          MATCHABLE(ReturnCodeAsValue, Success, InvalidInput, CalculationFailed)
-     *
-     *          MatchBox<ReturnCode::Type, ReturnCodeAsValue::Type> code_value_matcher{
-     *              { ReturnCode::Zero::grab(), ReturnCodeAsValue::Success::grab() },
-     *              { ReturnCode::MinusOne::grab(), ReturnCodeAsValue::InvalidInput::grab() },
-     *              { ReturnCode::MinusTwo::grab(), ReturnCodeAsValue::CalculationFailed::grab() }
-     *          };
-     *
-     *          int main()
-     *          {
-     *              for (auto const & return_code : ReturnCode::variants())
-     *                  std::cout << "code: " << return_code << ", as value: "
-     *                                        << code_value_matcher.at(return_code) << std::endl;
-     *              return 0;
-     *          }
-     *
-     */
+    // Associative array of Matchable to T.
     template<typename M, typename T>
     class MatchBox
     {
@@ -193,11 +169,9 @@ namespace matchable
     }
 
 
-    /**
-     * MatchBox stores a bool for each element anyway for tracking explicit setting, so MatchBox<M, bool>
-     * would yield 2 bools per element. To avoid the extra bool use this MatchBox<M, void> specialization
-     * instead.
-     */
+    // MatchBox stores a bool for each element anyway for tracking explicit setting, so MatchBox<M, bool>
+    // would yield 2 bools per element. To avoid the extra bool use this MatchBox<M, void> specialization
+    // instead.
     template<typename M>
     class MatchBox<M, void>
     {
@@ -333,13 +307,6 @@ namespace matchable
     };
 
 } // namespace matchable
-
-
-
-// next come the macros...
-//
-// note that compiling backslashes is slow!
-// code is formatted to minimize backslashes while maintaining some semblance of readability
 
 
 #define _matchable_declare_begin(_t)                                                                       \
@@ -851,10 +818,7 @@ namespace matchable
             { _t::_v::grab().set_##_s##_##vect(sv); return true; }({__VA_ARGS__});
 
 
-/**
- * Remove variants for the current scope (when the scope exits the removed variants are restored).
- * Usage: UNMATCHABLE(type, variant...)
- */
+// Remove variants for the current scope (when the scope exits the removed variants are restored).
 #define UNMATCHABLE(_t, ...)                                                                               \
     matchable::Unmatchable<_t::Type> unm_##_t{{_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)}}
 
@@ -885,17 +849,14 @@ namespace matchable
             {{_mcv(_matchable_concat_variant, _n0::_n1::_n2::_n3::_n4::_t, ##__VA_ARGS__)}}
 
 
-
-/**
- * Test if a given matchable instance is contained within a given list of variants
- */
+// Test if a given matchable instance is contained within a given list of variants
 #define MATCHABLE_INSTANCE_IN(_t, _i, ...)                                                                 \
     [](_t::Type const & t, std::vector<_t::Type> const & v)                                                \
         { return std::find(v.begin(), v.end(), t) != v.end(); }                                            \
             (_i, {_mcv(_matchable_concat_variant, _t, ##__VA_ARGS__)})
 
 
-
+// Add variants to existing matchable
 #define MATCHABLE_GROW(_t, ...) _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
