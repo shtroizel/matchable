@@ -50,9 +50,9 @@ MATCHABLE(
 )
 SPREADx2_MATCHABLE(
     Stability::Type,
-    Stability,
+    stability,
     SpaceComplexity::Type,
-    SpaceComplexity,
+    space_complexity,
     SortingAlgorithm,
     BubbleSort,
     BucketSort,
@@ -74,31 +74,31 @@ int main()
 {
     test_ok ok;
 
-    SortingAlgorithm::BubbleSort::grab().set_Stability(Stability::Stable::grab());
-    SortingAlgorithm::BucketSort::grab().set_Stability(Stability::Stable::grab());
-    SortingAlgorithm::CountingSort::grab().set_Stability(Stability::Stable::grab());
-    SortingAlgorithm::CubeSort::grab().set_Stability(Stability::Stable::grab());
-    SortingAlgorithm::HeapSort::grab().set_Stability(Stability::Unstable::grab());
-    SortingAlgorithm::InsertionSort::grab().set_Stability(Stability::Stable::grab());
-    SortingAlgorithm::MergeSort::grab().set_Stability(Stability::Stable::grab());
-    SortingAlgorithm::RadixSort::grab().set_Stability(Stability::Stable::grab());
-    SortingAlgorithm::SelectionSort::grab().set_Stability(Stability::Unstable::grab());
-    SortingAlgorithm::ShellSort::grab().set_Stability(Stability::Unstable::grab());
-    SortingAlgorithm::TimSort::grab().set_Stability(Stability::Stable::grab());
-    SortingAlgorithm::QuickSort::grab().set_Stability(Stability::Unstable::grab());
+    SortingAlgorithm::BubbleSort::grab().set_stability(Stability::Stable::grab());
+    SortingAlgorithm::BucketSort::grab().set_stability(Stability::Stable::grab());
+    SortingAlgorithm::CountingSort::grab().set_stability(Stability::Stable::grab());
+    SortingAlgorithm::CubeSort::grab().set_stability(Stability::Stable::grab());
+    SortingAlgorithm::HeapSort::grab().set_stability(Stability::Unstable::grab());
+    SortingAlgorithm::InsertionSort::grab().set_stability(Stability::Stable::grab());
+    SortingAlgorithm::MergeSort::grab().set_stability(Stability::Stable::grab());
+    SortingAlgorithm::RadixSort::grab().set_stability(Stability::Stable::grab());
+    SortingAlgorithm::SelectionSort::grab().set_stability(Stability::Unstable::grab());
+    SortingAlgorithm::ShellSort::grab().set_stability(Stability::Unstable::grab());
+    SortingAlgorithm::TimSort::grab().set_stability(Stability::Stable::grab());
+    SortingAlgorithm::QuickSort::grab().set_stability(Stability::Unstable::grab());
 
-    SortingAlgorithm::BubbleSort::grab().set_SpaceComplexity(SpaceComplexity::O_pl_1_pr_::grab());
-    SortingAlgorithm::BucketSort::grab().set_SpaceComplexity(SpaceComplexity::O_pl_n_pr_::grab());
-    SortingAlgorithm::CountingSort::grab().set_SpaceComplexity(SpaceComplexity::O_pl_k_pr_::grab());
-    SortingAlgorithm::CubeSort::grab().set_SpaceComplexity(SpaceComplexity::O_pl_n_pr_::grab());
-    SortingAlgorithm::HeapSort::grab().set_SpaceComplexity(SpaceComplexity::O_pl_1_pr_::grab());
-    SortingAlgorithm::InsertionSort::grab().set_SpaceComplexity(SpaceComplexity::O_pl_1_pr_::grab());
-    SortingAlgorithm::MergeSort::grab().set_SpaceComplexity(SpaceComplexity::O_pl_n_pr_::grab());
-    SortingAlgorithm::RadixSort::grab().set_SpaceComplexity(SpaceComplexity::O_pl_n_pls_k_pr_::grab());
-    SortingAlgorithm::SelectionSort::grab().set_SpaceComplexity(SpaceComplexity::O_pl_1_pr_::grab());
-    SortingAlgorithm::ShellSort::grab().set_SpaceComplexity(SpaceComplexity::O_pl_1_pr_::grab());
-    SortingAlgorithm::TimSort::grab().set_SpaceComplexity(SpaceComplexity::O_pl_n_pr_::grab());
-    SortingAlgorithm::QuickSort::grab().set_SpaceComplexity(SpaceComplexity::O_pl_log_pl_n_pr__pr_::grab());
+    SortingAlgorithm::BubbleSort::grab().set_space_complexity(SpaceComplexity::O_pl_1_pr_::grab());
+    SortingAlgorithm::BucketSort::grab().set_space_complexity(SpaceComplexity::O_pl_n_pr_::grab());
+    SortingAlgorithm::CountingSort::grab().set_space_complexity(SpaceComplexity::O_pl_k_pr_::grab());
+    SortingAlgorithm::CubeSort::grab().set_space_complexity(SpaceComplexity::O_pl_n_pr_::grab());
+    SortingAlgorithm::HeapSort::grab().set_space_complexity(SpaceComplexity::O_pl_1_pr_::grab());
+    SortingAlgorithm::InsertionSort::grab().set_space_complexity(SpaceComplexity::O_pl_1_pr_::grab());
+    SortingAlgorithm::MergeSort::grab().set_space_complexity(SpaceComplexity::O_pl_n_pr_::grab());
+    SortingAlgorithm::RadixSort::grab().set_space_complexity(SpaceComplexity::O_pl_n_pls_k_pr_::grab());
+    SortingAlgorithm::SelectionSort::grab().set_space_complexity(SpaceComplexity::O_pl_1_pr_::grab());
+    SortingAlgorithm::ShellSort::grab().set_space_complexity(SpaceComplexity::O_pl_1_pr_::grab());
+    SortingAlgorithm::TimSort::grab().set_space_complexity(SpaceComplexity::O_pl_n_pr_::grab());
+    SortingAlgorithm::QuickSort::grab().set_space_complexity(SpaceComplexity::O_pl_log_pl_n_pr__pr_::grab());
 
     std::vector<SortingAlgorithm::Type> stable_algorithms_by_space_complexity{
         SortingAlgorithm::variants().size()
@@ -107,7 +107,7 @@ int main()
         SortingAlgorithm::variants().begin(),
         SortingAlgorithm::variants().end(),
         stable_algorithms_by_space_complexity.begin(),
-        [](auto sa) { return sa.as_Stability() == Stability::Stable::grab(); }
+        [](auto sa) { return sa.as_stability() == Stability::Stable::grab(); }
     );
     stable_algorithms_by_space_complexity.resize(
         std::distance(stable_algorithms_by_space_complexity.begin(), it)
@@ -115,12 +115,12 @@ int main()
     std::stable_sort(
         stable_algorithms_by_space_complexity.begin(),
         stable_algorithms_by_space_complexity.end(),
-        [](auto a, auto b) { return a.as_SpaceComplexity() < b.as_SpaceComplexity(); }
+        [](auto a, auto b) { return a.as_space_complexity() < b.as_space_complexity(); }
     );
 
     std::cout << "Stable sorting algorithms: " << std::endl;
     for (auto sa : stable_algorithms_by_space_complexity)
-        std::cout << "    " << sa << " has space complexity of: " << sa.as_SpaceComplexity() << std::endl;
+        std::cout << "    " << sa << " has space complexity of: " << sa.as_space_complexity() << std::endl;
 
     std::vector<SortingAlgorithm::Type> truth{
         SortingAlgorithm::BubbleSort::grab(),

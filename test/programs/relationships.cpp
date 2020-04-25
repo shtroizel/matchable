@@ -35,22 +35,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "matchable.h"
 
 
-MATCHABLE(DayOfWeekOccurence, first, second, third, fourth, last)
+MATCHABLE(DayOfWeekOccurrence, first, second, third, fourth, last)
 
 MATCHABLE(DayOfWeek, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday);
 
-SPREADx1_MATCHABLE(DayOfWeek::Type, DayOfWeek, Days, Weekdays, Weekend)
+SPREADx1_MATCHABLE(DayOfWeek::Type, day_of_week, Days, Weekdays, Weekend)
 SET_SPREAD_VECT(
     Days,
     Weekdays,
-    DayOfWeek,
+    day_of_week,
     DayOfWeek::Monday::grab(),
     DayOfWeek::Tuesday::grab(),
     DayOfWeek::Wednesday::grab(),
     DayOfWeek::Thursday::grab(),
     DayOfWeek::Friday::grab()
 )
-SET_SPREAD_VECT(Days, Weekend, DayOfWeek, DayOfWeek::Sunday::grab(), DayOfWeek::Saturday::grab())
+SET_SPREAD_VECT(Days, Weekend, day_of_week, DayOfWeek::Sunday::grab(), DayOfWeek::Saturday::grab())
 
 MATCHABLE(
     DayOfMonth,
@@ -78,13 +78,13 @@ MATCHABLE(
 
 SPREADx4_MATCHABLE(
     DayOfWeek::Type,
-    DayOfWeek,
-    DayOfWeekOccurence::Type,
-    DayOfWeekOccurence,
+    day_of_week,
+    DayOfWeekOccurrence::Type,
+    occurrence,
     DayOfMonth::Type,
-    DayOfMonth,
+    day_of_month,
     Month::Type,
-    Month,
+    month,
     Holiday,
     Martin_spc_Luther_spc_King_spc_Jr_spc_Day,
     Lincoln_spc_Washington_spc_Day,
@@ -99,49 +99,49 @@ SPREADx4_MATCHABLE(
     Veterans_spc_Day,
     Christmas_spc_Day
 )
-SET_SPREAD(Holiday, Mothers_spc_Day, DayOfWeek, DayOfWeek::Sunday::grab())
-SET_SPREAD(Holiday, Mothers_spc_Day, DayOfWeekOccurence, DayOfWeekOccurence::second::grab())
-SET_SPREAD(Holiday, Mothers_spc_Day, Month, Month::May::grab())
+SET_SPREAD(Holiday, Mothers_spc_Day, day_of_week, DayOfWeek::Sunday::grab())
+SET_SPREAD(Holiday, Mothers_spc_Day, occurrence, DayOfWeekOccurrence::second::grab())
+SET_SPREAD(Holiday, Mothers_spc_Day, month, Month::May::grab())
 
-SET_SPREAD(Holiday, Fathers_spc_Day, DayOfWeek, DayOfWeek::Sunday::grab())
-SET_SPREAD(Holiday, Fathers_spc_Day, DayOfWeekOccurence, DayOfWeekOccurence::third::grab())
-SET_SPREAD(Holiday, Fathers_spc_Day, Month, Month::June::grab())
+SET_SPREAD(Holiday, Fathers_spc_Day, day_of_week, DayOfWeek::Sunday::grab())
+SET_SPREAD(Holiday, Fathers_spc_Day, occurrence, DayOfWeekOccurrence::third::grab())
+SET_SPREAD(Holiday, Fathers_spc_Day, month, Month::June::grab())
 
-SET_SPREAD(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, DayOfWeek, DayOfWeek::Monday::grab())
-SET_SPREAD(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, DayOfWeekOccurence, DayOfWeekOccurence::third::grab())
-SET_SPREAD(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, Month, Month::January::grab())
+SET_SPREAD(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+SET_SPREAD(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, occurrence, DayOfWeekOccurrence::third::grab())
+SET_SPREAD(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, month, Month::January::grab())
 
-SET_SPREAD(Holiday, Lincoln_spc_Washington_spc_Day, DayOfWeek, DayOfWeek::Monday::grab())
-SET_SPREAD(Holiday, Lincoln_spc_Washington_spc_Day, DayOfWeekOccurence, DayOfWeekOccurence::third::grab())
-SET_SPREAD(Holiday, Lincoln_spc_Washington_spc_Day, Month, Month::Februrary::grab())
+SET_SPREAD(Holiday, Lincoln_spc_Washington_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+SET_SPREAD(Holiday, Lincoln_spc_Washington_spc_Day, occurrence, DayOfWeekOccurrence::third::grab())
+SET_SPREAD(Holiday, Lincoln_spc_Washington_spc_Day, month, Month::Februrary::grab())
 
-SET_SPREAD(Holiday, Memorial_spc_Day, DayOfWeek, DayOfWeek::Monday::grab())
-SET_SPREAD(Holiday, Memorial_spc_Day, DayOfWeekOccurence, DayOfWeekOccurence::last::grab())
-SET_SPREAD(Holiday, Memorial_spc_Day, Month, Month::May::grab())
+SET_SPREAD(Holiday, Memorial_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+SET_SPREAD(Holiday, Memorial_spc_Day, occurrence, DayOfWeekOccurrence::last::grab())
+SET_SPREAD(Holiday, Memorial_spc_Day, month, Month::May::grab())
 
-SET_SPREAD(Holiday, Labor_spc_Day, DayOfWeek, DayOfWeek::Monday::grab())
-SET_SPREAD(Holiday, Labor_spc_Day, DayOfWeekOccurence, DayOfWeekOccurence::first::grab())
-SET_SPREAD(Holiday, Labor_spc_Day, Month, Month::September::grab())
+SET_SPREAD(Holiday, Labor_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+SET_SPREAD(Holiday, Labor_spc_Day, occurrence, DayOfWeekOccurrence::first::grab())
+SET_SPREAD(Holiday, Labor_spc_Day, month, Month::September::grab())
 
-SET_SPREAD(Holiday, Columbus_spc_Day, DayOfWeek, DayOfWeek::Monday::grab())
-SET_SPREAD(Holiday, Columbus_spc_Day, DayOfWeekOccurence, DayOfWeekOccurence::second::grab())
-SET_SPREAD(Holiday, Columbus_spc_Day, Month, Month::October::grab())
+SET_SPREAD(Holiday, Columbus_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+SET_SPREAD(Holiday, Columbus_spc_Day, occurrence, DayOfWeekOccurrence::second::grab())
+SET_SPREAD(Holiday, Columbus_spc_Day, month, Month::October::grab())
 
-SET_SPREAD(Holiday, Thanksgiving_spc_Day, DayOfWeek, DayOfWeek::Thursday::grab())
-SET_SPREAD(Holiday, Thanksgiving_spc_Day, DayOfWeekOccurence, DayOfWeekOccurence::fourth::grab())
-SET_SPREAD(Holiday, Thanksgiving_spc_Day, Month, Month::November::grab())
+SET_SPREAD(Holiday, Thanksgiving_spc_Day, day_of_week, DayOfWeek::Thursday::grab())
+SET_SPREAD(Holiday, Thanksgiving_spc_Day, occurrence, DayOfWeekOccurrence::fourth::grab())
+SET_SPREAD(Holiday, Thanksgiving_spc_Day, month, Month::November::grab())
 
-SET_SPREAD(Holiday, New_spc_Years_spc_Day, DayOfMonth, DayOfMonth::esc_1st::grab())
-SET_SPREAD(Holiday, New_spc_Years_spc_Day, Month, Month::January::grab())
+SET_SPREAD(Holiday, New_spc_Years_spc_Day, day_of_month, DayOfMonth::esc_1st::grab())
+SET_SPREAD(Holiday, New_spc_Years_spc_Day, month, Month::January::grab())
 
-SET_SPREAD(Holiday, Independence_spc_Day, DayOfMonth, DayOfMonth::esc_4th::grab())
-SET_SPREAD(Holiday, Independence_spc_Day, Month, Month::July::grab())
+SET_SPREAD(Holiday, Independence_spc_Day, day_of_month, DayOfMonth::esc_4th::grab())
+SET_SPREAD(Holiday, Independence_spc_Day, month, Month::July::grab())
 
-SET_SPREAD(Holiday, Veterans_spc_Day, DayOfMonth, DayOfMonth::esc_11th::grab())
-SET_SPREAD(Holiday, Veterans_spc_Day, Month, Month::November::grab())
+SET_SPREAD(Holiday, Veterans_spc_Day, day_of_month, DayOfMonth::esc_11th::grab())
+SET_SPREAD(Holiday, Veterans_spc_Day, month, Month::November::grab())
 
-SET_SPREAD(Holiday, Christmas_spc_Day, DayOfMonth, DayOfMonth::esc_25th::grab())
-SET_SPREAD(Holiday, Christmas_spc_Day, Month, Month::December::grab())
+SET_SPREAD(Holiday, Christmas_spc_Day, day_of_month, DayOfMonth::esc_25th::grab())
+SET_SPREAD(Holiday, Christmas_spc_Day, month, Month::December::grab())
 
 
 
@@ -153,7 +153,7 @@ bool is_weekday_v0(DayOfWeek::Type day)
 
 bool is_weekday_v1(DayOfWeek::Type day)
 {
-    auto const & v = Days::Weekdays().grab().as_DayOfWeek_vect();
+    auto const & v = Days::Weekdays().grab().as_day_of_week_vect();
     return std::find(v.begin(), v.end(), day) != v.end();
 }
 
@@ -175,12 +175,12 @@ void print_holidays()
     std::cout << "***** print_holidays() *****" << std::endl;
     for (Holiday::Type h : Holiday::variants_by_string())
     {
-        if (h.as_DayOfWeekOccurence().is_nil())
-            std::cout << "    " << h << " is celebrated on " << h.as_Month()
-                      << " " << h.as_DayOfMonth() << std::endl;
+        if (h.as_occurrence().is_nil())
+            std::cout << "    " << h << " is celebrated on " << h.as_month()
+                      << " " << h.as_day_of_month() << std::endl;
         else
-            std::cout << "    " << h << " is celebrated on the " << h.as_DayOfWeekOccurence()
-                      << " " << h.as_DayOfWeek() << " of " << h.as_Month() << std::endl;
+            std::cout << "    " << h << " is celebrated on the " << h.as_occurrence()
+                      << " " << h.as_day_of_week() << " of " << h.as_month() << std::endl;
     }
     std::cout << std::endl;
 }

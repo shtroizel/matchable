@@ -55,7 +55,7 @@ MATCHABLE(
 )
 SPREADx1_MATCHABLE(
     AttackPastTense::Type,
-    AttackPastTense,
+    past_tense,
     Attack,
     covers,
     crushes,
@@ -67,15 +67,15 @@ SPREADx1_MATCHABLE(
     smashes,
     vaporizes
 )
-SET_SPREAD(Attack, covers, AttackPastTense, AttackPastTense::covered::grab())
-SET_SPREAD(Attack, crushes, AttackPastTense, AttackPastTense::crushed::grab())
-SET_SPREAD(Attack, cuts, AttackPastTense, AttackPastTense::cut::grab())
-SET_SPREAD(Attack, decapitates, AttackPastTense, AttackPastTense::decapitated::grab())
-SET_SPREAD(Attack, disproves, AttackPastTense, AttackPastTense::disproved::grab())
-SET_SPREAD(Attack, eats, AttackPastTense, AttackPastTense::ate::grab())
-SET_SPREAD(Attack, poisons, AttackPastTense, AttackPastTense::poisoned::grab())
-SET_SPREAD(Attack, smashes, AttackPastTense, AttackPastTense::smashed::grab())
-SET_SPREAD(Attack, vaporizes, AttackPastTense, AttackPastTense::vaporized::grab())
+SET_SPREAD(Attack, covers, past_tense, AttackPastTense::covered::grab())
+SET_SPREAD(Attack, crushes, past_tense, AttackPastTense::crushed::grab())
+SET_SPREAD(Attack, cuts, past_tense, AttackPastTense::cut::grab())
+SET_SPREAD(Attack, decapitates, past_tense, AttackPastTense::decapitated::grab())
+SET_SPREAD(Attack, disproves, past_tense, AttackPastTense::disproved::grab())
+SET_SPREAD(Attack, eats, past_tense, AttackPastTense::ate::grab())
+SET_SPREAD(Attack, poisons, past_tense, AttackPastTense::poisoned::grab())
+SET_SPREAD(Attack, smashes, past_tense, AttackPastTense::smashed::grab())
+SET_SPREAD(Attack, vaporizes, past_tense, AttackPastTense::vaporized::grab())
 
 static matchable::MatchBox<Actor::Type, Attack::Type> const rock_attack({
     { Actor::Lizard::grab(), Attack::crushes::grab() },
@@ -150,9 +150,9 @@ Actor::Type compare_actors(Actor::Type actor_0, Actor::Type actor_1, compare_act
     {
         std::cout << "comparing " << actor_0 << " with " << actor_1 << ":\n    ";
         if (!attack_0.is_nil())
-            std::cout << actor_0 << " " << attack_0.as_AttackPastTense() << " " << actor_1 << std::endl;
+            std::cout << actor_0 << " " << attack_0.as_past_tense() << " " << actor_1 << std::endl;
         else if (!attack_1.is_nil())
-            std::cout << actor_1 << " " << attack_1.as_AttackPastTense() << " " << actor_0 << std::endl;
+            std::cout << actor_1 << " " << attack_1.as_past_tense() << " " << actor_0 << std::endl;
         else
             std::cout << "tie!" << std::endl;
         std::cout << std::endl;
