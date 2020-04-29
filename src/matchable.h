@@ -179,6 +179,7 @@ namespace matchable
         using match_t = M;
 
         MatchBox();
+        MatchBox(std::initializer_list<M> init_list);
         void clear();
         void set(M const &);
         void unset(M const &);
@@ -198,12 +199,21 @@ namespace matchable
         std::vector<bool> init_flags;
     };
 
+
     template<typename M>
     MatchBox<M, void>::MatchBox() : nil_init_flag{false}
     {
         init_flags.reserve(M::variants().size());
         for (size_t i = 0; i < M::variants().size(); ++i)
             init_flags.push_back(false);
+    }
+
+
+    template<typename M>
+    MatchBox<M, void>::MatchBox(std::initializer_list<M> init_list) : MatchBox()
+    {
+        for (auto const & m : init_list)
+            set(m);
     }
 
 
