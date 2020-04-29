@@ -711,7 +711,7 @@ namespace matchable
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define SPREADx3_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _t, ...)                                                             \
+#define SPREADx3_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _t, ...)                                       \
     _matchable_create_type_begin(_t)                                                                       \
     _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
     _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
@@ -726,7 +726,7 @@ namespace matchable
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define SPREADx4_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _t, ...)                                                             \
+#define SPREADx4_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _t, ...)                            \
     _matchable_create_type_begin(_t)                                                                       \
     _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
     _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
@@ -743,7 +743,7 @@ namespace matchable
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define SPREADx5_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _st4, _s4, _t, ...)                                                             \
+#define SPREADx5_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _st4, _s4, _t, ...)                 \
     _matchable_create_type_begin(_t)                                                                       \
     _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
     _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
