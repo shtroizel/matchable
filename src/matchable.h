@@ -162,7 +162,7 @@ namespace matchable
     std::vector<M> MatchBox<M, T>::currently_set() const
     {
         std::vector<M> ret;
-        for (auto const & m : M::variants())
+        for (auto const & m : M::variants_by_index())
             if (is_set(m))
                 ret.push_back(m);
         return ret;
