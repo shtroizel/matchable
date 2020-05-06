@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace matchable
 {
-    // Associative array of Matchable to T.
+    // Associative array for matchables
     template<typename M, typename T>
     class MatchBox
     {
@@ -322,11 +322,11 @@ namespace matchable
 #define _matchable_declare_begin(_t)                                                                       \
     namespace _t                                                                                           \
     {                                                                                                      \
-        using Type = Matchable<class I##_t>;                                                               \
+        using Type = MatchableType<class I##_t>;                                                           \
         class I##_t                                                                                        \
         {                                                                                                  \
-            friend class Matchable<I##_t>;                                                                 \
-            friend class ::matchable::Unmatchable<Matchable<I##_t>>;                                       \
+            friend class MatchableType<I##_t>;                                                             \
+            friend class ::matchable::Unmatchable<MatchableType<I##_t>>;                                   \
         public:                                                                                            \
             I##_t() = default;                                                                             \
             virtual ~I##_t() = default;                                                                    \
@@ -353,25 +353,25 @@ namespace matchable
     namespace _t                                                                                           \
     {                                                                                                      \
         template<typename T>                                                                               \
-        class Matchable                                                                                    \
+        class MatchableType                                                                                \
         {                                                                                                  \
         public:                                                                                            \
             using interface_type = T;                                                                      \
-            using MatchParam = ::matchable::MatchBox<Matchable, std::function<void()>>;                    \
+            using MatchParam = ::matchable::MatchBox<MatchableType, std::function<void()>>;                \
             using MatchParamWithFlowControl =                                                              \
-                    ::matchable::MatchBox<Matchable, std::function<void(matchable::FlowControl &)>>;       \
-            Matchable() = default;                                                                         \
-            ~Matchable() = default;                                                                        \
-            Matchable(std::shared_ptr<T> m) : t{m} {}                                                      \
-            Matchable(Matchable const & o) : t{nullptr == o.t ? nullptr : o.t->clone()} {}                 \
-            Matchable(Matchable &&) = default;                                                             \
-            Matchable & operator=(Matchable const & other)                                                 \
+                    ::matchable::MatchBox<MatchableType, std::function<void(matchable::FlowControl &)>>;   \
+            MatchableType() = default;                                                                     \
+            ~MatchableType() = default;                                                                    \
+            MatchableType(std::shared_ptr<T> m) : t{m} {}                                                  \
+            MatchableType(MatchableType const & o) : t{nullptr == o.t ? nullptr : o.t->clone()} {}         \
+            MatchableType(MatchableType &&) = default;                                                     \
+            MatchableType & operator=(MatchableType const & other)                                         \
             {                                                                                              \
                 if (this != &other)                                                                        \
                     t = nullptr == other.t ? nullptr : other.t->clone();                                   \
                 return *this;                                                                              \
             }                                                                                              \
-            Matchable & operator=(Matchable &&) = default;                                                 \
+            MatchableType & operator=(MatchableType &&) = default;                                         \
             std::string const & as_string() const                                                          \
             {                                                                                              \
                 static std::string const nil_str{"nil"};                                                   \
@@ -396,15 +396,17 @@ namespace matchable
                 if (mb.is_set(*this))                                                                      \
                     mb.at(*this)();                                                                        \
             }                                                                                              \
-            static std::vector<Matchable> const & variants() { return variants_by_index(); }               \
-            static std::vector<Matchable> const & variants_by_index() { return T::variants_by_index(); }   \
-            static std::vector<Matchable> const & variants_by_string() { return T::variants_by_string(); } \
-            bool operator==(Matchable const & m) const { return as_string() == m.as_string(); }            \
-            bool operator!=(Matchable const & m) const { return as_string() != m.as_string(); }            \
-            bool operator<(Matchable const & m) const { return as_index() < m.as_index(); }                \
-            bool lt_by_index(Matchable const & m) const { return as_index() < m.as_index(); }              \
-            bool lt_by_string(Matchable const & m) const { return as_string() < m.as_string(); }           \
-            friend std::ostream & operator<<(std::ostream & o, Matchable const & m)                        \
+            static std::vector<MatchableType> const & variants() { return variants_by_index(); }           \
+            static std::vector<MatchableType> const & variants_by_index()                                  \
+                { return T::variants_by_index(); }                                                         \
+            static std::vector<MatchableType> const & variants_by_string()                                 \
+                { return T::variants_by_string(); }                                                        \
+            bool operator==(MatchableType const & m) const { return as_string() == m.as_string(); }        \
+            bool operator!=(MatchableType const & m) const { return as_string() != m.as_string(); }        \
+            bool operator<(MatchableType const & m) const { return as_index() < m.as_index(); }            \
+            bool lt_by_index(MatchableType const & m) const { return as_index() < m.as_index(); }          \
+            bool lt_by_string(MatchableType const & m) const { return as_string() < m.as_string(); }       \
+            friend std::ostream & operator<<(std::ostream & o, MatchableType const & m)                    \
             {                                                                                              \
                 return o << m.as_string();                                                                 \
             }                                                                                              \
@@ -772,7 +774,7 @@ namespace matchable
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define SPREADx6_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _st4, _s4, _st5, _s5, _t, ...)                                                             \
+#define SPREADx6_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _st4, _s4, _st5, _s5, _t, ...)      \
     _matchable_create_type_begin(_t)                                                                       \
     _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
     _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
