@@ -27,8 +27,10 @@ def run_test(mode, clang):
     os.makedirs(src_dir)
 
     # copy matchable to source directory
-    shutil.copy(repo_root + 'src/matchable.h', src_dir)
-    shutil.copy(repo_root + 'src/matchable_fwd.h', src_dir)
+    matchable_dest_dir = src_dir + '/matchable'
+    os.makedirs(matchable_dest_dir)
+    shutil.copy(repo_root + 'include/matchable/matchable.h', matchable_dest_dir)
+    shutil.copy(repo_root + 'include/matchable/matchable_fwd.h', matchable_dest_dir)
 
     # remove and recreate CMakeLists.txt
     try:

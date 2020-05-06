@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 
-#include "matchable.h"
+#include "matchable/matchable.h"
 
 
 MATCHABLE(DayOfWeekOccurrence, first, second, third, fourth, last)

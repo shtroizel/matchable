@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "matchable.h"
+#include "matchable/matchable.h"
 
 
 MATCHABLE(Color, Red, Green, Blue)

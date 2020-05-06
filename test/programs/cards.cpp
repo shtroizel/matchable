@@ -36,7 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <random>
 #include <vector>
 
-#include "matchable.h"
+#include "matchable/matchable.h"
 #include "test_ok.h"
 
 

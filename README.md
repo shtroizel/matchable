@@ -9,8 +9,8 @@ for inconspicuous efficiency<br/>
 
 # Getting Started
 MATCHABLE is implemented by:<br/>
-* src/matchable.h<br/>
-* src/matchable_fwd.h
+* include/matchable/matchable.h<br/>
+* include/matchable/matchable_fwd.h
 # Complete Example
 The following program can be found at: test/programs/matchable_usage.cpp
 ```cpp

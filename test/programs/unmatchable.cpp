@@ -33,8 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <vector>
 
-#include "matchable_fwd.h"
-#include "matchable.h"
+#include "matchable/matchable_fwd.h"
+#include "matchable/matchable.h"
 #include "test_ok.h"
 
 
