@@ -71,7 +71,7 @@ def main():
         os.chdir(repo_root)
         exit(1)
 
-    if subprocess.run([install_dir + '/test/bin/run_all.sh', 'again_quietly']).returncode != 0:
+    if subprocess.run([install_dir + '/share/matchable/test/bin/run_all.sh', 'again_quietly']).returncode != 0:
         print('run_all.sh failed')
         os.chdir(repo_root)
         exit(1)

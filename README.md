@@ -1,14 +1,4 @@
-# MATCHABLE
-
-seemlessly flow<br/>
-between strings and identifiers<br/>
-itemized in groups<br/>
-that can spread forming relationships<br/>
-as a compile-time tool<br/>
-for inconspicuous efficiency<br/>
-
-# Getting Started
-MATCHABLE is implemented by:<br/>
+# Matchable Header Library
 * include/matchable/matchable.h<br/>
 * include/matchable/matchable_fwd.h
 # Complete Example
@@ -17,7 +7,7 @@ The following program can be found at: test/programs/matchable_usage.cpp
 #include <random>
 #include <iostream>
 
-#include "matchable.h"
+#include "matchable/matchable.h"
 
 
 
@@ -218,7 +208,7 @@ cd build
 cmake -DCMAKE_INSTALL_PREFIX=../install ..
 make install
 cd ..
-install/test/bin/run_all.sh again_quietly
+install/share/matchable/test/bin/run_all.sh again_quietly
 ```
 to specify custom build or install directories or to force use of clang see:
 ```
@@ -234,23 +224,23 @@ workflow).
 
 List all tests:
 ```
-install/test/bin/list.sh
+install/share/matchable/test/bin/list.sh
 ```
 Run Single Test (for example "max_variants"):
 ```
-install/test/bin/run_test.sh max_variants
+install/share/matchable/test/bin/run_test.sh max_variants
 ```
 Run Quietly:
 ```
-install/test/bin/run_test.sh max_variants quietly
+install/share/matchable/test/bin/run_test.sh max_variants quietly
 ```
 Run All Tests:
 ```
-install/test/bin/run_all.sh
+install/share/matchable/test/bin/run_all.sh
 ```
 Run All Tests Quietly
 ```
-install/test/bin/run_all.sh quietly
+install/share/matchable/test/bin/run_all.sh quietly
 ```
 
 # Example Source Code
@@ -259,8 +249,16 @@ Example code can be found under:
 test/programs
 ```
 
-# Versioning
+# Creating Matchables at Runtime
+libmatchable provides "MatchableMaker" for creating header files with matchable definitions programmatically
 
+## libmatchable
+both static and shared libraries can be found under install/lib/matchable
+
+## MatchableMaker
+Usage with examples comming soon...
+
+# Versioning
 For the versions available, see the [tags on this repository](https://github.com/shtroizel/matchable/tags).
 
 # Authors
