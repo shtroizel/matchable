@@ -18,9 +18,10 @@ def usage():
     print(sys.argv[0] + ' [OPTION]')
     print('    -h, --help            print this message')
     print('    -c  --clang           force use of clang compiler (uses default compiler if not set)')
+    print('    -n  --ninja           use ninja generator (uses make by default)')
 
 
-def run_test(mode, clang):
+def run_test(mode, use_clang, use_ninja):
 
     # remove and recreate source directory
     shutil.rmtree(src_dir, ignore_errors=True)
@@ -87,17 +88,26 @@ def run_test(mode, clang):
     os.chdir(src_dir + '/../build')
 
     # run cmake
-    if clang:
-        cmake_cmd = ['cmake', '-DCMAKE_CXX_COMPILER=/usr/bin/clang++', '-DCMAKE_C_COMPILER=/usr/bin/clang', '..']
-    else:
-        cmake_cmd = ['cmake', '..']
+    cmake_cmd = ['cmake']
+    if use_clang:
+        cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
+        cmake_cmd.append('-DCMAKE_CXX_COMPILER=/usr/bin/clang++')
+
+    if use_ninja:
+        cmake_cmd.append('-GNinja')
+
+    cmake_cmd.append('..')
+
     if subprocess.run(cmake_cmd).returncode != 0:
         print('cmake failed')
         exit(-1)
 
     # run make and track how much time it needs
     start = time.time()
-    return_code = subprocess.run(['make', '-j' + str(multiprocessing.cpu_count())]).returncode
+    if use_ninja:
+        return_code = subprocess.run(['ninja']).returncode
+    else:
+        return_code = subprocess.run(['make', '-j' + str(multiprocessing.cpu_count())]).returncode
     end = time.time()
 
     os.remove(prep_dir + '/../CMakeLists.txt')
@@ -112,25 +122,28 @@ def run_test(mode, clang):
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hc', ['help', 'clang'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcn', ['help', 'clang', 'ninja'])
     except getopt.GetoptError as err:
         print(err)
         usage()
         sys.exit(2)
 
-    clang = False
+    use_clang = False
+    use_ninja = False
     for o, a in opts:
         if o in ('-h', '--help'):
             usage()
             sys.exit()
         elif o in ('-c', '--clang'):
-            clang = True
+            use_clang = True
+        elif o in ('-n', '--ninja'):
+            use_ninja = True
         else:
             assert False, "unhandled option"
 
     try:
-        fwd_time = run_test("fwd", clang)
-        full_time = run_test("full", clang)
+        fwd_time = run_test("fwd", use_clang, use_ninja)
+        full_time = run_test("full", use_clang, use_ninja)
 
         print('\n\n******* Build Time Performance Summary *******\n')
         print('  using full definititions: ' + str(full_time))
