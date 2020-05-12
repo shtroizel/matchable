@@ -162,13 +162,13 @@ namespace matchable
 
 
 
+    MatchableMaker::~MatchableMaker()
+    {
+        for (auto & [n, m] : matchables)
+            delete m;
 
-
-
-
-
-
-
+        matchables.clear();
+    }
 
 
     Matchable * MatchableMaker::grab(std::string const & m)
