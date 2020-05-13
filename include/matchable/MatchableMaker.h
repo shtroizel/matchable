@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace matchable
 {
+    MATCHABLE(save_as__status, success, no_content, no_grow_mode, io_error, cyclic_dependencies);
     MATCHABLE(save_as__content, generated_matchable, matchables);
     MATCHABLE(save_as__grow_mode, wrap, always);
     MATCHABLE(set_spread_status, success, variant_lookup_failed, spread_lookup_failed);
@@ -51,14 +52,13 @@ namespace matchable
         //                     spread name, spread value, spread vector value
         std::vector<std::tuple<std::string, std::string, std::vector<std::string>>> spreads;
 
-        bool operator==(std::string const & other) const { return variant_name < other; }
+        bool operator==(std::string const & other) const { return variant_name == other; }
     };
 
 
     class Matchable
     {
         friend class MatchableMaker;
-
     public:
         void add_variant(std::string const & name);
         bool add_spread(std::string const & spread_type, std::string const & spread_name);
@@ -91,7 +91,7 @@ namespace matchable
     public:
         ~MatchableMaker();
         Matchable * grab(std::string const & m);
-        void save_as(
+        save_as__status::Type save_as(
             std::string const & filename,
             save_as__content::Flags const & content,
             save_as__grow_mode::Type mode

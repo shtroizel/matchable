@@ -43,12 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace matchable
 {
-    void Matchable::add_variant(std::string const & name)
+    void Matchable::add_variant(std::string const & variant_name)
     {
-        if (std::find(variants.begin(), variants.end(), name) == variants.end())
+        if (std::find(variants.begin(), variants.end(), variant_name) == variants.end())
         {
             MatchableVariant v;
-            v.variant_name = name;
+            v.variant_name = variant_name;
             variants.push_back(v);
         }
     }
@@ -149,19 +149,6 @@ namespace matchable
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     MatchableMaker::~MatchableMaker()
     {
         for (auto & [n, m] : matchables)
@@ -184,55 +171,74 @@ namespace matchable
     }
 
 
-    void MatchableMaker::save_as(
+    save_as__status::Type MatchableMaker::save_as(
         std::string const & filename,
         save_as__content::Flags const & content,
         save_as__grow_mode::Type mode
     )
     {
         if (content.currently_set().size() == 0)
-            return;
+            return save_as__status::no_content::grab();
 
         if (mode.is_nil())
-            return;
+            return save_as__status::no_grow_mode::grab();
 
         FILE * f = fopen(filename.c_str(), "w");
-        fputs("#include <matchable/matchable.h>\n#include <matchable/matchable_fwd.h>\n\n\n\n", f);
+        if (nullptr == f)
+            return save_as__status::io_error::grab();
 
-        // generated_matchable
+        save_as__status::Type ret{save_as__status::success::grab()};
+
+        if (fputs("#include <matchable/matchable.h>\n"
+                  "#include <matchable/matchable_fwd.h>\n\n\n\n", f) == EOF)
+            goto save_as_io_error;
+
+        // if we need matchable 'generated_matchable' with variants for each matchable in the maker
         if (content.is_set(save_as__content::generated_matchable::grab()))
         {
-            mode.match({
-                {save_as__grow_mode::wrap::grab(),
-                    [&](){
-                        fputs("MATCHABLE_FWD(generated_matchable)\n", f);
-                        fputs("SPREADx1_MATCHABLE(generated_matchable::Type, dependency, "
-                              "generated_matchable", f);
-                    }},
-                {save_as__grow_mode::always::grab(),
-                    [&](){
-                        fputs("MATCHABLE_GROW(generated_matchable", f);
-                    }},
-            });
+            if (mode == save_as__grow_mode::wrap::grab())
+            {
+                if (fputs("MATCHABLE(generated_matchable", f) == EOF)
+                    goto save_as_io_error;
+            }
+            else if (mode == save_as__grow_mode::always::grab())
+            {
+                if (fputs("MATCHABLE_GROW(generated_matchable", f) == EOF)
+                    goto save_as_io_error;
+            }
+            else
+            {
+                ret = save_as__status::no_grow_mode::grab();
+                goto save_as_cleanup;
+            }
             int matchable_count{0};
             for (auto const & [name, m] : matchables)
             {
                 ++matchable_count;
                 if (matchable_count % 17 == 0)
                 {
-                    fputs(")\nMATCHABLE_GROW(", f);
-                    fputs(name.c_str(), f);
+                    if (fputs(")\nMATCHABLE_GROW(", f) == EOF)
+                        goto save_as_io_error;
+
+                    if (fputs(name.c_str(), f) == EOF)
+                        goto save_as_io_error;
                 }
-                fputs(", ", f);
-                fputs(name.c_str(), f);
+                if (fputs(", ", f) == EOF)
+                    goto save_as_io_error;
+
+                if (fputs(name.c_str(), f) == EOF)
+                    goto save_as_io_error;
             }
-            fputs(")\n", f);
+            if (fputs(")\n", f) == EOF)
+                goto save_as_io_error;
         }
 
         if (content.is_set(save_as__content::matchables::grab()))
         {
+            // table recording whether each matchable has been written/saved (processed)
+            std::map<std::string, bool> processed;
             for (auto const & [name, m] : matchables)
-                fputs(print_matchable_fwd(*m).c_str(), f);
+                processed.insert({name, false});
 
             // if just growing then the order does not matter,
             // so just go through them all and grow grow grow
@@ -242,37 +248,51 @@ namespace matchable
                 {
                     std::string printed_matchable = print_matchable(*m, mode);
                     assert(printed_matchable.size());
-                    fputs(printed_matchable.c_str(), f);
+                    processed[name] = true;
+                    if (fputs(printed_matchable.c_str(), f) == EOF)
+                        goto save_as_io_error;
                 }
             }
-            // resolve so that dependency definitions occur first
-            //   - this is an issue when matchables spread to matchables
+            // not always growing means we provide definitions
+            // initial definitions must be resolved so that dependency definitions occur first
+            //   - this is an issue when matchables spread to matchables that are saved together
             else
             {
-                std::map<std::string, bool> processed;
+                // first forward declare all matchables effectively resolving all self spread
                 for (auto const & [name, m] : matchables)
-                    processed.insert({name, false});
+                    if (fputs(print_matchable_fwd(*m).c_str(), f) == EOF)
+                        goto save_as_io_error;
 
+                // for each iteration of the following while(), processed_count must be incremented...
+                // unchanged processed_count at end of iteration means we have cyclic dependencies!
                 int processed_count{0};
-
                 while (processed_count < (int) processed.size())
                 {
                     int const prev_processed_count{processed_count};
 
                     for (auto const & [name, m] : matchables)
                     {
+                        if (processed[name])
+                            continue;
+
                         // ready means all dependencies to other matchables within this maker have already
                         // been printed.
                         bool ready{true};
                         for (auto const & [s_type, s_name] : m->spread_types_and_names)
                         {
                             static std::string const matchable_type_ending{"::Type"};
-                            if (s_type.rfind(matchable_type_ending) != s_type.npos)
+                            if (s_type.size() > matchable_type_ending.size())
                             {
+                                // get the matchable's 'namespace' name (if it is indeed a matchable at all)
                                 std::string const s_type_without_ending{
                                     s_type.substr(0, s_type.size() - matchable_type_ending.size())
                                 };
 
+                                // if not self spread (would be ok since we forward declared earlier) &&
+                                // if this matchable dependency is also one of those to be saved &&
+                                // if this matchable dependency has yet to be written then
+                                //     we still have unprocessed dependencies
+                                //     we must wait (stop looking at spreads and skip to next matchable)
                                 if (
                                     s_type_without_ending != name &&
                                     processed.find(s_type_without_ending) != processed.end() &&
@@ -284,18 +304,23 @@ namespace matchable
                                 }
                             }
                         }
-                        if (!ready)
+                        if (!ready) // dependencies exist that have yet to be written, skip and try later
                             continue;
 
+                        // we are ready so write the matchable and record that we did so...
                         std::string const printed_matchable{print_matchable(*m, mode)};
-                        fputs(printed_matchable.c_str(), f);
+                        if (fputs(printed_matchable.c_str(), f) == EOF)
+                            goto save_as_io_error;
+
                         processed[name] = true;
                         processed_count++;
                     }
 
+                    // if we went through all the matchables and none of them were ready
                     if (prev_processed_count == processed_count)
                     {
-                        std::cout << "WARNING! cyclic dependencies detected!" << std::endl;
+                        ret = save_as__status::cyclic_dependencies::grab();
+                        std::cout << "WARNING! cyclic dependencies detected and omitted!" << std::endl;
                         for (auto const & [name, p] : processed)
                         {
                             if (!p)
@@ -304,23 +329,28 @@ namespace matchable
                                 for (auto const & [t, n] : matchables[name]->spread_types_and_names)
                                     std::cout << " " << n;
                                 std::cout << std::endl;
-
-                                std::string printed_matchable = print_matchable(*matchables[name], mode);
-                                fputs(printed_matchable.c_str(), f);
-                                processed[name] = true;
                             }
                         }
                         break;
                     }
-                }
-            }
+                } // while matchables still need to be processed
+            } // not always growing
 
             // initialize spreads
-            for (auto const & [Matchable, m] : matchables)
-                fputs(print_set_spread(*m).c_str(), f);
+            for (auto const & [name, m] : matchables)
+                if (processed[name])
+                    if (fputs(print_set_spread(*m).c_str(), f) == EOF)
+                        return save_as__status::io_error::grab();
         }
 
+        goto save_as_cleanup;
+
+save_as_io_error:
+        ret = save_as__status::io_error::grab();
+
+save_as_cleanup:
         fclose(f);
+        return ret;
     }
 
 
