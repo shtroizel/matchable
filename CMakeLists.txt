@@ -85,23 +85,23 @@ install(EXPORT matchable FILE matchable.cmake DESTINATION lib/matchable/cmake)
 include(CMakePackageConfigHelpers)
 
 configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
-    "${CMAKE_CURRENT_BINARY_DIR}/matchableConfig.cmake"
+    ${CMAKE_CURRENT_SOURCE_DIR}/config.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/matchable-config.cmake"
     INSTALL_DESTINATION "lib/matchable/cmake"
     NO_SET_AND_CHECK_MACRO
     NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
 
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/matchableConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/matchable-config-version.cmake"
     VERSION "${matchable_VERSION_MAJOR}.${matchable_VERSION_MINOR}.${matchable_VERSION_PATCH}"
     COMPATIBILITY SameMajorVersion
 )
 
 install(
     FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/matchableConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/matchableConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/matchable-config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/matchable-config-version.cmake
     DESTINATION lib/matchable/cmake
 )
 ############################################################################################################
