@@ -434,6 +434,34 @@ namespace matchable
                 return nil;                                                                                \
             return I##_t::variants_by_index().at(index);                                                   \
         }                                                                                                  \
+        inline Type type_and_neighbors_from_string(std::string const & str, Type * lt, Type * gt)          \
+        {                                                                                                  \
+            auto it = std::lower_bound(                                                                    \
+                I##_t::variants_by_string().begin(),                                                       \
+                I##_t::variants_by_string().end(),                                                         \
+                str,                                                                                       \
+                [](_t::Type const & v, std::string const & s){ return v.as_string() < s; }                 \
+            );                                                                                             \
+            if (it == I##_t::variants_by_string().end())                                                   \
+            {                                                                                              \
+                if (nullptr != lt)                                                                         \
+                    *lt = I##_t::variants_by_string().size() ? I##_t::variants_by_string().back() : nil;   \
+                if (nullptr != gt)                                                                         \
+                    *gt = nil;                                                                             \
+                return nil;                                                                                \
+            }                                                                                              \
+            if (nullptr != lt)                                                                             \
+                *lt = it == I##_t::variants_by_string().begin() ? nil : *std::prev(it, 1);                 \
+            if (str == it->as_string())                                                                    \
+            {                                                                                              \
+                if (nullptr != gt)                                                                         \
+                    *gt = std::next(it, 1) == I##_t::variants_by_string().end() ? nil : *std::next(it, 1); \
+                return *it;                                                                                \
+            }                                                                                              \
+            if (nullptr != gt)                                                                             \
+                *gt = *it;                                                                                 \
+            return nil;                                                                                    \
+        }                                                                                                  \
         inline Type from_string(std::string const & str)                                                   \
         {                                                                                                  \
             auto it = std::lower_bound(                                                                    \
