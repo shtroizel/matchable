@@ -54,6 +54,43 @@ namespace matchable
     }
 
 
+    void Matchable::del_variant(std::string const & variant_name)
+    {
+        auto variant_iter = std::find_if(
+            variants.begin(),
+            variants.end(),
+            [&](auto const & s) { return s.variant_name == variant_name; }
+        );
+
+        if (variant_iter != variants.end())
+            variants.erase(variant_iter);
+    }
+
+
+    void Matchable::variants_starting_with(std::string const & prefix, std::vector<std::string> & result)
+    {
+        result.clear();
+        for (auto const & v : variants)
+        {
+            if (v.variant_name.size() < prefix.size())
+                continue;
+
+            if (prefix == v.variant_name.substr(0, prefix.size()))
+                result.push_back(v.variant_name);
+        }
+    }
+
+
+    bool Matchable::has_variant(std::string const & variant_name)
+    {
+        return std::find_if(
+            variants.begin(),
+            variants.end(),
+            [&](auto const & s) { return s.variant_name == variant_name; }
+        ) != variants.end();
+    }
+
+
     bool Matchable::add_spread(std::string const & spread_type, std::string const & spread_name)
     {
         for (auto const & [type, name] : spread_types_and_names)
@@ -66,54 +103,106 @@ namespace matchable
 
 
     set_spread_status::Type Matchable::set_spread(
-        std::string const & variant,
-        std::string const & name,
+        std::string const & variant_name,
+        std::string const & spread_name,
         std::string const & value
     )
     {
         std::vector<MatchableVariant>::iterator iter;
-        set_spread_status::Type ret = verify_spread_and_variant__and__get_variant_iter(name, variant, iter);
+        set_spread_status::Type ret =
+                verify_spread_and_variant__and__get_variant_iter(spread_name, variant_name, iter);
         if (ret != set_spread_status::success::grab())
             return ret;
 
         auto spread_iter = std::find_if(
             iter->spreads.begin(),
             iter->spreads.end(),
-            [&](auto const & s) { return std::get<0>(s) == name; }
+            [&](auto const & s) { return std::get<0>(s) == spread_name; }
         );
 
         if (spread_iter != iter->spreads.end())
             std::get<1>(*spread_iter) = value;
         else
-            iter->spreads.push_back(std::make_tuple(name, value, std::vector<std::string>{}));
+            iter->spreads.push_back(std::make_tuple(spread_name, value, std::vector<std::string>{}));
 
         return ret;
     }
 
 
     set_spreadvect_status::Type Matchable::set_spreadvect(
-        std::string const & variant,
-        std::string const & name,
+        std::string const & variant_name,
+        std::string const & spread_name,
         std::vector<std::string> const & values
     )
     {
         std::vector<MatchableVariant>::iterator iter;
-        set_spread_status::Type ret = verify_spread_and_variant__and__get_variant_iter(name, variant, iter);
+        set_spread_status::Type ret =
+                verify_spread_and_variant__and__get_variant_iter(spread_name, variant_name, iter);
         if (ret != set_spread_status::success::grab())
             return ret;
 
         auto spread_iter = std::find_if(
             iter->spreads.begin(),
             iter->spreads.end(),
-            [&](auto const & s) { return std::get<0>(s) == name; }
+            [&](auto const & s) { return std::get<0>(s) == spread_name; }
         );
 
         if (spread_iter != iter->spreads.end())
             std::get<2>(*spread_iter) = values;
         else
-            iter->spreads.push_back(std::make_tuple(name, "", values));
+            iter->spreads.push_back(std::make_tuple(spread_name, "", values));
 
         return ret;
+    }
+
+
+    void Matchable::get_spread(
+        std::string const & variant_name,
+        std::string const & spread_name,
+        std::string & spread_value
+    )
+    {
+        std::vector<MatchableVariant>::iterator iter;
+        set_spread_status::Type ret =
+                verify_spread_and_variant__and__get_variant_iter(spread_name, variant_name, iter);
+        if (ret != set_spread_status::success::grab())
+            return;
+
+        auto spread_iter = std::find_if(
+            iter->spreads.begin(),
+            iter->spreads.end(),
+            [&](auto const & s) { return std::get<0>(s) == spread_name; }
+        );
+
+        if (spread_iter != iter->spreads.end())
+            spread_value = std::get<1>(*spread_iter);
+    }
+
+
+
+    void Matchable::get_spreadvect(
+        std::string const & variant_name,
+        std::string const & spread_name,
+        std::vector<std::string> & spread_values
+    )
+    {
+        std::vector<MatchableVariant>::iterator iter;
+        set_spread_status::Type ret =
+                verify_spread_and_variant__and__get_variant_iter(spread_name, variant_name, iter);
+        if (ret != set_spread_status::success::grab())
+        {
+            std::cout << "verify failed with: " << ret << std::endl;
+            return;
+        }
+
+        auto spread_iter = std::find_if(
+            iter->spreads.begin(),
+            iter->spreads.end(),
+            [&](auto const & s) { return std::get<0>(s) == spread_name; }
+        );
+
+        if (spread_iter != iter->spreads.end())
+            spread_values = std::get<2>(*spread_iter);
     }
 
 
@@ -189,7 +278,7 @@ namespace matchable
 
         save_as__status::Type ret{save_as__status::success::grab()};
 
-        if (fputs("#include <matchable/matchable.h>\n"
+        if (fputs("#pragma once\n\n\n#include <matchable/matchable.h>\n"
                   "#include <matchable/matchable_fwd.h>\n\n\n\n", f) == EOF)
             goto save_as_io_error;
 

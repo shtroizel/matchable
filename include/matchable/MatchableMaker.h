@@ -1,6 +1,4 @@
 #pragma once
-
-
 /*
 Copyright (c) 2019-2020, Eric Hyer
 All rights reserved.
@@ -30,12 +28,9 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-
 #include <map>
 #include <string>
 #include <matchable/matchable.h>
-
 
 namespace matchable
 {
@@ -48,19 +43,19 @@ namespace matchable
     struct MatchableVariant
     {
         std::string variant_name;
-
         //                     spread name, spread value, spread vector value
         std::vector<std::tuple<std::string, std::string, std::vector<std::string>>> spreads;
-
         bool operator==(std::string const & other) const { return variant_name == other; }
     };
-
 
     class Matchable
     {
         friend class MatchableMaker;
     public:
-        void add_variant(std::string const & name);
+        void add_variant(std::string const & variant_name);
+        void del_variant(std::string const & variant_name);
+        void variants_starting_with(std::string const & prefix, std::vector<std::string> & result);
+        bool has_variant(std::string const & variant_name);
         bool add_spread(std::string const & spread_type, std::string const & spread_name);
         set_spread_status::Type set_spread(
             std::string const & variant,
@@ -72,19 +67,26 @@ namespace matchable
             std::string const & spread_name,
             std::vector<std::string> const & spread_values
         );
-
+        void get_spread(
+            std::string const & variant_name,
+            std::string const & spread_name,
+            std::string & spread_value
+        );
+        void get_spreadvect(
+            std::string const & variant_name,
+            std::string const & spread_name,
+            std::vector<std::string> & spread_values
+        );
     private:
         set_spread_status::Type verify_spread_and_variant__and__get_variant_iter(
             std::string const & spread,
             std::string const & variant,
             std::vector<MatchableVariant>::iterator & iter
         );
-
         std::string name;
         std::vector<MatchableVariant> variants;
         std::vector<std::pair<std::string, std::string>> spread_types_and_names;
     };
-
 
     class MatchableMaker
     {
@@ -96,12 +98,10 @@ namespace matchable
             save_as__content::Flags const & content,
             save_as__grow_mode::Type mode
         );
-
+        std::map<std::string, Matchable *> matchables;
     private:
         std::string print_matchable_fwd(Matchable const & m);
         std::string print_matchable(Matchable const & m, save_as__grow_mode::Type mode);
         std::string print_set_spread(Matchable const & m);
-
-        std::map<std::string, Matchable *> matchables;
     };
 }
