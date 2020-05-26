@@ -15,7 +15,7 @@ prep_dir = repo_root + 'test_buildtimes/prepare'
 
 
 def usage():
-    print(sys.argv[0] + ' [OPTION]')
+    print(sys.argv[0] + ' [OPTION]...')
     print('    -h, --help            print this message')
     print('    -c  --clang           force use of clang compiler (uses default compiler if not set)')
     print('    -n  --ninja           use ninja generator (uses make by default)')
