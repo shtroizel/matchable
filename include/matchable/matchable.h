@@ -702,160 +702,160 @@ namespace matchable
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define _spread_matchable_amend_type(_st, _s, _t)                                                          \
+#define _property_matchable_amend_type(_pt, _p, _t)                                                        \
     public:                                                                                                \
-        std::vector<_st> const & as_##_s##_vect() const                                                    \
-            { return nullptr == t ? T::nil_##_s##_vect() : t->as_##_s##_vect(); }                          \
-        void set_##_s##_vect(std::vector<_st> const & v)                                                   \
-            { if (nullptr == t) T::nil_##_s##_vect() = v; else t->set_##_s##_vect(v); }                    \
-        _st const & as_##_s() const { return nullptr == t ? T::nil_##_s() : t->as_##_s(); }                \
-        void set_##_s(_st const & s) { if (nullptr == t) T::nil_##_s() = s; else t->set_##_s(s); }
+        std::vector<_pt> const & as_##_p##_vect() const                                                    \
+            { return nullptr == t ? T::nil_##_p##_vect() : t->as_##_p##_vect(); }                          \
+        void set_##_p##_vect(std::vector<_pt> const & v)                                                   \
+            { if (nullptr == t) T::nil_##_p##_vect() = v; else t->set_##_p##_vect(v); }                    \
+        _pt const & as_##_p() const { return nullptr == t ? T::nil_##_p() : t->as_##_p(); }                \
+        void set_##_p(_pt const & s) { if (nullptr == t) T::nil_##_p() = s; else t->set_##_p(s); }
 
 
-#define _spread_matchable_amend_declaration(_st, _s, _t)                                                   \
+#define _property_matchable_amend_declaration(_pt, _p, _t)                                                 \
     public:                                                                                                \
-        std::vector<_st> const & as_##_s##_vect() const { return _s##_vect_mb().at(Type(clone())); }       \
-        void set_##_s##_vect(std::vector<_st> const & v) { _s##_vect_mb().set(Type(clone()), v); }         \
-        _st const & as_##_s() const { return _s##_mb().at(Type(clone())); }                                \
-        void set_##_s(_st const & s) { _s##_mb().set(Type(clone()), s); }                                  \
+        std::vector<_pt> const & as_##_p##_vect() const { return _p##_vect_mb().at(Type(clone())); }       \
+        void set_##_p##_vect(std::vector<_pt> const & v) { _p##_vect_mb().set(Type(clone()), v); }         \
+        _pt const & as_##_p() const { return _p##_mb().at(Type(clone())); }                                \
+        void set_##_p(_pt const & s) { _p##_mb().set(Type(clone()), s); }                                  \
     private:                                                                                               \
-        static matchable::MatchBox<_t::Type, std::vector<_st>> & _s##_vect_mb()                            \
-            { static matchable::MatchBox<_t::Type, std::vector<_st>> mb; return mb; }                      \
-        static std::vector<_st> & nil_##_s##_vect() { static std::vector<_st> v; return v; }               \
-        static matchable::MatchBox<_t::Type, _st> & _s##_mb()                                              \
-            { static matchable::MatchBox<_t::Type, _st> mb; return mb; }                                   \
-        static _st & nil_##_s() { static _st s; return s; }
+        static matchable::MatchBox<_t::Type, std::vector<_pt>> & _p##_vect_mb()                            \
+            { static matchable::MatchBox<_t::Type, std::vector<_pt>> mb; return mb; }                      \
+        static std::vector<_pt> & nil_##_p##_vect() { static std::vector<_pt> v; return v; }               \
+        static matchable::MatchBox<_t::Type, _pt> & _p##_mb()                                              \
+            { static matchable::MatchBox<_t::Type, _pt> mb; return mb; }                                   \
+        static _pt & nil_##_p() { static _pt s; return s; }
 
 
-#define SPREADx1_MATCHABLE(_st0, _s0, _t, ...)                                                             \
+#define PROPERTYx1_MATCHABLE(_pt0, _p0, _t, ...)                                                           \
     _matchable_create_type_begin(_t)                                                                       \
-    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
+    _property_matchable_amend_type(_pt0, _p0, _t)                                                          \
     _matchable_create_type_end(_t)                                                                         \
     _matchable_declare_begin(_t)                                                                           \
-    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
+    _property_matchable_amend_declaration(_pt0, _p0, _t)                                                   \
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define SPREADx2_MATCHABLE(_st0, _s0, _st1, _s1, _t, ...)                                                  \
+#define PROPERTYx2_MATCHABLE(_pt0, _p0, _pt1, _p1, _t, ...)                                                \
     _matchable_create_type_begin(_t)                                                                       \
-    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
-    _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
+    _property_matchable_amend_type(_pt0, _p0, _t)                                                          \
+    _property_matchable_amend_type(_pt1, _p1, _t)                                                          \
     _matchable_create_type_end(_t)                                                                         \
     _matchable_declare_begin(_t)                                                                           \
-    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
-    _spread_matchable_amend_declaration(_st1, _s1, _t)                                                     \
+    _property_matchable_amend_declaration(_pt0, _p0, _t)                                                   \
+    _property_matchable_amend_declaration(_pt1, _p1, _t)                                                   \
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define SPREADx3_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _t, ...)                                       \
+#define PROPERTYx3_MATCHABLE(_pt0, _p0, _pt1, _p1, _pt2, _p2, _t, ...)                                     \
     _matchable_create_type_begin(_t)                                                                       \
-    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
-    _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
-    _spread_matchable_amend_type(_st2, _s2, _t)                                                            \
+    _property_matchable_amend_type(_pt0, _p0, _t)                                                          \
+    _property_matchable_amend_type(_pt1, _p1, _t)                                                          \
+    _property_matchable_amend_type(_pt2, _p2, _t)                                                          \
     _matchable_create_type_end(_t)                                                                         \
     _matchable_declare_begin(_t)                                                                           \
-    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
-    _spread_matchable_amend_declaration(_st1, _s1, _t)                                                     \
-    _spread_matchable_amend_declaration(_st2, _s2, _t)                                                     \
+    _property_matchable_amend_declaration(_pt0, _p0, _t)                                                   \
+    _property_matchable_amend_declaration(_pt1, _p1, _t)                                                   \
+    _property_matchable_amend_declaration(_pt2, _p2, _t)                                                   \
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define SPREADx4_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _t, ...)                            \
+#define PROPERTYx4_MATCHABLE(_pt0, _p0, _pt1, _p1, _pt2, _p2, _pt3, _p3, _t, ...)                          \
     _matchable_create_type_begin(_t)                                                                       \
-    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
-    _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
-    _spread_matchable_amend_type(_st2, _s2, _t)                                                            \
-    _spread_matchable_amend_type(_st3, _s3, _t)                                                            \
+    _property_matchable_amend_type(_pt0, _p0, _t)                                                          \
+    _property_matchable_amend_type(_pt1, _p1, _t)                                                          \
+    _property_matchable_amend_type(_pt2, _p2, _t)                                                          \
+    _property_matchable_amend_type(_pt3, _p3, _t)                                                          \
     _matchable_create_type_end(_t)                                                                         \
     _matchable_declare_begin(_t)                                                                           \
-    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
-    _spread_matchable_amend_declaration(_st1, _s1, _t)                                                     \
-    _spread_matchable_amend_declaration(_st2, _s2, _t)                                                     \
-    _spread_matchable_amend_declaration(_st3, _s3, _t)                                                     \
+    _property_matchable_amend_declaration(_pt0, _p0, _t)                                                   \
+    _property_matchable_amend_declaration(_pt1, _p1, _t)                                                   \
+    _property_matchable_amend_declaration(_pt2, _p2, _t)                                                   \
+    _property_matchable_amend_declaration(_pt3, _p3, _t)                                                   \
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define SPREADx5_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _st4, _s4, _t, ...)                 \
+#define PROPERTYx5_MATCHABLE(_pt0, _p0, _pt1, _p1, _pt2, _p2, _pt3, _p3, _pt4, _p4, _t, ...)               \
     _matchable_create_type_begin(_t)                                                                       \
-    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
-    _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
-    _spread_matchable_amend_type(_st2, _s2, _t)                                                            \
-    _spread_matchable_amend_type(_st3, _s3, _t)                                                            \
-    _spread_matchable_amend_type(_st4, _s4, _t)                                                            \
+    _property_matchable_amend_type(_pt0, _p0, _t)                                                          \
+    _property_matchable_amend_type(_pt1, _p1, _t)                                                          \
+    _property_matchable_amend_type(_pt2, _p2, _t)                                                          \
+    _property_matchable_amend_type(_pt3, _p3, _t)                                                          \
+    _property_matchable_amend_type(_pt4, _p4, _t)                                                          \
     _matchable_create_type_end(_t)                                                                         \
     _matchable_declare_begin(_t)                                                                           \
-    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
-    _spread_matchable_amend_declaration(_st1, _s1, _t)                                                     \
-    _spread_matchable_amend_declaration(_st2, _s2, _t)                                                     \
-    _spread_matchable_amend_declaration(_st3, _s3, _t)                                                     \
-    _spread_matchable_amend_declaration(_st4, _s4, _t)                                                     \
+    _property_matchable_amend_declaration(_pt0, _p0, _t)                                                   \
+    _property_matchable_amend_declaration(_pt1, _p1, _t)                                                   \
+    _property_matchable_amend_declaration(_pt2, _p2, _t)                                                   \
+    _property_matchable_amend_declaration(_pt3, _p3, _t)                                                   \
+    _property_matchable_amend_declaration(_pt4, _p4, _t)                                                   \
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define SPREADx6_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _st4, _s4, _st5, _s5, _t, ...)      \
+#define PROPERTYx6_MATCHABLE(_pt0, _p0, _pt1, _p1, _pt2, _p2, _pt3, _p3, _pt4, _p4, _pt5, _p5, _t, ...)    \
     _matchable_create_type_begin(_t)                                                                       \
-    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
-    _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
-    _spread_matchable_amend_type(_st2, _s2, _t)                                                            \
-    _spread_matchable_amend_type(_st3, _s3, _t)                                                            \
-    _spread_matchable_amend_type(_st4, _s4, _t)                                                            \
-    _spread_matchable_amend_type(_st5, _s5, _t)                                                            \
+    _property_matchable_amend_type(_pt0, _p0, _t)                                                          \
+    _property_matchable_amend_type(_pt1, _p1, _t)                                                          \
+    _property_matchable_amend_type(_pt2, _p2, _t)                                                          \
+    _property_matchable_amend_type(_pt3, _p3, _t)                                                          \
+    _property_matchable_amend_type(_pt4, _p4, _t)                                                          \
+    _property_matchable_amend_type(_pt5, _p5, _t)                                                          \
     _matchable_create_type_end(_t)                                                                         \
     _matchable_declare_begin(_t)                                                                           \
-    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
-    _spread_matchable_amend_declaration(_st1, _s1, _t)                                                     \
-    _spread_matchable_amend_declaration(_st2, _s2, _t)                                                     \
-    _spread_matchable_amend_declaration(_st3, _s3, _t)                                                     \
-    _spread_matchable_amend_declaration(_st4, _s4, _t)                                                     \
-    _spread_matchable_amend_declaration(_st5, _s5, _t)                                                     \
+    _property_matchable_amend_declaration(_pt0, _p0, _t)                                                   \
+    _property_matchable_amend_declaration(_pt1, _p1, _t)                                                   \
+    _property_matchable_amend_declaration(_pt2, _p2, _t)                                                   \
+    _property_matchable_amend_declaration(_pt3, _p3, _t)                                                   \
+    _property_matchable_amend_declaration(_pt4, _p4, _t)                                                   \
+    _property_matchable_amend_declaration(_pt5, _p5, _t)                                                   \
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define SPREADx7_MATCHABLE(_st0, _s0, _st1, _s1, _st2, _s2, _st3, _s3, _st4, _s4, _st5, _s5,               \
-                           _st6, _s6, _t, ...)                                                             \
+#define PROPERTYx7_MATCHABLE(_pt0, _p0, _pt1, _p1, _pt2, _p2, _pt3, _p3, _pt4, _p4, _pt5, _p5,             \
+                           _pt6, _p6, _t, ...)                                                             \
     _matchable_create_type_begin(_t)                                                                       \
-    _spread_matchable_amend_type(_st0, _s0, _t)                                                            \
-    _spread_matchable_amend_type(_st1, _s1, _t)                                                            \
-    _spread_matchable_amend_type(_st2, _s2, _t)                                                            \
-    _spread_matchable_amend_type(_st3, _s3, _t)                                                            \
-    _spread_matchable_amend_type(_st4, _s4, _t)                                                            \
-    _spread_matchable_amend_type(_st5, _s5, _t)                                                            \
-    _spread_matchable_amend_type(_st6, _s6, _t)                                                            \
+    _property_matchable_amend_type(_pt0, _p0, _t)                                                          \
+    _property_matchable_amend_type(_pt1, _p1, _t)                                                          \
+    _property_matchable_amend_type(_pt2, _p2, _t)                                                          \
+    _property_matchable_amend_type(_pt3, _p3, _t)                                                          \
+    _property_matchable_amend_type(_pt4, _p4, _t)                                                          \
+    _property_matchable_amend_type(_pt5, _p5, _t)                                                          \
+    _property_matchable_amend_type(_pt6, _p6, _t)                                                          \
     _matchable_create_type_end(_t)                                                                         \
     _matchable_declare_begin(_t)                                                                           \
-    _spread_matchable_amend_declaration(_st0, _s0, _t)                                                     \
-    _spread_matchable_amend_declaration(_st1, _s1, _t)                                                     \
-    _spread_matchable_amend_declaration(_st2, _s2, _t)                                                     \
-    _spread_matchable_amend_declaration(_st3, _s3, _t)                                                     \
-    _spread_matchable_amend_declaration(_st4, _s4, _t)                                                     \
-    _spread_matchable_amend_declaration(_st5, _s5, _t)                                                     \
-    _spread_matchable_amend_declaration(_st6, _s6, _t)                                                     \
+    _property_matchable_amend_declaration(_pt0, _p0, _t)                                                   \
+    _property_matchable_amend_declaration(_pt1, _p1, _t)                                                   \
+    _property_matchable_amend_declaration(_pt2, _p2, _t)                                                   \
+    _property_matchable_amend_declaration(_pt3, _p3, _t)                                                   \
+    _property_matchable_amend_declaration(_pt4, _p4, _t)                                                   \
+    _property_matchable_amend_declaration(_pt5, _p5, _t)                                                   \
+    _property_matchable_amend_declaration(_pt6, _p6, _t)                                                   \
     _matchable_declare_end(_t)                                                                             \
     _matchable_define(_t)                                                                                  \
     _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
-#define SET_SPREAD(_t, _v, _s, _sv)                                                                        \
-    static bool const SET_SPREAD_init_##_t##_##_v##_##_s =                                                 \
-        [](){_t::_v::grab().set_##_s(_sv); return true;}();
+#define SET_PROPERTY(_t, _v, _p, _pv)                                                                      \
+    static bool const SET_PROPERTY_init_##_t##_##_v##_##_p =                                               \
+        [](){_t::_v::grab().set_##_p(_pv); return true;}();
 
 
-#define SET_SPREAD_VECT(_t, _v, _s, ...)                                                                   \
-    static bool const SET_SPREAD_VECT_init_##_t##_##_v##_##_s =                                            \
-        [](decltype(_t::_v::grab().as_##_s##_vect()) sv)                                                   \
-            { _t::_v::grab().set_##_s##_##vect(sv); return true; }({__VA_ARGS__});
+#define SET_PROPERTY_VECT(_t, _v, _p, ...)                                                                 \
+    static bool const SET_PROPERTY_VECT_init_##_t##_##_v##_##_p =                                          \
+        [](decltype(_t::_v::grab().as_##_p##_vect()) sv)                                                   \
+            { _t::_v::grab().set_##_p##_##vect(sv); return true; }({__VA_ARGS__});
 
 
 // Remove variants for the current scope (when the scope exits the removed variants are restored).
@@ -897,7 +897,7 @@ namespace matchable
 
 
 // Add variants to existing matchable
-#define MATCHABLE_GROW(_t, ...) _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
+#define SPREAD_MATCHABLE(_t, ...) _mcv(_matchable_create_variant, _t, ##__VA_ARGS__)
 
 
 // FLOW CONTROL MACROS

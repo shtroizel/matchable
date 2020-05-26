@@ -48,7 +48,7 @@ MATCHABLE(
     O_pl_n_pr_,
     O_pl_n_pls_k_pr_
 )
-SPREADx2_MATCHABLE(
+PROPERTYx2_MATCHABLE(
     Stability::Type,
     stability,
     SpaceComplexity::Type,
@@ -98,7 +98,9 @@ int main()
     SortingAlgorithm::SelectionSort::grab().set_space_complexity(SpaceComplexity::O_pl_1_pr_::grab());
     SortingAlgorithm::ShellSort::grab().set_space_complexity(SpaceComplexity::O_pl_1_pr_::grab());
     SortingAlgorithm::TimSort::grab().set_space_complexity(SpaceComplexity::O_pl_n_pr_::grab());
-    SortingAlgorithm::QuickSort::grab().set_space_complexity(SpaceComplexity::O_pl_log_pl_n_pr__pr_::grab());
+    SortingAlgorithm::QuickSort::grab().set_space_complexity(
+        SpaceComplexity::O_pl_log_pl_n_pr__pr_::grab()
+    );
 
     std::vector<SortingAlgorithm::Type> stable_algorithms_by_space_complexity{
         SortingAlgorithm::variants().size()

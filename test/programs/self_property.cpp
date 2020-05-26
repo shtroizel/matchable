@@ -37,14 +37,14 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-// forward declare is enough for self spread
+// forward declare is enough for property of type self
 MATCHABLE_FWD(ppl)
 
-SPREADx2_MATCHABLE(ppl::Type, friends, int, favorite_number, ppl, Alice, Bob, Charlie)
-SET_SPREAD_VECT(ppl, Alice, friends, ppl::Bob::grab(), ppl::Charlie::grab())
-SET_SPREAD(ppl, Alice, favorite_number, 478)
-SET_SPREAD(ppl, Bob, favorite_number, 275)
-SET_SPREAD(ppl, Charlie, favorite_number, 696)
+PROPERTYx2_MATCHABLE(ppl::Type, friends, int, favorite_number, ppl, Alice, Bob, Charlie)
+SET_PROPERTY_VECT(ppl, Alice, friends, ppl::Bob::grab(), ppl::Charlie::grab())
+SET_PROPERTY(ppl, Alice, favorite_number, 478)
+SET_PROPERTY(ppl, Bob, favorite_number, 275)
+SET_PROPERTY(ppl, Charlie, favorite_number, 696)
 
 
 

@@ -91,147 +91,147 @@ namespace matchable
     }
 
 
-    bool Matchable::add_spread(std::string const & spread_type, std::string const & spread_name)
+    bool Matchable::add_property(std::string const & property_type, std::string const & property_name)
     {
-        for (auto const & [type, name] : spread_types_and_names)
-            if (name == spread_name)
+        for (auto const & [type, name] : property_types_and_names)
+            if (name == property_name)
                 return false;
 
-        spread_types_and_names.push_back(std::make_pair(spread_type, spread_name));
+        property_types_and_names.push_back(std::make_pair(property_type, property_name));
         return true;
     }
 
 
-    set_spread_status::Type Matchable::set_spread(
+    set_property_status::Type Matchable::set_property(
         std::string const & variant_name,
-        std::string const & spread_name,
+        std::string const & property_name,
         std::string const & value
     )
     {
         std::vector<MatchableVariant>::iterator iter;
-        set_spread_status::Type ret =
-                verify_spread_and_variant__and__get_variant_iter(spread_name, variant_name, iter);
-        if (ret != set_spread_status::success::grab())
+        set_property_status::Type ret =
+                verify_property_and_variant__and__get_variant_iter(property_name, variant_name, iter);
+        if (ret != set_property_status::success::grab())
             return ret;
 
-        auto spread_iter = std::find_if(
-            iter->spreads.begin(),
-            iter->spreads.end(),
-            [&](auto const & s) { return std::get<0>(s) == spread_name; }
+        auto property_iter = std::find_if(
+            iter->properties.begin(),
+            iter->properties.end(),
+            [&](auto const & s) { return std::get<0>(s) == property_name; }
         );
 
-        if (spread_iter != iter->spreads.end())
-            std::get<1>(*spread_iter) = value;
+        if (property_iter != iter->properties.end())
+            std::get<1>(*property_iter) = value;
         else
-            iter->spreads.push_back(std::make_tuple(spread_name, value, std::vector<std::string>{}));
+            iter->properties.push_back(std::make_tuple(property_name, value, std::vector<std::string>{}));
 
         return ret;
     }
 
 
-    set_spreadvect_status::Type Matchable::set_spreadvect(
+    set_propertyvect_status::Type Matchable::set_propertyvect(
         std::string const & variant_name,
-        std::string const & spread_name,
+        std::string const & property_name,
         std::vector<std::string> const & values
     )
     {
         std::vector<MatchableVariant>::iterator iter;
-        set_spread_status::Type ret =
-                verify_spread_and_variant__and__get_variant_iter(spread_name, variant_name, iter);
-        if (ret != set_spread_status::success::grab())
+        set_property_status::Type ret =
+                verify_property_and_variant__and__get_variant_iter(property_name, variant_name, iter);
+        if (ret != set_property_status::success::grab())
             return ret;
 
-        auto spread_iter = std::find_if(
-            iter->spreads.begin(),
-            iter->spreads.end(),
-            [&](auto const & s) { return std::get<0>(s) == spread_name; }
+        auto property_iter = std::find_if(
+            iter->properties.begin(),
+            iter->properties.end(),
+            [&](auto const & s) { return std::get<0>(s) == property_name; }
         );
 
-        if (spread_iter != iter->spreads.end())
-            std::get<2>(*spread_iter) = values;
+        if (property_iter != iter->properties.end())
+            std::get<2>(*property_iter) = values;
         else
-            iter->spreads.push_back(std::make_tuple(spread_name, "", values));
+            iter->properties.push_back(std::make_tuple(property_name, "", values));
 
         return ret;
     }
 
 
-    void Matchable::get_spread(
+    void Matchable::get_property(
         std::string const & variant_name,
-        std::string const & spread_name,
-        std::string & spread_value
+        std::string const & property_name,
+        std::string & property_value
     )
     {
         std::vector<MatchableVariant>::iterator iter;
-        set_spread_status::Type ret =
-                verify_spread_and_variant__and__get_variant_iter(spread_name, variant_name, iter);
-        if (ret != set_spread_status::success::grab())
+        set_property_status::Type ret =
+                verify_property_and_variant__and__get_variant_iter(property_name, variant_name, iter);
+        if (ret != set_property_status::success::grab())
             return;
 
-        auto spread_iter = std::find_if(
-            iter->spreads.begin(),
-            iter->spreads.end(),
-            [&](auto const & s) { return std::get<0>(s) == spread_name; }
+        auto property_iter = std::find_if(
+            iter->properties.begin(),
+            iter->properties.end(),
+            [&](auto const & s) { return std::get<0>(s) == property_name; }
         );
 
-        if (spread_iter != iter->spreads.end())
-            spread_value = std::get<1>(*spread_iter);
+        if (property_iter != iter->properties.end())
+            property_value = std::get<1>(*property_iter);
     }
 
 
 
-    void Matchable::get_spreadvect(
+    void Matchable::get_propertyvect(
         std::string const & variant_name,
-        std::string const & spread_name,
-        std::vector<std::string> & spread_values
+        std::string const & property_name,
+        std::vector<std::string> & property_values
     )
     {
         std::vector<MatchableVariant>::iterator iter;
-        set_spread_status::Type ret =
-                verify_spread_and_variant__and__get_variant_iter(spread_name, variant_name, iter);
-        if (ret != set_spread_status::success::grab())
+        set_property_status::Type ret =
+                verify_property_and_variant__and__get_variant_iter(property_name, variant_name, iter);
+        if (ret != set_property_status::success::grab())
         {
             std::cout << "verify failed with: " << ret << std::endl;
             return;
         }
 
-        auto spread_iter = std::find_if(
-            iter->spreads.begin(),
-            iter->spreads.end(),
-            [&](auto const & s) { return std::get<0>(s) == spread_name; }
+        auto property_iter = std::find_if(
+            iter->properties.begin(),
+            iter->properties.end(),
+            [&](auto const & s) { return std::get<0>(s) == property_name; }
         );
 
-        if (spread_iter != iter->spreads.end())
-            spread_values = std::get<2>(*spread_iter);
+        if (property_iter != iter->properties.end())
+            property_values = std::get<2>(*property_iter);
     }
 
 
-    set_spread_status::Type Matchable::verify_spread_and_variant__and__get_variant_iter(
-        std::string const & spread,
+    set_property_status::Type Matchable::verify_property_and_variant__and__get_variant_iter(
+        std::string const & property,
         std::string const & variant,
         std::vector<MatchableVariant>::iterator & iter
     )
     {
-        // verify spread exists (has been added by add_spread())
+        // verify property exists (has been added by add_property())
         {
             auto t_and_n_iter = std::find_if(
-                spread_types_and_names.begin(),
-                spread_types_and_names.end(),
-                [&](auto const & t_and_n) { return t_and_n.second == spread; }
+                property_types_and_names.begin(),
+                property_types_and_names.end(),
+                [&](auto const & t_and_n) { return t_and_n.second == property; }
             );
-            if (t_and_n_iter == spread_types_and_names.end())
-                return set_spread_status::spread_lookup_failed::grab();
+            if (t_and_n_iter == property_types_and_names.end())
+                return set_property_status::property_lookup_failed::grab();
         }
 
         auto variant_iter = std::find(variants.begin(), variants.end(), variant);
 
         // verify add_variant() called for given variant
         if (variant_iter == variants.end())
-            return set_spread_status::variant_lookup_failed::grab();
+            return set_property_status::variant_lookup_failed::grab();
 
         // only change iter on success
         iter = variant_iter;
-        return set_spread_status::success::grab();
+        return set_property_status::success::grab();
     }
 
 
@@ -263,14 +263,14 @@ namespace matchable
     save_as__status::Type MatchableMaker::save_as(
         std::string const & filename,
         save_as__content::Flags const & content,
-        save_as__grow_mode::Type mode
+        save_as__spread_mode::Type mode
     )
     {
         if (content.currently_set().size() == 0)
             return save_as__status::no_content::grab();
 
         if (mode.is_nil())
-            return save_as__status::no_grow_mode::grab();
+            return save_as__status::no_spread_mode::grab();
 
         FILE * f = fopen(filename.c_str(), "w");
         if (nullptr == f)
@@ -285,19 +285,19 @@ namespace matchable
         // if we need matchable 'generated_matchable' with variants for each matchable in the maker
         if (content.is_set(save_as__content::generated_matchable::grab()))
         {
-            if (mode == save_as__grow_mode::wrap::grab())
+            if (mode == save_as__spread_mode::wrap::grab())
             {
                 if (fputs("MATCHABLE(generated_matchable", f) == EOF)
                     goto save_as_io_error;
             }
-            else if (mode == save_as__grow_mode::always::grab())
+            else if (mode == save_as__spread_mode::always::grab())
             {
-                if (fputs("MATCHABLE_GROW(generated_matchable", f) == EOF)
+                if (fputs("SPREAD_MATCHABLE(generated_matchable", f) == EOF)
                     goto save_as_io_error;
             }
             else
             {
-                ret = save_as__status::no_grow_mode::grab();
+                ret = save_as__status::no_spread_mode::grab();
                 goto save_as_cleanup;
             }
             int matchable_count{0};
@@ -306,7 +306,7 @@ namespace matchable
                 ++matchable_count;
                 if (matchable_count % 17 == 0)
                 {
-                    if (fputs(")\nMATCHABLE_GROW(", f) == EOF)
+                    if (fputs(")\nSPREAD_MATCHABLE(", f) == EOF)
                         goto save_as_io_error;
 
                     if (fputs(name.c_str(), f) == EOF)
@@ -329,9 +329,9 @@ namespace matchable
             for (auto const & [name, m] : matchables)
                 processed.insert({name, false});
 
-            // if just growing then the order does not matter,
-            // so just go through them all and grow grow grow
-            if (mode == save_as__grow_mode::always::grab())
+            // if just spreading then the order does not matter,
+            // so just go through them all and spread spread spread
+            if (mode == save_as__spread_mode::always::grab())
             {
                 for (auto const & [name, m] : matchables)
                 {
@@ -342,12 +342,12 @@ namespace matchable
                         goto save_as_io_error;
                 }
             }
-            // not always growing means we provide definitions
+            // not always spreading means we provide definitions
             // initial definitions must be resolved so that dependency definitions occur first
-            //   - this is an issue when matchables spread to matchables that are saved together
+            //   - this is an issue when matchables and their matchable properties are saved together
             else
             {
-                // first forward declare all matchables effectively resolving all self spread
+                // first forward declare all matchables resolving any dependency to self
                 for (auto const & [name, m] : matchables)
                     if (fputs(print_matchable_fwd(*m).c_str(), f) == EOF)
                         goto save_as_io_error;
@@ -367,7 +367,7 @@ namespace matchable
                         // ready means all dependencies to other matchables within this maker have already
                         // been printed.
                         bool ready{true};
-                        for (auto const & [s_type, s_name] : m->spread_types_and_names)
+                        for (auto const & [s_type, s_name] : m->property_types_and_names)
                         {
                             static std::string const matchable_type_ending{"::Type"};
                             if (s_type.size() > matchable_type_ending.size())
@@ -377,11 +377,11 @@ namespace matchable
                                     s_type.substr(0, s_type.size() - matchable_type_ending.size())
                                 };
 
-                                // if not self spread (would be ok since we forward declared earlier) &&
+                                // if not self dependency (would be ok since we forward declared earlier) &&
                                 // if this matchable dependency is also one of those to be saved &&
                                 // if this matchable dependency has yet to be written then
                                 //     we still have unprocessed dependencies
-                                //     we must wait (stop looking at spreads and skip to next matchable)
+                                //     we must wait (stop looking at properties and skip to next matchable)
                                 if (
                                     s_type_without_ending != name &&
                                     processed.find(s_type_without_ending) != processed.end() &&
@@ -415,7 +415,7 @@ namespace matchable
                             if (!p)
                             {
                                 std::cout << "    " << name << " : ";
-                                for (auto const & [t, n] : matchables[name]->spread_types_and_names)
+                                for (auto const & [t, n] : matchables[name]->property_types_and_names)
                                     std::cout << " " << n;
                                 std::cout << std::endl;
                             }
@@ -423,12 +423,12 @@ namespace matchable
                         break;
                     }
                 } // while matchables still need to be processed
-            } // not always growing
+            } // not always spreading
 
-            // initialize spreads
+            // initialize properties
             for (auto const & [name, m] : matchables)
                 if (processed[name])
-                    if (fputs(print_set_spread(*m).c_str(), f) == EOF)
+                    if (fputs(print_set_property(*m).c_str(), f) == EOF)
                         return save_as__status::io_error::grab();
         }
 
@@ -454,7 +454,7 @@ save_as_cleanup:
 
     std::string MatchableMaker::print_matchable(
         matchable::Matchable const & m,
-        save_as__grow_mode::Type mode
+        save_as__spread_mode::Type mode
     )
     {
         std::string ret;
@@ -462,16 +462,16 @@ save_as_cleanup:
         if (mode.is_nil())
             return ret;
 
-        if (mode == save_as__grow_mode::wrap::grab())
+        if (mode == save_as__spread_mode::wrap::grab())
         {
-            if (m.spread_types_and_names.size() > 0)
+            if (m.property_types_and_names.size() > 0)
             {
-                ret += "SPREADx";
-                ret += std::to_string(m.spread_types_and_names.size());
+                ret += "PROPERTYx";
+                ret += std::to_string(m.property_types_and_names.size());
                 ret += "_";
             }
             ret += "MATCHABLE(";
-            for (auto const & [t, n] : m.spread_types_and_names)
+            for (auto const & [t, n] : m.property_types_and_names)
             {
                 ret += t;
                 ret += ", ";
@@ -479,9 +479,9 @@ save_as_cleanup:
                 ret += ", ";
             }
         }
-        else if (mode == save_as__grow_mode::always::grab())
+        else if (mode == save_as__spread_mode::always::grab())
         {
-            ret += "MATCHABLE_GROW(";
+            ret += "SPREAD_MATCHABLE(";
         }
         else
         {
@@ -495,7 +495,7 @@ save_as_cleanup:
             ++variant_count;
             if (variant_count % 17 == 0)
             {
-                ret += ")\nMATCHABLE_GROW(";
+                ret += ")\nSPREAD_MATCHABLE(";
                 ret += m.name;
             }
 
@@ -508,16 +508,16 @@ save_as_cleanup:
     }
 
 
-    std::string MatchableMaker::print_set_spread(Matchable const & m)
+    std::string MatchableMaker::print_set_property(Matchable const & m)
     {
         std::string ret;
         for (auto const & variant : m.variants)
         {
-            for (auto const & [s_name, s_value, s_values] : variant.spreads)
+            for (auto const & [s_name, s_value, s_values] : variant.properties)
             {
                 if (s_value.size() > 0)
                 {
-                    ret += "SET_SPREAD(";
+                    ret += "SET_PROPERTY(";
                     ret += m.name;
                     ret += ", ";
                     ret += variant.variant_name;
@@ -529,7 +529,7 @@ save_as_cleanup:
                 }
                 if (s_values.size() > 0)
                 {
-                    ret += "SET_SPREAD_VECT(";
+                    ret += "SET_PROPERTY_VECT(";
                     ret += m.name;
                     ret += ", ";
                     ret += variant.variant_name;

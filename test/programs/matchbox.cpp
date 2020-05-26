@@ -53,7 +53,7 @@ MATCHABLE(
     smashed,
     vaporized
 )
-SPREADx1_MATCHABLE(
+PROPERTYx1_MATCHABLE(
     AttackPastTense::Type,
     past_tense,
     Attack,
@@ -67,15 +67,15 @@ SPREADx1_MATCHABLE(
     smashes,
     vaporizes
 )
-SET_SPREAD(Attack, covers, past_tense, AttackPastTense::covered::grab())
-SET_SPREAD(Attack, crushes, past_tense, AttackPastTense::crushed::grab())
-SET_SPREAD(Attack, cuts, past_tense, AttackPastTense::cut::grab())
-SET_SPREAD(Attack, decapitates, past_tense, AttackPastTense::decapitated::grab())
-SET_SPREAD(Attack, disproves, past_tense, AttackPastTense::disproved::grab())
-SET_SPREAD(Attack, eats, past_tense, AttackPastTense::ate::grab())
-SET_SPREAD(Attack, poisons, past_tense, AttackPastTense::poisoned::grab())
-SET_SPREAD(Attack, smashes, past_tense, AttackPastTense::smashed::grab())
-SET_SPREAD(Attack, vaporizes, past_tense, AttackPastTense::vaporized::grab())
+SET_PROPERTY(Attack, covers, past_tense, AttackPastTense::covered::grab())
+SET_PROPERTY(Attack, crushes, past_tense, AttackPastTense::crushed::grab())
+SET_PROPERTY(Attack, cuts, past_tense, AttackPastTense::cut::grab())
+SET_PROPERTY(Attack, decapitates, past_tense, AttackPastTense::decapitated::grab())
+SET_PROPERTY(Attack, disproves, past_tense, AttackPastTense::disproved::grab())
+SET_PROPERTY(Attack, eats, past_tense, AttackPastTense::ate::grab())
+SET_PROPERTY(Attack, poisons, past_tense, AttackPastTense::poisoned::grab())
+SET_PROPERTY(Attack, smashes, past_tense, AttackPastTense::smashed::grab())
+SET_PROPERTY(Attack, vaporizes, past_tense, AttackPastTense::vaporized::grab())
 
 static matchable::MatchBox<Actor::Type, Attack::Type> const rock_attack({
     { Actor::Lizard::grab(), Attack::crushes::grab() },

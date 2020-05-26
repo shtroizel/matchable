@@ -42,12 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 MATCHABLE(Color, Black, Red)
-SPREADx1_MATCHABLE(Color::Type, color, Suit, Clubs, Diamonds, Hearts, Spades)
+PROPERTYx1_MATCHABLE(Color::Type, color, Suit, Clubs, Diamonds, Hearts, Spades)
 
 // There are two syntaxes for this. The SET_SPREAD() macro is used here for the black suits.
 // To demonstrate the other syntax we use the run-time interface within main() to set the red suits.
-SET_SPREAD(Suit, Clubs, color, Color::Black::grab())
-SET_SPREAD(Suit, Spades, color, Color::Black::grab())
+SET_PROPERTY(Suit, Clubs, color, Color::Black::grab())
+SET_PROPERTY(Suit, Spades, color, Color::Black::grab())
 
 MATCHABLE(Rank, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace)
 

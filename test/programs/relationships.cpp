@@ -39,8 +39,8 @@ MATCHABLE(DayOfWeekOccurrence, first, second, third, fourth, last)
 
 MATCHABLE(DayOfWeek, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday);
 
-SPREADx1_MATCHABLE(DayOfWeek::Type, day_of_week, Days, Weekdays, Weekend)
-SET_SPREAD_VECT(
+PROPERTYx1_MATCHABLE(DayOfWeek::Type, day_of_week, Days, Weekdays, Weekend)
+SET_PROPERTY_VECT(
     Days,
     Weekdays,
     day_of_week,
@@ -50,7 +50,7 @@ SET_SPREAD_VECT(
     DayOfWeek::Thursday::grab(),
     DayOfWeek::Friday::grab()
 )
-SET_SPREAD_VECT(Days, Weekend, day_of_week, DayOfWeek::Sunday::grab(), DayOfWeek::Saturday::grab())
+SET_PROPERTY_VECT(Days, Weekend, day_of_week, DayOfWeek::Sunday::grab(), DayOfWeek::Saturday::grab())
 
 MATCHABLE(
     DayOfMonth,
@@ -76,7 +76,7 @@ MATCHABLE(
     December
 )
 
-SPREADx4_MATCHABLE(
+PROPERTYx4_MATCHABLE(
     DayOfWeek::Type,
     day_of_week,
     DayOfWeekOccurrence::Type,
@@ -99,49 +99,50 @@ SPREADx4_MATCHABLE(
     Veterans_spc_Day,
     Christmas_spc_Day
 )
-SET_SPREAD(Holiday, Mothers_spc_Day, day_of_week, DayOfWeek::Sunday::grab())
-SET_SPREAD(Holiday, Mothers_spc_Day, occurrence, DayOfWeekOccurrence::second::grab())
-SET_SPREAD(Holiday, Mothers_spc_Day, month, Month::May::grab())
+SET_PROPERTY(Holiday, Mothers_spc_Day, day_of_week, DayOfWeek::Sunday::grab())
+SET_PROPERTY(Holiday, Mothers_spc_Day, occurrence, DayOfWeekOccurrence::second::grab())
+SET_PROPERTY(Holiday, Mothers_spc_Day, month, Month::May::grab())
 
-SET_SPREAD(Holiday, Fathers_spc_Day, day_of_week, DayOfWeek::Sunday::grab())
-SET_SPREAD(Holiday, Fathers_spc_Day, occurrence, DayOfWeekOccurrence::third::grab())
-SET_SPREAD(Holiday, Fathers_spc_Day, month, Month::June::grab())
+SET_PROPERTY(Holiday, Fathers_spc_Day, day_of_week, DayOfWeek::Sunday::grab())
+SET_PROPERTY(Holiday, Fathers_spc_Day, occurrence, DayOfWeekOccurrence::third::grab())
+SET_PROPERTY(Holiday, Fathers_spc_Day, month, Month::June::grab())
 
-SET_SPREAD(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, day_of_week, DayOfWeek::Monday::grab())
-SET_SPREAD(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, occurrence, DayOfWeekOccurrence::third::grab())
-SET_SPREAD(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, month, Month::January::grab())
+SET_PROPERTY(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+SET_PROPERTY(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day,
+             occurrence, DayOfWeekOccurrence::third::grab())
+SET_PROPERTY(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, month, Month::January::grab())
 
-SET_SPREAD(Holiday, Lincoln_spc_Washington_spc_Day, day_of_week, DayOfWeek::Monday::grab())
-SET_SPREAD(Holiday, Lincoln_spc_Washington_spc_Day, occurrence, DayOfWeekOccurrence::third::grab())
-SET_SPREAD(Holiday, Lincoln_spc_Washington_spc_Day, month, Month::Februrary::grab())
+SET_PROPERTY(Holiday, Lincoln_spc_Washington_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+SET_PROPERTY(Holiday, Lincoln_spc_Washington_spc_Day, occurrence, DayOfWeekOccurrence::third::grab())
+SET_PROPERTY(Holiday, Lincoln_spc_Washington_spc_Day, month, Month::Februrary::grab())
 
-SET_SPREAD(Holiday, Memorial_spc_Day, day_of_week, DayOfWeek::Monday::grab())
-SET_SPREAD(Holiday, Memorial_spc_Day, occurrence, DayOfWeekOccurrence::last::grab())
-SET_SPREAD(Holiday, Memorial_spc_Day, month, Month::May::grab())
+SET_PROPERTY(Holiday, Memorial_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+SET_PROPERTY(Holiday, Memorial_spc_Day, occurrence, DayOfWeekOccurrence::last::grab())
+SET_PROPERTY(Holiday, Memorial_spc_Day, month, Month::May::grab())
 
-SET_SPREAD(Holiday, Labor_spc_Day, day_of_week, DayOfWeek::Monday::grab())
-SET_SPREAD(Holiday, Labor_spc_Day, occurrence, DayOfWeekOccurrence::first::grab())
-SET_SPREAD(Holiday, Labor_spc_Day, month, Month::September::grab())
+SET_PROPERTY(Holiday, Labor_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+SET_PROPERTY(Holiday, Labor_spc_Day, occurrence, DayOfWeekOccurrence::first::grab())
+SET_PROPERTY(Holiday, Labor_spc_Day, month, Month::September::grab())
 
-SET_SPREAD(Holiday, Columbus_spc_Day, day_of_week, DayOfWeek::Monday::grab())
-SET_SPREAD(Holiday, Columbus_spc_Day, occurrence, DayOfWeekOccurrence::second::grab())
-SET_SPREAD(Holiday, Columbus_spc_Day, month, Month::October::grab())
+SET_PROPERTY(Holiday, Columbus_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+SET_PROPERTY(Holiday, Columbus_spc_Day, occurrence, DayOfWeekOccurrence::second::grab())
+SET_PROPERTY(Holiday, Columbus_spc_Day, month, Month::October::grab())
 
-SET_SPREAD(Holiday, Thanksgiving_spc_Day, day_of_week, DayOfWeek::Thursday::grab())
-SET_SPREAD(Holiday, Thanksgiving_spc_Day, occurrence, DayOfWeekOccurrence::fourth::grab())
-SET_SPREAD(Holiday, Thanksgiving_spc_Day, month, Month::November::grab())
+SET_PROPERTY(Holiday, Thanksgiving_spc_Day, day_of_week, DayOfWeek::Thursday::grab())
+SET_PROPERTY(Holiday, Thanksgiving_spc_Day, occurrence, DayOfWeekOccurrence::fourth::grab())
+SET_PROPERTY(Holiday, Thanksgiving_spc_Day, month, Month::November::grab())
 
-SET_SPREAD(Holiday, New_spc_Years_spc_Day, day_of_month, DayOfMonth::esc_1st::grab())
-SET_SPREAD(Holiday, New_spc_Years_spc_Day, month, Month::January::grab())
+SET_PROPERTY(Holiday, New_spc_Years_spc_Day, day_of_month, DayOfMonth::esc_1st::grab())
+SET_PROPERTY(Holiday, New_spc_Years_spc_Day, month, Month::January::grab())
 
-SET_SPREAD(Holiday, Independence_spc_Day, day_of_month, DayOfMonth::esc_4th::grab())
-SET_SPREAD(Holiday, Independence_spc_Day, month, Month::July::grab())
+SET_PROPERTY(Holiday, Independence_spc_Day, day_of_month, DayOfMonth::esc_4th::grab())
+SET_PROPERTY(Holiday, Independence_spc_Day, month, Month::July::grab())
 
-SET_SPREAD(Holiday, Veterans_spc_Day, day_of_month, DayOfMonth::esc_11th::grab())
-SET_SPREAD(Holiday, Veterans_spc_Day, month, Month::November::grab())
+SET_PROPERTY(Holiday, Veterans_spc_Day, day_of_month, DayOfMonth::esc_11th::grab())
+SET_PROPERTY(Holiday, Veterans_spc_Day, month, Month::November::grab())
 
-SET_SPREAD(Holiday, Christmas_spc_Day, day_of_month, DayOfMonth::esc_25th::grab())
-SET_SPREAD(Holiday, Christmas_spc_Day, month, Month::December::grab())
+SET_PROPERTY(Holiday, Christmas_spc_Day, day_of_month, DayOfMonth::esc_25th::grab())
+SET_PROPERTY(Holiday, Christmas_spc_Day, month, Month::December::grab())
 
 
 

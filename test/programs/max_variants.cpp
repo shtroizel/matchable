@@ -151,7 +151,7 @@ MATCHABLE(
 
 
 // grow beyond 108 variants...
-MATCHABLE_GROW(
+SPREAD_MATCHABLE(
     Number,
     one_spc_hundred_spc_and_spc_eight,
     one_spc_hundred_spc_and_spc_nine,
