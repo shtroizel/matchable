@@ -86,21 +86,21 @@ Params:
 * **type** The new "matchable" to be created<br/>
 * **variant...** 0..108 comma separated variants of the new matchable type
 
-#### SPREADx1_MATCHABLE(spread_type, spread_name, type, variant...)
-Same as MATCHABLE(), but injects a property called **spread_name** of type **spread_type**<br/>
+#### PROPERTYx1_MATCHABLE(property_type, property_name, type, variant...)
+Same as MATCHABLE(), but injects a property called **property_name** of type **property_type**<br/>
 Params:
-* **spread_type** type of injected property<br/>
-* **spread_name** name of injected property<br/>
+* **property_type** type of injected property<br/>
+* **property_name** name of injected property<br/>
 * **type** name of the new "matchable" to be created<br/>
 * **variant...** 0..108 comma separated variants of the new matchable<br/>
 <br/>
 The property is available both as a single value and as a vector with:<br/>
 
-**spread_type** const & as_**spread_name**()<br/>
-std::vector<**spread_type**> const & as_**spread_name**_vect()<br/>
+**property_type** const & as_**property_name**()<br/>
+std::vector<**property_type**> const & as_**property_name**_vect()<br/>
 
-void set_**spread_name**(**spread_type** const &)<br/>
-void set_**spread_name**_vect(std::vector<**spread_type**> const &)<br/>
+void set_**property_name**(**property_type** const &)<br/>
+void set_**property_name**_vect(std::vector<**property_type**> const &)<br/>
 
 
 Examples:<br>
@@ -108,48 +108,47 @@ test/programs/cards.cpp<br/>
 test/programs/matchbox.cpp<br/>
 test/programs/sorting.cpp<br/>
 
-#### SPREADx*_MATCHABLE()
-Similar to SPREADx1_MATCHABLE(), the following macros exist for injecting multiple properties when creating matchables.<br/>
+#### PROPERTYx*_MATCHABLE()
+Similar to PROPERTYx1_MATCHABLE(), the following macros exist for injecting multiple properties when creating matchables.<br/>
 
-SPREADx2_MATCHABLE()<br/>
-SPREADx3_MATCHABLE()<br/>
-SPREADx4_MATCHABLE()<br/>
-SPREADx5_MATCHABLE()<br/>
-SPREADx6_MATCHABLE()<br/>
-SPREADx7_MATCHABLE()<br/>
+PROPERTYx2_MATCHABLE()<br/>
+PROPERTYx3_MATCHABLE()<br/>
+PROPERTYx4_MATCHABLE()<br/>
+PROPERTYx5_MATCHABLE()<br/>
+PROPERTYx6_MATCHABLE()<br/>
+PROPERTYx7_MATCHABLE()<br/>
 
 Example: test/programs/relationships.cpp
 
 ## Going beyond 108 variants
-Although a matchable is initially defined with up to 108 variants, it may grow as needed to achieve variant
-counts higher than 108.
-#### MATCHABLE_GROW(type, variant...)
+Although a matchable is initially defined with up to 108 variants, it may spread to achieve variant counts higher than 108.
+#### SPREAD_MATCHABLE(type, variant...)
 Add up to 108 new variants to **type**.<br/>
 This may be repeated as needed...<br/>
 Example: test/programs/max_variants.cpp
 
-## Macros for setting spreads at link-time
+## Macros for setting properties at link-time
 
-#### SET_SPREAD(type, variant, spread_name, spread_value)
+#### SET_PROPERTY(type, variant, property_name, property_value)
 Params:
 * **type** A matchable type
 * **variant** A variant of **type**
-* **spread_name** A spread available to **type**.
-* **spread_value** The new value to be set
+* **property_name** A property available to **type**.
+* **property_value** The new value to be set
 
-Calls **type**::**variant**::grab().set_**spread_name**(**spread_value**) at link-time.<br/>
+Calls **type**::**variant**::grab().set_**property_name**(**property_value**) at link-time.<br/>
 Examples:<br/>
 test/programs/cards.cpp<br/>
 test/programs/relationships.cpp<br/>
 
-#### SET_SPREAD_VECT(type, variant, spread_name, spread_values...)
+#### SET_PROPERTY_VECT(type, variant, property_name, property_values...)
 Params:
 * **type** A matchable type
 * **variant** A variant of **type**
-* **spread_name** A spread available to **type**
-* **spread_values...** The new values to be set
+* **property_name** A property available to **type**
+* **property_values...** The new values to be set
 
-Calls **type**::**variant**::grab().set_**spread_name**_vect() with a vector formed by the given **spread_values...**<br/>
+Calls **type**::**variant**::grab().set_**property_name**_vect() with a vector formed by the given **property_values...**<br/>
 Example: test/programs/relationships.cpp<br/>
 
 ## Run-time macros
