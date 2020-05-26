@@ -912,88 +912,59 @@ namespace matchable
     {
         inline std::string unescape_all(std::string const & input);
         inline std::string escape_all(std::string const & input);
-    }
 
-    MATCHABLE(
-        escapable,
-        _spc_,
-        _bng_,
-        _qt_,
-        _hsh_,
-        _dol_,
-        _pct_,
-        _amp_,
-        _sqt_,
-        _pl_,
-        _pr_,
-        _ast_,
-        _pls_,
-        _cma_,
-        _mns_,
-        _dot_,
-        _slsh_,
-        _cln_,
-        _scln_,
-        _lt_,
-        _eq_,
-        _gt_,
-        _q_,
-        _at_,
-        _sbl_,
-        _bslsh_,
-        _sbr_,
-        _crt_,
-        _bqt_,
-        _cbl_,
-        _pip_,
-        _cbr_,
-        _tld_
-    )
-
-    namespace escapable
-    {
-        inline std::string unescape(escapable::Type esc)
+        inline std::vector<std::pair<std::string, std::string>> const & code_symbol_pairs()
         {
-            if (esc.is_nil())
+            static std::vector<std::pair<std::string, std::string>> const csp =
+                [&](){
+                    std::vector<std::pair<std::string, std::string>> csp_init;
+                    csp_init.push_back(std::make_pair("_spc_", " "));
+                    csp_init.push_back(std::make_pair("_bng_", "!"));
+                    csp_init.push_back(std::make_pair("_qt_", "\""));
+                    csp_init.push_back(std::make_pair("_hsh_", "#"));
+                    csp_init.push_back(std::make_pair("_dol_", "$"));
+                    csp_init.push_back(std::make_pair("_pct_", "%"));
+                    csp_init.push_back(std::make_pair("_amp_", "&"));
+                    csp_init.push_back(std::make_pair("_sqt_", "'"));
+                    csp_init.push_back(std::make_pair("_pl_", "("));
+                    csp_init.push_back(std::make_pair("_pr_", ")"));
+                    csp_init.push_back(std::make_pair("_ast_", "*"));
+                    csp_init.push_back(std::make_pair("_pls_", "+"));
+                    csp_init.push_back(std::make_pair("_cma_", ","));
+                    csp_init.push_back(std::make_pair("_mns_", "-"));
+                    csp_init.push_back(std::make_pair("_dot_", "."));
+                    csp_init.push_back(std::make_pair("_slsh_", "/"));
+                    csp_init.push_back(std::make_pair("_cln_", ":"));
+                    csp_init.push_back(std::make_pair("_scln_", ";"));
+                    csp_init.push_back(std::make_pair("_lt_", "<"));
+                    csp_init.push_back(std::make_pair("_eq_", "="));
+                    csp_init.push_back(std::make_pair("_gt_", ">"));
+                    csp_init.push_back(std::make_pair("_q_", "?"));
+                    csp_init.push_back(std::make_pair("_at_", "@"));
+                    csp_init.push_back(std::make_pair("_sbl_", "["));
+                    csp_init.push_back(std::make_pair("_bslsh_", "\\"));
+                    csp_init.push_back(std::make_pair("_sbr_", "]"));
+                    csp_init.push_back(std::make_pair("_crt_", "^"));
+                    csp_init.push_back(std::make_pair("_bqt_", "`"));
+                    csp_init.push_back(std::make_pair("_cbl_", "{"));
+                    csp_init.push_back(std::make_pair("_pip_", "|"));
+                    csp_init.push_back(std::make_pair("_cbr_", "}"));
+                    csp_init.push_back(std::make_pair("_tld_", "~"));
+                    return csp_init;
+                }();
+            return csp;
+        }
+
+        inline std::string unescape(std::string const & esc)
+        {
+            if (esc.size() == 0)
                 return "";
 
-            static const MatchBox<escapable::Type, std::string> u({
-                {escapable::_spc_::grab(), " "},
-                {escapable::_bng_::grab(), "!"},
-                {escapable::_qt_::grab(), "\""},
-                {escapable::_hsh_::grab(), "#"},
-                {escapable::_dol_::grab(), "$"},
-                {escapable::_pct_::grab(), "$"},
-                {escapable::_amp_::grab(), "&"},
-                {escapable::_sqt_::grab(), "'"},
-                {escapable::_pl_::grab(), "("},
-                {escapable::_pr_::grab(), ")"},
-                {escapable::_ast_::grab(), "*"},
-                {escapable::_pls_::grab(), "+"},
-                {escapable::_cma_::grab(), ","},
-                {escapable::_mns_::grab(), "-"},
-                {escapable::_dot_::grab(), "."},
-                {escapable::_slsh_::grab(), "/"},
-                {escapable::_cln_::grab(), ":"},
-                {escapable::_scln_::grab(), ";"},
-                {escapable::_lt_::grab(), "<"},
-                {escapable::_eq_::grab(), "="},
-                {escapable::_gt_::grab(), ">"},
-                {escapable::_q_::grab(), "?"},
-                {escapable::_at_::grab(), "@"},
-                {escapable::_sbl_::grab(), "["},
-                {escapable::_bslsh_::grab(), "\\"},
-                {escapable::_sbr_::grab(), "]"},
-                {escapable::_crt_::grab(), "^"},
-                {escapable::_bqt_::grab(), "`"},
-                {escapable::_cbl_::grab(), "{"},
-                {escapable::_pip_::grab(), "|"},
-                {escapable::_cbr_::grab(), "}"},
-                {escapable::_tld_::grab(), "~"},
-            });
+            for (auto const & [code, symbol] : code_symbol_pairs())
+                if (code == esc)
+                    return symbol;
 
-            assert(u.at(esc) != "");
-            return u.at(esc);
+            return esc;
         }
 
 
@@ -1001,18 +972,18 @@ namespace matchable
         {
             std::string unescaped{input};
             size_t index = 0;
-            for (auto escapable_variant : escapable::variants_by_index())
+            for (auto const & [code, symbol] : code_symbol_pairs())
             {
                 index = 0;
                 while (true)
                 {
-                    index = unescaped.find(escapable_variant.as_string(), index);
+                    index = unescaped.find(code, index);
                     if (index == std::string::npos)
                         break;
 
-                    auto replacement = unescape(escapable_variant);
+                    auto replacement = symbol;
                     assert(replacement != "");
-                    unescaped.erase(index, escapable_variant.as_string().size());
+                    unescaped.erase(index, code.size());
                     unescaped.insert(index, replacement);
                     index += replacement.size();
                 }
@@ -1021,47 +992,47 @@ namespace matchable
         }
 
 
-        inline Type escape(std::string const & str)
+        inline std::string escape(std::string const & str)
         {
             if (str.size() != 1)
-                return escapable::nil;
+                return str;
 
             static int const offset{32};
-            static std::array<escapable::Type, 128 - offset> const escapables =
+            static std::array<std::string, 128 - offset> const escapables =
                 [&](){
-                    std::array<escapable::Type, 128 - offset> e;
-                    e[(int) ' ' - offset] = escapable::_spc_::grab();
-                    e[(int) '!' - offset] = escapable::_bng_::grab();
-                    e[(int) '"' - offset] = escapable::_qt_::grab();
-                    e[(int) '#' - offset] = escapable::_hsh_::grab();
-                    e[(int) '$' - offset] = escapable::_dol_::grab();
-                    e[(int) '%' - offset] = escapable::_pct_::grab();
-                    e[(int) '&' - offset] = escapable::_amp_::grab();
-                    e[(int) '\'' - offset] = escapable::_sqt_::grab();
-                    e[(int) '(' - offset] = escapable::_pl_::grab();
-                    e[(int) ')' - offset] = escapable::_pr_::grab();
-                    e[(int) '*' - offset] = escapable::_ast_::grab();
-                    e[(int) '+' - offset] = escapable::_pls_::grab();
-                    e[(int) ',' - offset] = escapable::_cma_::grab();
-                    e[(int) '-' - offset] = escapable::_mns_::grab();
-                    e[(int) '.' - offset] = escapable::_dot_::grab();
-                    e[(int) '/' - offset] = escapable::_slsh_::grab();
-                    e[(int) ':' - offset] = escapable::_cln_::grab();
-                    e[(int) ';' - offset] = escapable::_scln_::grab();
-                    e[(int) '<' - offset] = escapable::_lt_::grab();
-                    e[(int) '=' - offset] = escapable::_eq_::grab();
-                    e[(int) '>' - offset] = escapable::_gt_::grab();
-                    e[(int) '?' - offset] = escapable::_q_::grab();
-                    e[(int) '@' - offset] = escapable::_at_::grab();
-                    e[(int) '[' - offset] = escapable::_sbl_::grab();
-                    e[(int) '\\' - offset] = escapable::_bslsh_::grab();
-                    e[(int) ']' - offset] = escapable::_sbr_::grab();
-                    e[(int) '^' - offset] = escapable::_crt_::grab();
-                    e[(int) '`' - offset] = escapable::_bqt_::grab();
-                    e[(int) '{' - offset] = escapable::_cbl_::grab();
-                    e[(int) '|' - offset] = escapable::_pip_::grab();
-                    e[(int) '}' - offset] = escapable::_cbr_::grab();
-                    e[(int) '~' - offset] = escapable::_tld_::grab();
+                    std::array<std::string, 128 - offset> e;
+                    e[(int) ' ' - offset] = "_spc_";
+                    e[(int) '!' - offset] = "_bng_";
+                    e[(int) '"' - offset] = "_qt_";
+                    e[(int) '#' - offset] = "_hsh_";
+                    e[(int) '$' - offset] = "_dol_";
+                    e[(int) '%' - offset] = "_pct_";
+                    e[(int) '&' - offset] = "_amp_";
+                    e[(int) '\'' - offset] = "_sqt_";
+                    e[(int) '(' - offset] = "_pl_";
+                    e[(int) ')' - offset] = "_pr_";
+                    e[(int) '*' - offset] = "_ast_";
+                    e[(int) '+' - offset] = "_pls_";
+                    e[(int) ',' - offset] = "_cma_";
+                    e[(int) '-' - offset] = "_mns_";
+                    e[(int) '.' - offset] = "_dot_";
+                    e[(int) '/' - offset] = "_slsh_";
+                    e[(int) ':' - offset] = "_cln_";
+                    e[(int) ';' - offset] = "_scln_";
+                    e[(int) '<' - offset] = "_lt_";
+                    e[(int) '=' - offset] = "_eq_";
+                    e[(int) '>' - offset] = "_gt_";
+                    e[(int) '?' - offset] = "_q_";
+                    e[(int) '@' - offset] = "_at_";
+                    e[(int) '[' - offset] = "_sbl_";
+                    e[(int) '\\' - offset] = "_bslsh_";
+                    e[(int) ']' - offset] = "_sbr_";
+                    e[(int) '^' - offset] = "_crt_";
+                    e[(int) '`' - offset] = "_bqt_";
+                    e[(int) '{' - offset] = "_cbl_";
+                    e[(int) '|' - offset] = "_pip_";
+                    e[(int) '}' - offset] = "_cbr_";
+                    e[(int) '~' - offset] = "_tld_";
                     return e;
                 }();
 
@@ -1069,20 +1040,20 @@ namespace matchable
             if (ch >= offset && ch < 127)
                 return escapables[ch - offset];
 
-            return escapable::nil;
+            return str;
         }
 
 
         inline std::string escape_all(std::string const & input)
         {
             std::string escaped;
-            escapable::Type escapable;
+            std::string escapable;
             std::string char_as_str;
             for (size_t i = 0; i < input.size(); ++i)
             {
                 char_as_str = std::string(1, input[i]);
                 escapable = escapable::escape(char_as_str);
-                escaped += escapable.is_nil() ? char_as_str : escapable.as_string();
+                escaped += escapable == "" ? char_as_str : escapable;
             }
             return escaped;
         }

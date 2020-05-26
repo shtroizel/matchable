@@ -158,12 +158,8 @@ int main()
     }
 
     std::cout << "\nescape codes:" << std::endl;
-    for (auto e : matchable::escapable::variants_by_index())
-    {
-        std::cout << "    " << e << " matches '"
-                  << matchable::escapable::unescape(e)
-                  << "'" << std::endl;
-    }
+    for (auto const & [code, symbol] : matchable::escapable::code_symbol_pairs())
+        std::cout << "    " << code << " matches '" << symbol << "'" << std::endl;
 
     auto s = special::from_string("xor_eq");
     TEST_EQ(ok, s, special::esc_xor_eq::grab());
