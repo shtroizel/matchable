@@ -434,7 +434,7 @@ namespace matchable
         static Type const nil{};                                                                           \
         inline Type from_index(int index)                                                                  \
         {                                                                                                  \
-            if (index < 0 || index >= (int) I##_t::variants().size())                                      \
+            if (index < 0 || index >= (int) I##_t::variants_by_index().size())                             \
                 return nil;                                                                                \
             return I##_t::variants_by_index().at(index);                                                   \
         }                                                                                                  \
