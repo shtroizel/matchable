@@ -159,6 +159,14 @@ int main()
         TEST_EQ(ok, tu, TimeUnit::from_index(tu.as_index()));
     TEST_EQ(ok, TimeUnit::from_index(107), TimeUnit::nil);
 
+    // from_as_string_index()
+    TEST_EQ(ok, TimeUnit::Seconds::grab().as_by_string_index(), 3);
+    TEST_EQ(ok, TimeUnit::Minutes::grab().as_by_string_index(), 2);
+    TEST_EQ(ok, TimeUnit::Hours::grab().as_by_string_index(), 1);
+    TEST_EQ(ok, TimeUnit::Days::grab().as_by_string_index(), 0);
+    TEST_EQ(ok, TimeUnit::Weeks::grab().as_by_string_index(), 4);
+    TEST_EQ(ok, TimeUnit::nil.as_by_string_index(), -1);
+
     // is_nil()
     TEST_NE(ok, time_unit.is_nil(), true);
 

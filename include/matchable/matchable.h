@@ -331,6 +331,7 @@ namespace matchable
             I##_t() = default;                                                                             \
             virtual ~I##_t() = default;                                                                    \
             virtual int as_index() const = 0;                                                              \
+            virtual int as_by_string_index() const = 0;                                                    \
             virtual std::string const & as_string() const = 0;                                             \
             virtual std::string const & as_identifier_string() const = 0;                                  \
             static std::vector<Type> const & variants() { return variants_by_index(); }                    \
@@ -339,6 +340,7 @@ namespace matchable
             static bool register_variant(Type const & variant, int * i);                                   \
         protected:                                                                                         \
         private:                                                                                           \
+            virtual void set_by_string_index(int index) = 0;                                               \
             virtual std::shared_ptr<I##_t> clone() const = 0;                                              \
             static std::vector<Type> & by_index() { static std::vector<Type> v; return v; }                \
             static std::vector<Type> & by_string() { static std::vector<Type> v; return v; }
@@ -352,7 +354,7 @@ namespace matchable
 #define _matchable_create_type_begin(_t)                                                                   \
     namespace _t                                                                                           \
     {                                                                                                      \
-        template<typename T>                                                                               \
+        template<class T>                                                                                  \
         class MatchableType                                                                                \
         {                                                                                                  \
         public:                                                                                            \
@@ -383,6 +385,7 @@ namespace matchable
                 return nullptr == t ? nil_str : t->as_identifier_string();                                 \
             }                                                                                              \
             int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
+            int as_by_string_index() const { return nullptr == t ? -1 : t->as_by_string_index(); }         \
             bool is_nil() const { return nullptr == t; }                                                   \
             matchable::FlowControl match(MatchParamWithFlowControl const & mb) const                       \
             {                                                                                              \
@@ -410,6 +413,7 @@ namespace matchable
             {                                                                                              \
                 return o << m.as_string();                                                                 \
             }                                                                                              \
+            void set_by_string_index(int index) { if (nullptr != t) t->set_by_string_index(index); }       \
         private:                                                                                           \
             std::shared_ptr<T> t;
 
@@ -433,6 +437,12 @@ namespace matchable
             if (index < 0 || index >= (int) I##_t::variants().size())                                      \
                 return nil;                                                                                \
             return I##_t::variants_by_index().at(index);                                                   \
+        }                                                                                                  \
+        inline Type from_by_string_index(int index)                                                        \
+        {                                                                                                  \
+            if (index < 0 || index >= (int) I##_t::variants_by_string().size())                            \
+                return nil;                                                                                \
+            return I##_t::variants_by_string().at(index);                                                  \
         }                                                                                                  \
         inline Type type_and_neighbors_from_string(std::string const & str, Type * lt, Type * gt)          \
         {                                                                                                  \
@@ -499,6 +509,8 @@ namespace matchable
                     std::upper_bound(by_string().begin(), by_string().end(), variant, pred),               \
                     variant                                                                                \
                 );                                                                                         \
+                for (int i = 0; i < (int) by_string().size(); ++i)                                         \
+                    by_string()[i].set_by_string_index(i);                                                 \
             }                                                                                              \
             return true;                                                                                   \
         }                                                                                                  \
@@ -513,6 +525,7 @@ namespace matchable
         public:                                                                                            \
             _v() = default;                                                                                \
             int as_index() const override { return *m_index(); }                                           \
+            int as_by_string_index() const override { return *m_by_string_index(); }                       \
             std::string const & as_string() const override                                                 \
             {                                                                                              \
                 static std::string const s =                                                               \
@@ -528,8 +541,10 @@ namespace matchable
             }                                                                                              \
             std::string const & as_identifier_string() const override                                      \
                 { static std::string const s{#_v}; return s; }                                             \
+            void set_by_string_index(int index) override { *m_by_string_index() = index; }                 \
             static Type grab() { return Type(create()); }                                                  \
             static int * m_index() { static int i{-1}; return &i; }                                        \
+            static int * m_by_string_index() { static int i{-1}; return &i; }                              \
         private:                                                                                           \
             std::shared_ptr<I##_t> clone() const  override { return create(); }                            \
             static std::shared_ptr<_v> create() { return std::make_shared<_v>(); }

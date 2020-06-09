@@ -39,6 +39,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     template<typename M> class MatchBox<M, void>;                                                          \
     namespace _t                                                                                           \
     {                                                                                                      \
-        template<typename T> class MatchableType;                                                          \
+        template<class T> class MatchableType;                                                          \
         using Type = MatchableType<class I##_t>;                                                           \
     }
