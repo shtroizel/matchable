@@ -160,7 +160,7 @@ int main()
     TEST_EQ(ok, TimeUnit::from_index(107), TimeUnit::nil);
 
     // is_nil()
-    TEST_NE(ok, time_unit, TimeUnit::nil);
+    TEST_NE(ok, time_unit.is_nil(), true);
 
     // Flags
     TimeUnit::Flags flags;
