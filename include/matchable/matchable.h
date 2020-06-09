@@ -839,7 +839,7 @@ namespace matchable
 
 
 #define PROPERTYx7_MATCHABLE(_pt0, _p0, _pt1, _p1, _pt2, _p2, _pt3, _p3, _pt4, _p4, _pt5, _p5,             \
-                           _pt6, _p6, _t, ...)                                                             \
+                             _pt6, _p6, _t, ...)                                                           \
     _matchable_create_type_begin(_t)                                                                       \
     _property_matchable_amend_type(_pt0, _p0, _t)                                                          \
     _property_matchable_amend_type(_pt1, _p1, _t)                                                          \
