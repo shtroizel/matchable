@@ -444,7 +444,7 @@ namespace matchable
                 return nil;                                                                                \
             return I##_t::variants_by_string().at(index);                                                  \
         }                                                                                                  \
-        inline Type type_and_neighbors_from_string(std::string const & str, Type * lt, Type * gt)          \
+        inline Type lookup(std::string const & str, bool * found)                                          \
         {                                                                                                  \
             auto it = std::lower_bound(                                                                    \
                 I##_t::variants_by_string().begin(),                                                       \
@@ -454,23 +454,13 @@ namespace matchable
             );                                                                                             \
             if (it == I##_t::variants_by_string().end())                                                   \
             {                                                                                              \
-                if (nullptr != lt)                                                                         \
-                    *lt = I##_t::variants_by_string().size() ? I##_t::variants_by_string().back() : nil;   \
-                if (nullptr != gt)                                                                         \
-                    *gt = nil;                                                                             \
-                return nil;                                                                                \
+                if (nullptr != found)                                                                      \
+                    *found = false;                                                                        \
+                return I##_t::variants_by_string().size() ? I##_t::variants_by_string().back() : nil;      \
             }                                                                                              \
-            if (nullptr != lt)                                                                             \
-                *lt = it == I##_t::variants_by_string().begin() ? nil : *std::prev(it, 1);                 \
-            if (str == it->as_string())                                                                    \
-            {                                                                                              \
-                if (nullptr != gt)                                                                         \
-                    *gt = std::next(it, 1) == I##_t::variants_by_string().end() ? nil : *std::next(it, 1); \
-                return *it;                                                                                \
-            }                                                                                              \
-            if (nullptr != gt)                                                                             \
-                *gt = *it;                                                                                 \
-            return nil;                                                                                    \
+            if (nullptr != found)                                                                          \
+                *found = str == it->as_string();                                                           \
+            return *it;                                                                                    \
         }                                                                                                  \
         inline Type from_string(std::string const & str)                                                   \
         {                                                                                                  \

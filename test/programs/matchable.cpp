@@ -116,33 +116,26 @@ int main()
     TEST_EQ(ok, TimeUnit::from_string("nil"), TimeUnit::nil);
     TEST_EQ(ok, TimeUnit::from_string("Weeks"), TimeUnit::Weeks::grab());
 
-    // type_and_neighbors_from_string()
+    // lookup()
     {
-        TimeUnit::Type below, above;
-        auto tu = TimeUnit::type_and_neighbors_from_string("107", &below, &above);
-        TEST_EQ(ok, tu, TimeUnit::nil);
-        TEST_EQ(ok, below, TimeUnit::nil);
-        TEST_EQ(ok, above, TimeUnit::Days::grab());
-        tu = TimeUnit::type_and_neighbors_from_string("Years", &below, &above);
-        TEST_EQ(ok, tu, TimeUnit::nil);
-        TEST_EQ(ok, below, TimeUnit::Weeks::grab());
-        TEST_EQ(ok, above, TimeUnit::nil);
-        tu = TimeUnit::type_and_neighbors_from_string("Fortnites", &below, &above);
-        TEST_EQ(ok, tu, TimeUnit::nil);
-        TEST_EQ(ok, below, TimeUnit::Days::grab());
-        TEST_EQ(ok, above, TimeUnit::Hours::grab());
-        tu = TimeUnit::type_and_neighbors_from_string("Minutes", &below, &above);
-        TEST_EQ(ok, tu, TimeUnit::Minutes::grab());
-        TEST_EQ(ok, below, TimeUnit::Hours::grab());
-        TEST_EQ(ok, above, TimeUnit::Seconds::grab());
-        tu = TimeUnit::type_and_neighbors_from_string("Days", &below, &above);
+        bool found;
+        auto tu = TimeUnit::lookup("107", &found);
         TEST_EQ(ok, tu, TimeUnit::Days::grab());
-        TEST_EQ(ok, below, TimeUnit::nil);
-        TEST_EQ(ok, above, TimeUnit::Hours::grab());
-        tu = TimeUnit::type_and_neighbors_from_string("Weeks", &below, &above);
+        TEST_EQ(ok, found, false);
+        tu = TimeUnit::lookup("Years", &found);
         TEST_EQ(ok, tu, TimeUnit::Weeks::grab());
-        TEST_EQ(ok, below, TimeUnit::Seconds::grab());
-        TEST_EQ(ok, above, TimeUnit::nil);
+        TEST_EQ(ok, found, false);
+        tu = TimeUnit::lookup("Fortnites", nullptr);
+        TEST_EQ(ok, tu, TimeUnit::Hours::grab());
+        tu = TimeUnit::lookup("Minutes", &found);
+        TEST_EQ(ok, tu, TimeUnit::Minutes::grab());
+        TEST_EQ(ok, found, true);
+        tu = TimeUnit::lookup("Days", &found);
+        TEST_EQ(ok, tu, TimeUnit::Days::grab());
+        TEST_EQ(ok, found, true);
+        tu = TimeUnit::lookup("Weeks", &found);
+        TEST_EQ(ok, tu, TimeUnit::Weeks::grab());
+        TEST_EQ(ok, found, true);
     }
 
     // as_index()
@@ -159,7 +152,7 @@ int main()
         TEST_EQ(ok, tu, TimeUnit::from_index(tu.as_index()));
     TEST_EQ(ok, TimeUnit::from_index(107), TimeUnit::nil);
 
-    // from_as_string_index()
+    // as_by_string_index()
     TEST_EQ(ok, TimeUnit::Seconds::grab().as_by_string_index(), 3);
     TEST_EQ(ok, TimeUnit::Minutes::grab().as_by_string_index(), 2);
     TEST_EQ(ok, TimeUnit::Hours::grab().as_by_string_index(), 1);
@@ -168,7 +161,7 @@ int main()
     TEST_EQ(ok, TimeUnit::nil.as_by_string_index(), -1);
 
     // is_nil()
-    TEST_NE(ok, time_unit.is_nil(), true);
+    TEST_EQ(ok, time_unit.is_nil(), false);
 
     // Flags
     TimeUnit::Flags flags;
@@ -256,20 +249,8 @@ int main()
         std::cout << "    " << variant << std::endl;
 
     // matchable without variants
-    NIL::Type n, o, p;
+    NIL::Type n;
     TEST_EQ(ok, n.is_nil(), true);
-    n = NIL::type_and_neighbors_from_string("107", &o, &p);
-    TEST_EQ(ok, n.is_nil(), true);
-    TEST_EQ(ok, o.is_nil(), true);
-    TEST_EQ(ok, p.is_nil(), true);
-    n = NIL::type_and_neighbors_from_string("107", nullptr, nullptr);
-    TEST_EQ(ok, n.is_nil(), true);
-    n = NIL::type_and_neighbors_from_string("107", &o, nullptr);
-    TEST_EQ(ok, n.is_nil(), true);
-    TEST_EQ(ok, o.is_nil(), true);
-    n = NIL::type_and_neighbors_from_string("107", nullptr, &o);
-    TEST_EQ(ok, n.is_nil(), true);
-    TEST_EQ(ok, o.is_nil(), true);
 
     return ok();
 }
