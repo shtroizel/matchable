@@ -151,6 +151,7 @@ int main()
     TEST_EQ(ok, TimeUnit::Hours::grab().as_index(), 2);
     TEST_EQ(ok, TimeUnit::Days::grab().as_index(), 3);
     TEST_EQ(ok, TimeUnit::Weeks::grab().as_index(), 4);
+    TEST_EQ(ok, NIL::from_string("107").as_index(), -1);
 
     // from_index()
     TEST_EQ(ok, TimeUnit::from_index(-1), TimeUnit::nil);
