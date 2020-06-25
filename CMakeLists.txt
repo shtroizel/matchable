@@ -12,9 +12,9 @@ install(DIRECTORY include/matchable DESTINATION include)
 ####### Testing ############################################################################################
 
 # test system
-install(PROGRAMS scripts/run_all.sh DESTINATION share/matchable/test/bin/)
-install(PROGRAMS scripts/run_test.sh DESTINATION share/matchable/test/bin/)
-install(PROGRAMS scripts/list.sh DESTINATION share/matchable/test/bin/)
+install(PROGRAMS test_scripts/run_all.sh DESTINATION share/matchable/test/bin/)
+install(PROGRAMS test_scripts/run_test.sh DESTINATION share/matchable/test/bin/)
+install(PROGRAMS test_scripts/list.sh DESTINATION share/matchable/test/bin/)
 
 # tests
 function(add_matchable_test test_name)
