@@ -198,23 +198,23 @@ g++ >= 8.3.0
 
 # Building, Installing and Running Tests
 ```
-scripts/setup.py
+scripts/build_and_install.py
 ```
-setup.py without arguments will from the project root do:
+build_and_install.py without arguments will from the project root do:
 ```
 mkdir build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=../install ..
 make install
 cd ..
-install/share/matchable/test/bin/run_all.sh again_quietly
 ```
-to specify custom build or install directories or to force use of clang see:
+
+refer to help for custom build/install directories and other options:
 ```
-scripts/setup.py -h
+scripts/build_and_install.py -h
 ```
-* use of setup.py is of course optional and serves as a reference or example workflow
-* setup.py will remove the build and install directories before starting!
+* use of build_and_install.py is of course optional and serves as a reference or example workflow
+* build_and_install.py will remove the build and install directories before starting!
 # Running Tests / Examples
 Assuming workflow above with install directory under the project root (modify paths accordingly for your
 workflow).
