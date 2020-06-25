@@ -17,7 +17,6 @@ def usage():
     print(sys.argv[0] + ' [OPTION]')
     print('    -h, --help            print this message')
     print('    -c  --clang           force use of clang compiler (uses default compiler if not set)')
-    print('    -n  --ninja           use ninja generator (uses make by default)')
     print('    -b  --build_dir       build directory (defaults to <repo root>/build)')
     print('    -i  --install_dir     install directory (defaults to <repo root>/install)')
     print('                          note that relative paths are relative to build_dir')
@@ -26,14 +25,13 @@ def usage():
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcnb:i:', ['help', 'clang', 'ninja', 'build', 'install'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:', ['help', 'clang', 'build', 'install'])
     except getopt.GetoptError as err:
         print(err)
         usage()
         sys.exit(2)
 
     use_clang = False
-    use_ninja = False
     build_dir = repo_root + 'build'
     install_dir = repo_root + 'install'
 
@@ -43,8 +41,6 @@ def main():
             sys.exit()
         elif o in ('-c', '--clang'):
             use_clang = True
-        elif o in ('-n', '--ninja'):
-            use_ninja = True
         elif o in ('-b', '--build_dir'):
             build_dir = a
         elif o in ('-i', '--install_dir'):
@@ -60,8 +56,6 @@ def main():
     os.chdir(build_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
-    if use_ninja:
-        cmake_cmd.append('-GNinja')
 
     if use_clang:
         cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
@@ -74,16 +68,10 @@ def main():
         os.chdir(repo_root)
         exit(1)
 
-    if use_ninja:
-        if subprocess.run(['ninja', 'install']).returncode != 0:
-            print('ninja failed')
-            os.chdir(repo_root)
-            exit(1)
-    else:
-        if subprocess.run(['make', '-j' + str(multiprocessing.cpu_count()), 'install']).returncode != 0:
-            print('make failed')
-            os.chdir(repo_root)
-            exit(1)
+    if subprocess.run(['make', '-j' + str(multiprocessing.cpu_count()), 'install']).returncode != 0:
+        print('make failed')
+        os.chdir(repo_root)
+        exit(1)
 
     if subprocess.run([install_dir + '/share/matchable/test/bin/run_all.sh', 'again_quietly']).returncode != 0:
         print('run_all.sh failed')
