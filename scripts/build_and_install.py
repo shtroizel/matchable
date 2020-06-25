@@ -20,12 +20,13 @@ def usage():
     print('    -b  --build_dir       build directory (defaults to <repo root>/build)')
     print('    -i  --install_dir     install directory (defaults to <repo root>/install)')
     print('                          note that relative paths are relative to build_dir')
+    print('    -t  --test            if build succeeds also run tests')
 
 
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:', ['help', 'clang', 'build', 'install'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:t', ['help', 'clang', 'build', 'install', 'test'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -34,6 +35,7 @@ def main():
     use_clang = False
     build_dir = repo_root + 'build'
     install_dir = repo_root + 'install'
+    run_tests = False
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -45,6 +47,8 @@ def main():
             build_dir = a
         elif o in ('-i', '--install_dir'):
             install_dir = a
+        elif o in ('-t', '--test'):
+            run_tests = True
         else:
             assert False, "unhandled option"
 
@@ -73,10 +77,12 @@ def main():
         os.chdir(repo_root)
         exit(1)
 
-    if subprocess.run([install_dir + '/share/matchable/test/bin/run_all.sh', 'again_quietly']).returncode != 0:
-        print('run_all.sh failed')
-        os.chdir(repo_root)
-        exit(1)
+    if run_tests:
+        if subprocess.run([install_dir + '/share/matchable/test/bin/run_all.sh',
+                           'again_quietly']).returncode != 0:
+            print('run_all.sh failed')
+            os.chdir(repo_root)
+            exit(1)
 
     os.chdir(repo_root)
     exit(0)
