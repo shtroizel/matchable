@@ -22,14 +22,15 @@ def usage():
     print('                          note that relative paths are relative to build_dir')
     default_cpu_count = str(multiprocessing.cpu_count())
     print('    -j  --jobs            max jobs (default is cpu count [' + default_cpu_count + '])')
-    print('    -t  --test            if build succeeds also run tests')
+    print('    -l  --lib_only        build library only (default is to build tests too)')
+    print('    -t  --test            if build succeeds also run tests (incompatible with \'-l\'')
 
 
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:j:t', ['help', 'clang', 'build', 'install',
-                                                               'jobs', 'test'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:j:lt', ['help', 'clang', 'build', 'install',
+                                                               'jobs', 'lib_only', 'test'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -39,6 +40,7 @@ def main():
     build_dir = repo_root + 'build'
     install_dir = repo_root + 'install'
     jobs = str(multiprocessing.cpu_count())
+    lib_only = False
     run_tests = False
 
     for o, a in opts:
@@ -53,6 +55,8 @@ def main():
             install_dir = a
         elif o in ('-j', '--jobs'):
             jobs = a
+        elif o in ('-l', '--lib_only'):
+            lib_only = True
         elif o in ('-t', '--test'):
             run_tests = True
         else:
@@ -66,6 +70,9 @@ def main():
     os.chdir(build_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
+
+    if lib_only:
+        cmake_cmd.append('-DLIB_ONLY=ON')
 
     if use_clang:
         cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
@@ -83,7 +90,7 @@ def main():
         os.chdir(repo_root)
         exit(1)
 
-    if run_tests:
+    if not lib_only and run_tests:
         if subprocess.run([install_dir + '/share/matchable/test/bin/run_all.sh',
                            'again_quietly']).returncode != 0:
             print('run_all.sh failed')

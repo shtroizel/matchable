@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(matchable VERSION 10.0.2)
+project(matchable VERSION 10.0.3)
+
+option(LIB_ONLY "Build library only (no tests/examples)" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -9,31 +11,33 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
 install(DIRECTORY include/matchable DESTINATION include)
 
 
+
 ####### Testing ############################################################################################
+if(NOT LIB_ONLY)
+    # test system
+    install(PROGRAMS test_scripts/run_all.sh DESTINATION share/matchable/test/bin/)
+    install(PROGRAMS test_scripts/run_test.sh DESTINATION share/matchable/test/bin/)
+    install(PROGRAMS test_scripts/list.sh DESTINATION share/matchable/test/bin/)
 
-# test system
-install(PROGRAMS test_scripts/run_all.sh DESTINATION share/matchable/test/bin/)
-install(PROGRAMS test_scripts/run_test.sh DESTINATION share/matchable/test/bin/)
-install(PROGRAMS test_scripts/list.sh DESTINATION share/matchable/test/bin/)
-
-# tests
-function(add_matchable_test test_name)
-    add_executable(${test_name} test/programs/${test_name}.cpp)
-    target_include_directories(${test_name} PRIVATE include)
-    target_include_directories(${test_name} PRIVATE test/include)
-    target_include_directories(${test_name} PUBLIC "${PROJECT_BINARY_DIR}")
-    install(TARGETS ${test_name} RUNTIME DESTINATION share/matchable/test/programs)
-endfunction()
-add_matchable_test(cards)
-add_matchable_test(escapable)
-add_matchable_test(self_property)
-add_matchable_test(matchable)
-add_matchable_test(matchable_usage)
-add_matchable_test(matchbox)
-add_matchable_test(max_variants)
-add_matchable_test(relationships)
-add_matchable_test(sorting)
-add_matchable_test(unmatchable)
+    # tests
+    function(add_matchable_test test_name)
+        add_executable(${test_name} test/programs/${test_name}.cpp)
+        target_include_directories(${test_name} PRIVATE include)
+        target_include_directories(${test_name} PRIVATE test/include)
+        target_include_directories(${test_name} PUBLIC "${PROJECT_BINARY_DIR}")
+        install(TARGETS ${test_name} RUNTIME DESTINATION share/matchable/test/programs)
+    endfunction()
+    add_matchable_test(cards)
+    add_matchable_test(escapable)
+    add_matchable_test(self_property)
+    add_matchable_test(matchable)
+    add_matchable_test(matchable_usage)
+    add_matchable_test(matchbox)
+    add_matchable_test(max_variants)
+    add_matchable_test(relationships)
+    add_matchable_test(sorting)
+    add_matchable_test(unmatchable)
+endif()
 ############################################################################################################
 
 
