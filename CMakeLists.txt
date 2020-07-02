@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(matchable VERSION 10.0.3)
+project(matchable VERSION 10.0.4)
 
 option(LIB_ONLY "Build library only (no tests/examples)" OFF)
 
