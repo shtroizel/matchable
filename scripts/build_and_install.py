@@ -35,6 +35,16 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
     matchable_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
     os.chdir(matchable_root)
 
+    if build_dir == '':
+        build_dir = matchable_root + '/build'
+    while build_dir[-1] == '/':
+        build_dir = build_dir[:-1]
+
+    if install_dir == '':
+        install_dir = matchable_root + '/install'
+    while install_dir[-1] == '/':
+        install_dir = install_dir[:-1]
+
     shutil.rmtree(build_dir, ignore_errors=True)
     os.makedirs(build_dir)
     os.chdir(build_dir)
