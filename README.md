@@ -255,7 +255,10 @@ libmatchable provides "MatchableMaker" for creating header files with matchable 
 both static and shared libraries can be found under install/lib/matchable
 
 ## MatchableMaker
-Usage with examples comming soon...
+see include/MatchableMaker.h
+
+example use of MatchableMaker can be found in the matchmaker project<br/>
+search for "MatchableMaker" in https://github.com/shtroizel/matchmaker/blob/master/data_reader/src/matchmaker_data_reader.cpp
 
 # Versioning
 For the versions available, see the [tags on this repository](https://github.com/shtroizel/matchable/tags).
