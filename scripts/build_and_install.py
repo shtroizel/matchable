@@ -7,6 +7,7 @@ import subprocess
 import sys
 import getopt
 
+from shutil import which
 
 
 def usage():
@@ -61,8 +62,13 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
         cmake_cmd.append('-DLIB_ONLY=ON')
 
     if use_clang:
-        cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
-        cmake_cmd.append('-DCMAKE_CXX_COMPILER=/usr/bin/clang++')
+        clang_c = which('clang')
+        clang_cxx = which('clang++')
+        if clang_c is None or clang_cxx is None:
+            print('search for clang compiler failed')
+            exit(1)
+        cmake_cmd.append('-DCMAKE_C_COMPILER=' + clang_c)
+        cmake_cmd.append('-DCMAKE_CXX_COMPILER=' + clang_cxx)
 
     if debug:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
