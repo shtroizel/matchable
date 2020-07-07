@@ -26,10 +26,13 @@ def usage():
     print('                            * by default tests are built too\n')
     print('    -t  --test            if build succeeds also run tests')
     print('                            * incompatible with \'-l\'\n')
+    print('    -d  --debug           debug build')
+    print('                            * use -DCMAKE_BUILD_TYPE=Debug (default is: '                       \
+            + '-DCMAKE_BUILD_TYPE=Release)\n')
 
 
 
-def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tests):
+def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tests, debug):
     start_dir = os.getcwd()
 
     matchable_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
@@ -61,6 +64,11 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
         cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=/usr/bin/clang++')
 
+    if debug:
+        cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
+    else:
+        cmake_cmd.append('-DCMAKE_BUILD_TYPE=Release')
+
     cmake_cmd.append(matchable_root)
 
     if subprocess.run(cmake_cmd).returncode != 0:
@@ -85,8 +93,8 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:j:lt',
-                ['help', 'clang', 'build', 'install', 'jobs', 'lib_only', 'test'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:j:ltd',
+                ['help', 'clang', 'build', 'install', 'jobs', 'lib_only', 'test', 'debug'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -99,6 +107,7 @@ def main():
     jobs = str(multiprocessing.cpu_count())
     lib_only = False
     run_tests = False
+    debug = False
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -116,10 +125,12 @@ def main():
             lib_only = True
         elif o in ('-t', '--test'):
             run_tests = True
+        elif o in ('-d', '--debug'):
+            debug = True
         else:
             assert False, "unhandled option"
 
-    build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tests)
+    build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tests, debug)
 
     exit(0)
 
