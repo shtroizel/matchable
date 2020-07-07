@@ -18,10 +18,10 @@ def usage():
     print(sys.argv[0] + ' [OPTION]...')
     print('    -h, --help            print this message')
     print('    -c  --clang           force use of clang compiler (uses default compiler if not set)')
-    print('    -n  --ninja           use ninja generator (uses make by default)')
+    print('    -d  --debug           build with debug symbols')
 
 
-def run_test(mode, use_clang, use_ninja):
+def run_test(mode, use_clang, debug):
 
     # remove and recreate source directory
     shutil.rmtree(src_dir, ignore_errors=True)
@@ -93,8 +93,10 @@ def run_test(mode, use_clang, use_ninja):
         cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=/usr/bin/clang++')
 
-    if use_ninja:
-        cmake_cmd.append('-GNinja')
+    if debug:
+        cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
+    else:
+        cmake_cmd.append('-DCMAKE_BUILD_TYPE=Release')
 
     cmake_cmd.append('..')
 
@@ -104,7 +106,7 @@ def run_test(mode, use_clang, use_ninja):
 
     # run make and track how much time it needs
     start = time.time()
-    if use_ninja:
+    if debug:
         return_code = subprocess.run(['ninja']).returncode
     else:
         return_code = subprocess.run(['make', '-j' + str(multiprocessing.cpu_count())]).returncode
@@ -122,28 +124,28 @@ def run_test(mode, use_clang, use_ninja):
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcn', ['help', 'clang', 'ninja'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcd', ['help', 'clang', 'debug'])
     except getopt.GetoptError as err:
         print(err)
         usage()
         sys.exit(2)
 
     use_clang = False
-    use_ninja = False
+    debug = False
     for o, a in opts:
         if o in ('-h', '--help'):
             usage()
             sys.exit()
         elif o in ('-c', '--clang'):
             use_clang = True
-        elif o in ('-n', '--ninja'):
-            use_ninja = True
+        elif o in ('-d', '--debug'):
+            debug = True
         else:
             assert False, "unhandled option"
 
     try:
-        fwd_time = run_test("fwd", use_clang, use_ninja)
-        full_time = run_test("full", use_clang, use_ninja)
+        fwd_time = run_test("fwd", use_clang, debug)
+        full_time = run_test("full", use_clang, debug)
 
         print('\n\n******* Build Time Performance Summary *******\n')
         print('  using full definititions: ' + str(full_time))
