@@ -1002,7 +1002,7 @@ namespace matchable
         inline std::vector<std::pair<std::string, std::string>> const & code_symbol_pairs()
         {
             static std::vector<std::pair<std::string, std::string>> const csp =
-                [&](){
+                [](){
                     std::vector<std::pair<std::string, std::string>> csp_init;
                     csp_init.push_back(std::make_pair("_spc_", " "));
                     csp_init.push_back(std::make_pair("_bng_", "!"));
