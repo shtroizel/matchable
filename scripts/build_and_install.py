@@ -12,28 +12,37 @@ from shutil import which
 
 def usage():
     print('options for building matchable:\n')
-    print('    -h, --help            print this message\n')
-    print('    -c  --clang           force use of clang compiler')
-    print('                            * system compiler used by default\n')
-    print('    -b  --build_dir       build directory')
-    print('                            * defaults to <matchable root>/build')
-    print('                            * relative paths are relative to <matchable root>\n')
-    print('    -i  --install_dir     install directory')
-    print('                            * defaults to <matchable root>/install')
-    print('                            * relative paths are relative to build_dir\n')
-    print('    -j  --jobs            max jobs')
-    print('                            * default is cpu count [' + str(multiprocessing.cpu_count()) + ']\n')
-    print('    -l  --lib_only        build library only')
-    print('                            * by default tests are built too\n')
-    print('    -t  --test            if build succeeds also run tests')
-    print('                            * incompatible with \'-l\'\n')
-    print('    -d  --debug           debug build')
-    print('                            * use -DCMAKE_BUILD_TYPE=Debug (default is: '                       \
+    print('    -h, --help                   print this message\n')
+    print('    -c  --clang                  force use of clang compiler')
+    print('                                   * system compiler used by default\n')
+    print('    -b  --build_dir              build directory')
+    print('                                   * defaults to <matchable root>/build')
+    print('                                   * relative paths are relative to <matchable root>\n')
+    print('    -i  --install_dir            install directory')
+    print('                                   * defaults to <matchable root>/install')
+    print('                                   * relative paths are relative to build_dir\n')
+    print('    -j  --jobs                   max jobs')
+    print('                                   * default is cpu count ['                                    \
+            + str(multiprocessing.cpu_count()) + ']\n')
+    print('    -l  --lib_only               build library only')
+    print('                                   * by default tests are built too\n')
+    print('    -t  --test                   if build succeeds also run tests')
+    print('                                   * incompatible with \'-l\'\n')
+    print('    -d  --debug                  debug build')
+    print('                                   * use -DCMAKE_BUILD_TYPE=Debug (default is: '                \
             + '-DCMAKE_BUILD_TYPE=Release)\n')
+    print('    -a  --alphabetical_only      variants \'by string\' only (omit \'by index\'')
+    print('                                   * adds definition MATCHABLE_OMIT_BY_INDEX which will:')
+    print('                                     - omit variants_by_index()')
+    print('                                     - omit as_index()')
+    print('                                     - omit from_index()')
+    print('                                     - omit lt_by_index()')
+    print('                                     - reduces memory and time needed to compile')
 
 
 
-def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tests, debug):
+def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tests, debug,
+                      alphabetical_only):
     start_dir = os.getcwd()
 
     matchable_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
@@ -75,6 +84,9 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
     else:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Release')
 
+    if alphabetical_only:
+        cmake_cmd.append('-DOMIT_BY_INDEX=ON')
+
     cmake_cmd.append(matchable_root)
 
     if subprocess.run(cmake_cmd).returncode != 0:
@@ -99,8 +111,9 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:j:ltd',
-                ['help', 'clang', 'build', 'install', 'jobs', 'lib_only', 'test', 'debug'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:j:ltda',
+                ['help', 'clang', 'build', 'install', 'jobs', 'lib_only', 'test', 'debug',
+                 'alphabetical_only'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -114,6 +127,7 @@ def main():
     lib_only = False
     run_tests = False
     debug = False
+    alphabetical_only = False
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -133,10 +147,13 @@ def main():
             run_tests = True
         elif o in ('-d', '--debug'):
             debug = True
+        elif o in ('-a', '--alphabetical_only'):
+            alphabetical_only = True
         else:
             assert False, "unhandled option"
 
-    build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tests, debug)
+    build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tests, debug,
+                      alphabetical_only)
 
     exit(0)
 

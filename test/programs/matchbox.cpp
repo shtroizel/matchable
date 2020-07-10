@@ -129,8 +129,8 @@ void choose_actors(Actor::Type & actor_0, Actor::Type & actor_1)
     static std::mt19937 engine{std::random_device()()};
     static std::uniform_int_distribution<int> actor_distribution{0, (int) Actor::variants().size() - 1};
 
-    actor_0 = Actor::from_index(actor_distribution(engine));
-    actor_1 = Actor::from_index(actor_distribution(engine));
+    actor_0 = Actor::from_by_string_index(actor_distribution(engine));
+    actor_1 = Actor::from_by_string_index(actor_distribution(engine));
 }
 
 

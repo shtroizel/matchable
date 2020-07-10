@@ -91,11 +91,13 @@ int main()
 
     // compare operators
     another_time_unit = TimeUnit::Seconds::grab();
+#ifndef MATCHABLE_OMIT_BY_INDEX
     if (time_unit < another_time_unit) // index compare! (same as lt_by_index())
         TEST_FAIL(ok);
 
     if (time_unit.lt_by_index(another_time_unit))
         TEST_FAIL(ok);
+#endif
 
     if (another_time_unit.lt_by_string(time_unit))
         TEST_FAIL(ok);
@@ -138,6 +140,7 @@ int main()
         TEST_EQ(ok, found, true);
     }
 
+#ifndef MATCHABLE_OMIT_BY_INDEX
     // as_index()
     TEST_EQ(ok, TimeUnit::Seconds::grab().as_index(), 0);
     TEST_EQ(ok, TimeUnit::Minutes::grab().as_index(), 1);
@@ -151,6 +154,7 @@ int main()
     for (auto tu : TimeUnit::variants())
         TEST_EQ(ok, tu, TimeUnit::from_index(tu.as_index()));
     TEST_EQ(ok, TimeUnit::from_index(107), TimeUnit::nil);
+#endif
 
     // as_by_string_index()
     TEST_EQ(ok, TimeUnit::Seconds::grab().as_by_string_index(), 3);

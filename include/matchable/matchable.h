@@ -71,6 +71,12 @@ namespace matchable
         T default_t;
         std::vector<T> targets;
         std::vector<bool> init_flags;
+        using as_index_func_type = int (M::*)() const;
+#ifdef MATCHABLE_OMIT_BY_INDEX
+        as_index_func_type as_index_func = &M::as_by_string_index;
+#else
+        as_index_func_type as_index_func = &M::as_index;
+#endif
     };
 
 
@@ -103,14 +109,14 @@ namespace matchable
     template<typename M, typename T>
     T const & MatchBox<M, T>::at(M const & match) const
     {
-        return match.is_nil() ? nil_target : targets[static_cast<size_t>(match.as_index())];
+        return match.is_nil() ? nil_target : targets[static_cast<size_t>((match.*as_index_func)())];
     }
 
 
     template<typename M, typename T>
     T & MatchBox<M, T>::mut_at(M const & match)
     {
-        return match.is_nil() ? nil_target : targets[static_cast<size_t>(match.as_index())];
+        return match.is_nil() ? nil_target : targets[static_cast<size_t>((match.*as_index_func)())];
     }
 
 
@@ -124,7 +130,7 @@ namespace matchable
         }
         else
         {
-            size_t index = static_cast<size_t>(match.as_index());
+            size_t index = static_cast<size_t>((match.*as_index_func)());
             targets[index] = target;
             init_flags[index] = true;
         }
@@ -141,7 +147,7 @@ namespace matchable
         }
         else
         {
-            size_t index = static_cast<size_t>(match.as_index());
+            size_t index = static_cast<size_t>((match.*as_index_func)());
             targets[index] = default_t;
             init_flags[index] = false;
         }
@@ -154,7 +160,7 @@ namespace matchable
         if (match.is_nil())
             return nil_target_init_flag;
 
-        return init_flags[static_cast<size_t>(match.as_index())];
+        return init_flags[static_cast<size_t>((match.*as_index_func)())];
     }
 
 
@@ -197,6 +203,12 @@ namespace matchable
     private:
         bool nil_init_flag;
         std::vector<bool> init_flags;
+        using as_index_func_type = int (M::*)() const;
+#ifdef MATCHABLE_OMIT_BY_INDEX
+        as_index_func_type as_index_func = &M::as_by_string_index;
+#else
+        as_index_func_type as_index_func = &M::as_index;
+#endif
     };
 
 
@@ -232,7 +244,7 @@ namespace matchable
         if (match.is_nil())
             nil_init_flag = true;
         else
-            init_flags[static_cast<size_t>(match.as_index())] = true;
+            init_flags[static_cast<size_t>((match.*as_index_func)())] = true;
     }
 
 
@@ -242,7 +254,7 @@ namespace matchable
         if (match.is_nil())
             nil_init_flag = false;
         else
-            init_flags[static_cast<size_t>(match.as_index())] = false;
+            init_flags[static_cast<size_t>((match.*as_index_func)())] = false;
     }
 
 
@@ -252,7 +264,7 @@ namespace matchable
         if (match.is_nil())
             return nil_init_flag;
 
-        return init_flags[static_cast<size_t>(match.as_index())];
+        return init_flags[static_cast<size_t>((match.*as_index_func)())];
     }
 
 
@@ -300,20 +312,40 @@ namespace matchable
     public:
         Unmatchable(std::initializer_list<M> um)
         {
-            prev_variants = M::variants();
-            auto i = std::remove_if(
-                M::interface_type::by_index().begin(),
-                M::interface_type::by_index().end(),
-                [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
-            );
-            M::interface_type::by_index().erase(i, M::interface_type::by_index().end());
+            {
+                prev_variants_by_string = M::interface_type::variants_by_string();
+                auto i = std::remove_if(
+                    M::interface_type::by_string().begin(),
+                    M::interface_type::by_string().end(),
+                    [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
+                );
+                M::interface_type::by_string().erase(i, M::interface_type::by_string().end());
+            }
+
+#ifndef MATCHABLE_OMIT_BY_INDEX
+            {
+                prev_variants_by_index = M::interface_type::variants_by_index();
+                auto i = std::remove_if(
+                    M::interface_type::by_index().begin(),
+                    M::interface_type::by_index().end(),
+                    [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
+                );
+                M::interface_type::by_index().erase(i, M::interface_type::by_index().end());
+            }
+#endif
         }
         ~Unmatchable()
         {
-            M::interface_type::by_index() = prev_variants;
+            M::interface_type::by_string() = prev_variants_by_string;
+#ifndef MATCHABLE_OMIT_BY_INDEX
+            M::interface_type::by_index() = prev_variants_by_index;
+#endif
         }
     private:
-        std::vector<M> prev_variants;
+        std::vector<M> prev_variants_by_string;
+#ifndef MATCHABLE_OMIT_BY_INDEX
+        std::vector<M> prev_variants_by_index;
+#endif
     };
 
 } // namespace matchable
@@ -330,25 +362,35 @@ namespace matchable
         public:                                                                                            \
             I##_t() = default;                                                                             \
             virtual ~I##_t() = default;                                                                    \
-            virtual int as_index() const = 0;                                                              \
             virtual int as_by_string_index() const = 0;                                                    \
             virtual std::string const & as_string() const = 0;                                             \
             virtual std::string const & as_identifier_string() const = 0;                                  \
-            static std::vector<Type> const & variants() { return variants_by_index(); }                    \
-            static std::vector<Type> const & variants_by_index() { return by_index(); }                    \
             static std::vector<Type> const & variants_by_string() { return by_string(); }                  \
             static bool register_variant(Type const & variant, int * i);                                   \
-        protected:                                                                                         \
         private:                                                                                           \
             virtual void set_by_string_index(int index) = 0;                                               \
             virtual std::shared_ptr<I##_t> clone() const = 0;                                              \
-            static std::vector<Type> & by_index() { static std::vector<Type> v; return v; }                \
             static std::vector<Type> & by_string() { static std::vector<Type> v; return v; }
 
 
+#ifdef MATCHABLE_OMIT_BY_INDEX
 #define _matchable_declare_end(_t)                                                                         \
+        public:                                                                                            \
+            static std::vector<Type> const & variants() { return variants_by_string(); }                   \
         };                                                                                                 \
     }
+#else
+#define _matchable_declare_end(_t)                                                                         \
+        public:                                                                                            \
+            virtual int as_index() const = 0;                                                              \
+            static std::vector<Type> const & variants() { return variants_by_index(); }                    \
+            static std::vector<Type> const & variants_by_index() { return by_index(); }                    \
+        private:                                                                                           \
+            static std::vector<Type> & by_index() { static std::vector<Type> v; return v; }                \
+        };                                                                                                 \
+    }
+#endif
+
 
 
 #define _matchable_create_type_begin(_t)                                                                   \
@@ -384,7 +426,6 @@ namespace matchable
                 static std::string const nil_str{"nil"};                                                   \
                 return nullptr == t ? nil_str : t->as_identifier_string();                                 \
             }                                                                                              \
-            int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
             int as_by_string_index() const { return nullptr == t ? -1 : t->as_by_string_index(); }         \
             bool is_nil() const { return nullptr == t; }                                                   \
             matchable::FlowControl match(MatchParamWithFlowControl const & mb) const                       \
@@ -399,15 +440,11 @@ namespace matchable
                 if (mb.is_set(*this))                                                                      \
                     mb.at(*this)();                                                                        \
             }                                                                                              \
-            static std::vector<MatchableType> const & variants() { return variants_by_index(); }           \
-            static std::vector<MatchableType> const & variants_by_index()                                  \
-                { return T::variants_by_index(); }                                                         \
+            static std::vector<MatchableType> const & variants() { return T::variants(); }                 \
             static std::vector<MatchableType> const & variants_by_string()                                 \
                 { return T::variants_by_string(); }                                                        \
             bool operator==(MatchableType const & m) const { return as_string() == m.as_string(); }        \
             bool operator!=(MatchableType const & m) const { return as_string() != m.as_string(); }        \
-            bool operator<(MatchableType const & m) const { return as_index() < m.as_index(); }            \
-            bool lt_by_index(MatchableType const & m) const { return as_index() < m.as_index(); }          \
             bool lt_by_string(MatchableType const & m) const { return as_string() < m.as_string(); }       \
             friend std::ostream & operator<<(std::ostream & o, MatchableType const & m)                    \
             {                                                                                              \
@@ -418,26 +455,32 @@ namespace matchable
             std::shared_ptr<T> t;
 
 
+#ifdef MATCHABLE_OMIT_BY_INDEX
 #define _matchable_create_type_end(_t)                                                                     \
+        public:                                                                                            \
+            bool operator<(MatchableType const & m) const                                                  \
+                { return as_by_string_index() < m.as_by_string_index(); }                                  \
         };                                                                                                 \
     }
+#else
+#define _matchable_create_type_end(_t)                                                                     \
+        public:                                                                                            \
+            int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
+            bool lt_by_index(MatchableType const & m) const { return as_index() < m.as_index(); }          \
+            bool operator<(MatchableType const & m) const { return as_index() < m.as_index(); }            \
+        };                                                                                                 \
+    }
+#endif
 
 
-#define _matchable_define(_t)                                                                              \
+#define _matchable_define_common(_t)                                                                       \
     namespace _t                                                                                           \
     {                                                                                                      \
         using Flags = matchable::MatchBox<Type, void>;                                                     \
-        inline std::vector<Type> const & variants_by_index() { return I##_t::variants_by_index(); }        \
+        inline std::vector<Type> const & variants() { return I##_t::variants(); }                          \
         inline std::vector<Type> const & variants_by_string() { return I##_t::variants_by_string(); }      \
-        inline std::vector<Type> const & variants() { return variants_by_index(); }                        \
         static std::string const name{#_t};                                                                \
         static Type const nil{};                                                                           \
-        inline Type from_index(int index)                                                                  \
-        {                                                                                                  \
-            if (index < 0 || index >= (int) I##_t::variants_by_index().size())                             \
-                return nil;                                                                                \
-            return I##_t::variants_by_index().at(index);                                                   \
-        }                                                                                                  \
         inline Type from_by_string_index(int index)                                                        \
         {                                                                                                  \
             if (index < 0 || index >= (int) I##_t::variants_by_string().size())                            \
@@ -476,24 +519,24 @@ namespace matchable
         }                                                                                                  \
         inline Type from_identifier_string(std::string const & str)                                        \
         {                                                                                                  \
-            for (auto v : variants_by_index())                                                             \
+            for (auto v : variants())                                                                      \
                 if (v.as_identifier_string() == str)                                                       \
                     return v;                                                                              \
             return Type{};                                                                                 \
         }                                                                                                  \
         static bool const register_##_t = I##_t::register_variant(nil, nullptr);                           \
-        inline bool I##_t::register_variant(Type const & variant, int * index)                             \
-        {                                                                                                  \
+    }
+
+
+#define _matchable_define__register_variant__common                                                        \
             if (variant.is_nil())                                                                          \
             {                                                                                              \
-                by_index().clear();                                                                        \
                 by_string().clear();                                                                       \
             }                                                                                              \
             else                                                                                           \
             {                                                                                              \
                 if (nullptr != index)                                                                      \
                     *index = static_cast<int>(variants().size());                                          \
-                by_index().push_back(variant);                                                             \
                 static auto pred = [](auto a, auto b) { return a.lt_by_string(b); };                       \
                 by_string().insert(                                                                        \
                     std::upper_bound(by_string().begin(), by_string().end(), variant, pred),               \
@@ -501,10 +544,40 @@ namespace matchable
                 );                                                                                         \
                 for (int i = 0; i < (int) by_string().size(); ++i)                                         \
                     by_string()[i].set_by_string_index(i);                                                 \
-            }                                                                                              \
+            }
+
+
+#ifdef MATCHABLE_OMIT_BY_INDEX
+#define _matchable_define(_t)                                                                              \
+    _matchable_define_common(_t)                                                                           \
+    namespace _t                                                                                           \
+    {                                                                                                      \
+        inline bool I##_t::register_variant(Type const & variant, int * index)                             \
+        {                                                                                                  \
+            _matchable_define__register_variant__common                                                    \
             return true;                                                                                   \
         }                                                                                                  \
     }
+#else
+#define _matchable_define(_t)                                                                              \
+    _matchable_define_common(_t)                                                                           \
+    namespace _t                                                                                           \
+    {                                                                                                      \
+        inline bool I##_t::register_variant(Type const & variant, int * index)                             \
+        {                                                                                                  \
+            _matchable_define__register_variant__common                                                    \
+            variant.is_nil() ? by_index().clear() : by_index().push_back(variant);                         \
+            return true;                                                                                   \
+        }                                                                                                  \
+        inline std::vector<Type> const & variants_by_index() { return I##_t::variants_by_index(); }        \
+        inline Type from_index(int index)                                                                  \
+        {                                                                                                  \
+            if (index < 0 || index >= (int) I##_t::variants_by_index().size())                             \
+                return nil;                                                                                \
+            return I##_t::variants_by_index().at(index);                                                   \
+        }                                                                                                  \
+    }
+#endif
 
 
 #define _matchable_create_variant_begin(_t, _v)                                                            \
@@ -514,7 +587,6 @@ namespace matchable
         {                                                                                                  \
         public:                                                                                            \
             _v() = default;                                                                                \
-            int as_index() const override { return *m_index(); }                                           \
             int as_by_string_index() const override { return *m_by_string_index(); }                       \
             std::string const & as_string() const override                                                 \
             {                                                                                              \
@@ -533,17 +605,26 @@ namespace matchable
                 { static std::string const s{#_v}; return s; }                                             \
             void set_by_string_index(int index) override { *m_by_string_index() = index; }                 \
             static Type grab() { return Type(create()); }                                                  \
-            static int * m_index() { static int i{-1}; return &i; }                                        \
             static int * m_by_string_index() { static int i{-1}; return &i; }                              \
         private:                                                                                           \
             std::shared_ptr<I##_t> clone() const  override { return create(); }                            \
             static std::shared_ptr<_v> create() { return std::make_shared<_v>(); }
 
 
+#ifdef MATCHABLE_OMIT_BY_INDEX
 #define _matchable_create_variant_end(_t, _v)                                                              \
+        };                                                                                                 \
+        static bool const register_me_##_t##_v = I##_t::register_variant(_v::grab(), nullptr);             \
+    }
+#else
+#define _matchable_create_variant_end(_t, _v)                                                              \
+        public:                                                                                            \
+            int as_index() const override { return *m_index(); }                                           \
+            static int * m_index() { static int i{-1}; return &i; }                                        \
         };                                                                                                 \
         static bool const register_me_##_t##_v = I##_t::register_variant(_v::grab(), _v::m_index());       \
     }
+#endif
 
 
 #define _matchable_create_variant(_t, _v)                                                                  \

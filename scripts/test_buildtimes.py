@@ -8,6 +8,8 @@ import multiprocessing
 import sys
 import getopt
 
+from shutil import which
+
 
 repo_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
 src_dir = repo_root + 'test_buildtimes/src'
@@ -19,9 +21,11 @@ def usage():
     print('    -h, --help            print this message')
     print('    -c  --clang           force use of clang compiler (uses default compiler if not set)')
     print('    -d  --debug           build with debug symbols')
+    print('    -m  --minimal         build with minimal features')
+    print('                            * use alphabetical only (omit by index)')
 
 
-def run_test(mode, use_clang, debug):
+def run_test(mode, use_clang, debug, minimal):
 
     # remove and recreate source directory
     shutil.rmtree(src_dir, ignore_errors=True)
@@ -89,14 +93,25 @@ def run_test(mode, use_clang, debug):
 
     # run cmake
     cmake_cmd = ['cmake']
+
     if use_clang:
-        cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
-        cmake_cmd.append('-DCMAKE_CXX_COMPILER=/usr/bin/clang++')
+        clang_c = which('clang')
+        clang_cxx = which('clang++')
+        if clang_c is None or clang_cxx is None:
+            print('search for clang compiler failed')
+            exit(1)
+        cmake_cmd.append('-DCMAKE_C_COMPILER=' + clang_c)
+        cmake_cmd.append('-DCMAKE_CXX_COMPILER=' + clang_cxx)
 
     if debug:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
     else:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Release')
+
+    if minimal:
+        cmake_cmd.append('-DOMIT_BY_INDEX=ON')
+    else:
+        cmake_cmd.append('-DOMIT_BY_INDEX=OFF')
 
     cmake_cmd.append('..')
 
@@ -106,10 +121,7 @@ def run_test(mode, use_clang, debug):
 
     # run make and track how much time it needs
     start = time.time()
-    if debug:
-        return_code = subprocess.run(['ninja']).returncode
-    else:
-        return_code = subprocess.run(['make', '-j' + str(multiprocessing.cpu_count())]).returncode
+    return_code = subprocess.run(['make', '-j' + str(multiprocessing.cpu_count())]).returncode
     end = time.time()
 
     os.remove(prep_dir + '/../CMakeLists.txt')
@@ -124,7 +136,7 @@ def run_test(mode, use_clang, debug):
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcd', ['help', 'clang', 'debug'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcdm', ['help', 'clang', 'debug', 'minimal'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -132,6 +144,7 @@ def main():
 
     use_clang = False
     debug = False
+    minimal = False
     for o, a in opts:
         if o in ('-h', '--help'):
             usage()
@@ -140,12 +153,14 @@ def main():
             use_clang = True
         elif o in ('-d', '--debug'):
             debug = True
+        elif o in ('-m', '--minimal'):
+            minimal = True
         else:
             assert False, "unhandled option"
 
     try:
-        fwd_time = run_test("fwd", use_clang, debug)
-        full_time = run_test("full", use_clang, debug)
+        fwd_time = run_test("fwd", use_clang, debug, minimal)
+        full_time = run_test("full", use_clang, debug, minimal)
 
         print('\n\n******* Build Time Performance Summary *******\n')
         print('  using full definititions: ' + str(full_time))

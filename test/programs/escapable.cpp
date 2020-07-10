@@ -150,7 +150,7 @@ int main()
     test_ok ok;
 
     std::cout << "special:" << std::endl;
-    for (auto s : special::variants_by_index())
+    for (auto s : special::variants())
     {
         std::cout << "    " << s << std::endl;
         TEST_EQ(ok, s.as_identifier_string().substr(0, 4), std::string("esc_"));
