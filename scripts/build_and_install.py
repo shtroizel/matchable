@@ -31,13 +31,12 @@ def usage():
     print('    -d  --debug                  debug build')
     print('                                   * use -DCMAKE_BUILD_TYPE=Debug (default is: '                \
             + '-DCMAKE_BUILD_TYPE=Release)\n')
-    print('    -a  --alphabetical_only      variants \'by string\' only (omit \'by index\'')
+    print('    -a  --alphabetical_only      variants \'by string\' only (omit \'by index\')')
     print('                                   * adds definition MATCHABLE_OMIT_BY_INDEX which will:')
     print('                                     - omit variants_by_index()')
     print('                                     - omit as_index()')
     print('                                     - omit from_index()')
-    print('                                     - omit lt_by_index()')
-    print('                                     - reduces memory and time needed to compile')
+    print('                                     - omit lt_by_index()\n')
 
 
 
