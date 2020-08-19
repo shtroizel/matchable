@@ -37,6 +37,7 @@ namespace matchable
     MATCHABLE(save_as__status, success, no_content, no_spread_mode, io_error, cyclic_dependencies);
     MATCHABLE(save_as__content, generated_matchable, matchables);
     MATCHABLE(save_as__spread_mode, wrap, always);
+    MATCHABLE(load__status, success, io_error, syntax_error);
     MATCHABLE(set_property_status, success, variant_lookup_failed, property_lookup_failed);
     namespace set_propertyvect_status = set_property_status;
 
@@ -77,15 +78,15 @@ namespace matchable
             std::string const & property_name,
             std::vector<std::string> & property_values
         );
+        std::string name;
+        std::vector<MatchableVariant> variants;
+        std::vector<std::pair<std::string, std::string>> property_types_and_names;
     private:
         set_property_status::Type verify_property_and_variant__and__get_variant_iter(
             std::string const & property,
             std::string const & variant,
             std::vector<MatchableVariant>::iterator & iter
         );
-        std::string name;
-        std::vector<MatchableVariant> variants;
-        std::vector<std::pair<std::string, std::string>> property_types_and_names;
     };
 
     class MatchableMaker
@@ -98,6 +99,7 @@ namespace matchable
             save_as__content::Flags const & content,
             save_as__spread_mode::Type mode
         );
+        load__status::Type load(std::string const & filename);
         std::map<std::string, Matchable *> matchables;
     private:
         std::string print_matchable_fwd(Matchable const & m);
