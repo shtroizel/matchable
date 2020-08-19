@@ -595,8 +595,6 @@ namespace matchable
                         std::string s{#_v};                                                                \
                         if (_t::name == "escapable")                                                       \
                             return s;                                                                      \
-                        if (s.substr(0, 4) == "esc_")                                                      \
-                            s.erase(0, 4);                                                                 \
                         return matchable::escapable::unescape_all(s);                                      \
                     }();                                                                                   \
                 return s;                                                                                  \
@@ -1074,6 +1072,9 @@ namespace matchable
                     index += replacement.size();
                 }
             }
+            if (unescaped.substr(0, 4) == "esc_")
+                unescaped.erase(0, 4);
+
             return unescaped;
         }
 
