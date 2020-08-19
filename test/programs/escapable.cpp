@@ -155,6 +155,7 @@ int main()
         std::cout << "    " << s << std::endl;
         TEST_EQ(ok, s.as_identifier_string().substr(0, 4), std::string("esc_"));
         TEST_EQ(ok, s.as_identifier_string().substr(4, s.as_identifier_string().size()), s.as_string());
+        TEST_EQ(ok, matchable::escapable::unescape_all(s.as_identifier_string()), s.as_string());
     }
 
     std::cout << "\nescape codes:" << std::endl;
