@@ -1,5 +1,3 @@
 *.kdev4
-build
-install
-build_q
-install_q
+build*
+install*
