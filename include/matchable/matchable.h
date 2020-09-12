@@ -1055,6 +1055,9 @@ namespace matchable
         inline std::string unescape_all(std::string const & input)
         {
             std::string unescaped{input};
+            if (unescaped.substr(0, 4) == "esc_")
+                unescaped.erase(0, 4);
+
             size_t index = 0;
             for (auto const & [code, symbol] : code_symbol_pairs())
             {
@@ -1072,8 +1075,6 @@ namespace matchable
                     index += replacement.size();
                 }
             }
-            if (unescaped.substr(0, 4) == "esc_")
-                unescaped.erase(0, 4);
 
             return unescaped;
         }
