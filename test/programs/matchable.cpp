@@ -118,24 +118,26 @@ int main()
     TEST_EQ(ok, TimeUnit::from_string("nil"), TimeUnit::nil);
     TEST_EQ(ok, TimeUnit::from_string("Weeks"), TimeUnit::Weeks::grab());
 
-    // lookup()
+    // variants_by_string_index_of()
     {
         bool found;
-        auto tu = TimeUnit::lookup("107", &found);
+        auto tu = TimeUnit::from_by_string_index(TimeUnit::variants_by_string_index_of("107", &found));
         TEST_EQ(ok, tu, TimeUnit::Days::grab());
         TEST_EQ(ok, found, false);
-        tu = TimeUnit::lookup("Years", &found);
-        TEST_EQ(ok, tu, TimeUnit::Weeks::grab());
+        int index = TimeUnit::variants_by_string_index_of("Years", &found);
+        tu = TimeUnit::from_by_string_index(index);
+        TEST_EQ(ok, tu, TimeUnit::nil);
+        TEST_EQ(ok, index, (int) TimeUnit::variants().size());
         TEST_EQ(ok, found, false);
-        tu = TimeUnit::lookup("Fortnites", nullptr);
+        tu = TimeUnit::from_by_string_index(TimeUnit::variants_by_string_index_of("Fortnites", nullptr));
         TEST_EQ(ok, tu, TimeUnit::Hours::grab());
-        tu = TimeUnit::lookup("Minutes", &found);
+        tu = TimeUnit::from_by_string_index(TimeUnit::variants_by_string_index_of("Minutes", &found));
         TEST_EQ(ok, tu, TimeUnit::Minutes::grab());
         TEST_EQ(ok, found, true);
-        tu = TimeUnit::lookup("Days", &found);
+        tu = TimeUnit::from_by_string_index(TimeUnit::variants_by_string_index_of("Days", &found));
         TEST_EQ(ok, tu, TimeUnit::Days::grab());
         TEST_EQ(ok, found, true);
-        tu = TimeUnit::lookup("Weeks", &found);
+        tu = TimeUnit::from_by_string_index(TimeUnit::variants_by_string_index_of("Weeks", &found));
         TEST_EQ(ok, tu, TimeUnit::Weeks::grab());
         TEST_EQ(ok, found, true);
     }
