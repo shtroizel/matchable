@@ -487,7 +487,7 @@ namespace matchable
                 return nil;                                                                                \
             return I##_t::variants_by_string().at(index);                                                  \
         }                                                                                                  \
-        inline Type lookup(std::string const & str, bool * found)                                          \
+        inline int variants_by_string_index_of(std::string const & str, bool * found)                      \
         {                                                                                                  \
             auto it = std::lower_bound(                                                                    \
                 I##_t::variants_by_string().begin(),                                                       \
@@ -499,11 +499,11 @@ namespace matchable
             {                                                                                              \
                 if (nullptr != found)                                                                      \
                     *found = false;                                                                        \
-                return I##_t::variants_by_string().size() ? I##_t::variants_by_string().back() : nil;      \
+                return I##_t::variants_by_string().size();                                                 \
             }                                                                                              \
             if (nullptr != found)                                                                          \
                 *found = str == it->as_string();                                                           \
-            return *it;                                                                                    \
+            return it->as_by_string_index();                                                               \
         }                                                                                                  \
         inline Type from_string(std::string const & str)                                                   \
         {                                                                                                  \
