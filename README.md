@@ -117,6 +117,16 @@ PROPERTYx4_MATCHABLE()<br/>
 PROPERTYx5_MATCHABLE()<br/>
 PROPERTYx6_MATCHABLE()<br/>
 PROPERTYx7_MATCHABLE()<br/>
+PROPERTYx8_MATCHABLE()<br/>
+PROPERTYx9_MATCHABLE()<br/>
+PROPERTYx10_MATCHABLE()<br/>
+PROPERTYx11_MATCHABLE()<br/>
+PROPERTYx12_MATCHABLE()<br/>
+PROPERTYx13_MATCHABLE()<br/>
+PROPERTYx14_MATCHABLE()<br/>
+PROPERTYx15_MATCHABLE()<br/>
+PROPERTYx16_MATCHABLE()<br/>
+PROPERTYx17_MATCHABLE()<br/>
 
 Example: test/programs/relationships.cpp
 
@@ -255,10 +265,13 @@ libmatchable provides "MatchableMaker" for creating header files with matchable 
 both static and shared libraries can be found under install/lib/matchable
 
 ## MatchableMaker
-see include/MatchableMaker.h
+see include/MatchableMaker.h<br>
 
-example use of MatchableMaker can be found in the matchmaker project<br/>
-search for "MatchableMaker" in https://github.com/shtroizel/matchmaker/blob/master/data_reader/src/matchmaker_data_reader.cpp
+example comming soon... until then see the MATCHMAKER project<br/>
+search for "MatchableMaker" in one of these files:<br/>
+
+https://github.com/shtroizel/matchmaker/blob/master/data_reader/stage_0/src/data_reader_stage_0.cpp<br/>
+https://github.com/shtroizel/matchmaker/blob/master/data_reader/stage_1/src/data_reader_stage_1.cpp<br/>
 
 # Versioning
 For the versions available, see the [tags on this repository](https://github.com/shtroizel/matchable/tags).

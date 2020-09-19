@@ -454,6 +454,16 @@ save_as_cleanup:
         esc_PROPERTYx5_MATCHABLE,
         esc_PROPERTYx6_MATCHABLE,
         esc_PROPERTYx7_MATCHABLE,
+        esc_PROPERTYx8_MATCHABLE,
+        esc_PROPERTYx9_MATCHABLE,
+        esc_PROPERTYx10_MATCHABLE,
+        esc_PROPERTYx11_MATCHABLE,
+        esc_PROPERTYx12_MATCHABLE,
+        esc_PROPERTYx13_MATCHABLE,
+        esc_PROPERTYx14_MATCHABLE,
+        esc_PROPERTYx15_MATCHABLE,
+        esc_PROPERTYx16_MATCHABLE,
+        esc_PROPERTYx17_MATCHABLE,
         esc_SPREAD_MATCHABLE,
         esc_SET_PROPERTY,
         esc_SET_PROPERTY_VECT
@@ -694,6 +704,295 @@ save_as_cleanup:
                         m->add_property(args[10], args[11]);
                         m->add_property(args[12], args[13]);
                         for (int i = 15; i < (int) args.size(); ++i)
+                            m->add_variant(args[i]);
+                    }},
+
+                {MatchableKeyword::esc_PROPERTYx8_MATCHABLE::grab(),
+                    [&](){
+                        if (args.size() < 17)
+                        {
+                            std::cout << "Error loading PROPERTYx8_MATCHABLE(), expected >= 17 args (got "
+                                      << args.size() << ")" << std::endl;
+                            ret = load__status::syntax_error::grab();
+                            return;
+                        }
+                        auto m = grab(args[16]);
+                        m->add_property(args[0], args[1]);
+                        m->add_property(args[2], args[3]);
+                        m->add_property(args[4], args[5]);
+                        m->add_property(args[6], args[7]);
+                        m->add_property(args[8], args[9]);
+                        m->add_property(args[10], args[11]);
+                        m->add_property(args[12], args[13]);
+                        m->add_property(args[14], args[15]);
+                        for (int i = 17; i < (int) args.size(); ++i)
+                            m->add_variant(args[i]);
+                    }},
+
+                {MatchableKeyword::esc_PROPERTYx9_MATCHABLE::grab(),
+                    [&](){
+                        if (args.size() < 19)
+                        {
+                            std::cout << "Error loading PROPERTYx9_MATCHABLE(), expected >= 19 args (got "
+                                      << args.size() << ")" << std::endl;
+                            ret = load__status::syntax_error::grab();
+                            return;
+                        }
+                        auto m = grab(args[18]);
+                        m->add_property(args[0], args[1]);
+                        m->add_property(args[2], args[3]);
+                        m->add_property(args[4], args[5]);
+                        m->add_property(args[6], args[7]);
+                        m->add_property(args[8], args[9]);
+                        m->add_property(args[10], args[11]);
+                        m->add_property(args[12], args[13]);
+                        m->add_property(args[14], args[15]);
+                        m->add_property(args[16], args[17]);
+                        for (int i = 19; i < (int) args.size(); ++i)
+                            m->add_variant(args[i]);
+                    }},
+
+                {MatchableKeyword::esc_PROPERTYx10_MATCHABLE::grab(),
+                    [&](){
+                        if (args.size() < 21)
+                        {
+                            std::cout << "Error loading PROPERTYx10_MATCHABLE(), expected >= 21 args (got "
+                                      << args.size() << ")" << std::endl;
+                            ret = load__status::syntax_error::grab();
+                            return;
+                        }
+                        auto m = grab(args[20]);
+                        m->add_property(args[0], args[1]);
+                        m->add_property(args[2], args[3]);
+                        m->add_property(args[4], args[5]);
+                        m->add_property(args[6], args[7]);
+                        m->add_property(args[8], args[9]);
+                        m->add_property(args[10], args[11]);
+                        m->add_property(args[12], args[13]);
+                        m->add_property(args[14], args[15]);
+                        m->add_property(args[16], args[17]);
+                        m->add_property(args[18], args[19]);
+                        for (int i = 21; i < (int) args.size(); ++i)
+                            m->add_variant(args[i]);
+                    }},
+
+                {MatchableKeyword::esc_PROPERTYx10_MATCHABLE::grab(),
+                    [&](){
+                        if (args.size() < 21)
+                        {
+                            std::cout << "Error loading PROPERTYx10_MATCHABLE(), expected >= 21 args (got "
+                                      << args.size() << ")" << std::endl;
+                            ret = load__status::syntax_error::grab();
+                            return;
+                        }
+                        auto m = grab(args[20]);
+                        m->add_property(args[0], args[1]);
+                        m->add_property(args[2], args[3]);
+                        m->add_property(args[4], args[5]);
+                        m->add_property(args[6], args[7]);
+                        m->add_property(args[8], args[9]);
+                        m->add_property(args[10], args[11]);
+                        m->add_property(args[12], args[13]);
+                        m->add_property(args[14], args[15]);
+                        m->add_property(args[16], args[17]);
+                        m->add_property(args[18], args[19]);
+                        for (int i = 21; i < (int) args.size(); ++i)
+                            m->add_variant(args[i]);
+                    }},
+
+                {MatchableKeyword::esc_PROPERTYx11_MATCHABLE::grab(),
+                    [&](){
+                        if (args.size() < 23)
+                        {
+                            std::cout << "Error loading PROPERTYx11_MATCHABLE(), expected >= 23 args (got "
+                                      << args.size() << ")" << std::endl;
+                            ret = load__status::syntax_error::grab();
+                            return;
+                        }
+                        auto m = grab(args[22]);
+                        m->add_property(args[0], args[1]);
+                        m->add_property(args[2], args[3]);
+                        m->add_property(args[4], args[5]);
+                        m->add_property(args[6], args[7]);
+                        m->add_property(args[8], args[9]);
+                        m->add_property(args[10], args[11]);
+                        m->add_property(args[12], args[13]);
+                        m->add_property(args[14], args[15]);
+                        m->add_property(args[16], args[17]);
+                        m->add_property(args[18], args[19]);
+                        m->add_property(args[20], args[21]);
+                        for (int i = 23; i < (int) args.size(); ++i)
+                            m->add_variant(args[i]);
+                    }},
+
+                {MatchableKeyword::esc_PROPERTYx12_MATCHABLE::grab(),
+                    [&](){
+                        if (args.size() < 25)
+                        {
+                            std::cout << "Error loading PROPERTYx12_MATCHABLE(), expected >= 25 args (got "
+                                      << args.size() << ")" << std::endl;
+                            ret = load__status::syntax_error::grab();
+                            return;
+                        }
+                        auto m = grab(args[24]);
+                        m->add_property(args[0], args[1]);
+                        m->add_property(args[2], args[3]);
+                        m->add_property(args[4], args[5]);
+                        m->add_property(args[6], args[7]);
+                        m->add_property(args[8], args[9]);
+                        m->add_property(args[10], args[11]);
+                        m->add_property(args[12], args[13]);
+                        m->add_property(args[14], args[15]);
+                        m->add_property(args[16], args[17]);
+                        m->add_property(args[18], args[19]);
+                        m->add_property(args[20], args[21]);
+                        m->add_property(args[22], args[23]);
+                        for (int i = 25; i < (int) args.size(); ++i)
+                            m->add_variant(args[i]);
+                    }},
+
+                {MatchableKeyword::esc_PROPERTYx13_MATCHABLE::grab(),
+                    [&](){
+                        if (args.size() < 27)
+                        {
+                            std::cout << "Error loading PROPERTYx13_MATCHABLE(), expected >= 27 args (got "
+                                      << args.size() << ")" << std::endl;
+                            ret = load__status::syntax_error::grab();
+                            return;
+                        }
+                        auto m = grab(args[26]);
+                        m->add_property(args[0], args[1]);
+                        m->add_property(args[2], args[3]);
+                        m->add_property(args[4], args[5]);
+                        m->add_property(args[6], args[7]);
+                        m->add_property(args[8], args[9]);
+                        m->add_property(args[10], args[11]);
+                        m->add_property(args[12], args[13]);
+                        m->add_property(args[14], args[15]);
+                        m->add_property(args[16], args[17]);
+                        m->add_property(args[18], args[19]);
+                        m->add_property(args[20], args[21]);
+                        m->add_property(args[22], args[23]);
+                        m->add_property(args[24], args[25]);
+                        for (int i = 27; i < (int) args.size(); ++i)
+                            m->add_variant(args[i]);
+                    }},
+
+                {MatchableKeyword::esc_PROPERTYx14_MATCHABLE::grab(),
+                    [&](){
+                        if (args.size() < 29)
+                        {
+                            std::cout << "Error loading PROPERTYx14_MATCHABLE(), expected >= 29 args (got "
+                                      << args.size() << ")" << std::endl;
+                            ret = load__status::syntax_error::grab();
+                            return;
+                        }
+                        auto m = grab(args[28]);
+                        m->add_property(args[0], args[1]);
+                        m->add_property(args[2], args[3]);
+                        m->add_property(args[4], args[5]);
+                        m->add_property(args[6], args[7]);
+                        m->add_property(args[8], args[9]);
+                        m->add_property(args[10], args[11]);
+                        m->add_property(args[12], args[13]);
+                        m->add_property(args[14], args[15]);
+                        m->add_property(args[16], args[17]);
+                        m->add_property(args[18], args[19]);
+                        m->add_property(args[20], args[21]);
+                        m->add_property(args[22], args[23]);
+                        m->add_property(args[24], args[25]);
+                        m->add_property(args[26], args[27]);
+                        for (int i = 29; i < (int) args.size(); ++i)
+                            m->add_variant(args[i]);
+                    }},
+
+                {MatchableKeyword::esc_PROPERTYx15_MATCHABLE::grab(),
+                    [&](){
+                        if (args.size() < 31)
+                        {
+                            std::cout << "Error loading PROPERTYx15_MATCHABLE(), expected >= 31 args (got "
+                                      << args.size() << ")" << std::endl;
+                            ret = load__status::syntax_error::grab();
+                            return;
+                        }
+                        auto m = grab(args[30]);
+                        m->add_property(args[0], args[1]);
+                        m->add_property(args[2], args[3]);
+                        m->add_property(args[4], args[5]);
+                        m->add_property(args[6], args[7]);
+                        m->add_property(args[8], args[9]);
+                        m->add_property(args[10], args[11]);
+                        m->add_property(args[12], args[13]);
+                        m->add_property(args[14], args[15]);
+                        m->add_property(args[16], args[17]);
+                        m->add_property(args[18], args[19]);
+                        m->add_property(args[20], args[21]);
+                        m->add_property(args[22], args[23]);
+                        m->add_property(args[24], args[25]);
+                        m->add_property(args[26], args[27]);
+                        m->add_property(args[28], args[29]);
+                        for (int i = 31; i < (int) args.size(); ++i)
+                            m->add_variant(args[i]);
+                    }},
+
+                {MatchableKeyword::esc_PROPERTYx16_MATCHABLE::grab(),
+                    [&](){
+                        if (args.size() < 33)
+                        {
+                            std::cout << "Error loading PROPERTYx16_MATCHABLE(), expected >= 33 args (got "
+                                      << args.size() << ")" << std::endl;
+                            ret = load__status::syntax_error::grab();
+                            return;
+                        }
+                        auto m = grab(args[32]);
+                        m->add_property(args[0], args[1]);
+                        m->add_property(args[2], args[3]);
+                        m->add_property(args[4], args[5]);
+                        m->add_property(args[6], args[7]);
+                        m->add_property(args[8], args[9]);
+                        m->add_property(args[10], args[11]);
+                        m->add_property(args[12], args[13]);
+                        m->add_property(args[14], args[15]);
+                        m->add_property(args[16], args[17]);
+                        m->add_property(args[18], args[19]);
+                        m->add_property(args[20], args[21]);
+                        m->add_property(args[22], args[23]);
+                        m->add_property(args[24], args[25]);
+                        m->add_property(args[26], args[27]);
+                        m->add_property(args[28], args[29]);
+                        m->add_property(args[30], args[31]);
+                        for (int i = 33; i < (int) args.size(); ++i)
+                            m->add_variant(args[i]);
+                    }},
+
+                {MatchableKeyword::esc_PROPERTYx17_MATCHABLE::grab(),
+                    [&](){
+                        if (args.size() < 35)
+                        {
+                            std::cout << "Error loading PROPERTYx17_MATCHABLE(), expected >= 35 args (got "
+                                      << args.size() << ")" << std::endl;
+                            ret = load__status::syntax_error::grab();
+                            return;
+                        }
+                        auto m = grab(args[34]);
+                        m->add_property(args[0], args[1]);
+                        m->add_property(args[2], args[3]);
+                        m->add_property(args[4], args[5]);
+                        m->add_property(args[6], args[7]);
+                        m->add_property(args[8], args[9]);
+                        m->add_property(args[10], args[11]);
+                        m->add_property(args[12], args[13]);
+                        m->add_property(args[14], args[15]);
+                        m->add_property(args[16], args[17]);
+                        m->add_property(args[18], args[19]);
+                        m->add_property(args[20], args[21]);
+                        m->add_property(args[22], args[23]);
+                        m->add_property(args[24], args[25]);
+                        m->add_property(args[26], args[27]);
+                        m->add_property(args[28], args[29]);
+                        m->add_property(args[30], args[31]);
+                        m->add_property(args[32], args[33]);
+                        for (int i = 35; i < (int) args.size(); ++i)
                             m->add_variant(args[i]);
                     }},
 

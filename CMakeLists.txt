@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(matchable VERSION 11.0.1)
+project(matchable VERSION 11.1.0)
 
 option(LIB_ONLY "Build library only (no tests/examples)" OFF)
 option(OMIT_BY_INDEX "Omit by index" OFF)
@@ -37,6 +37,7 @@ if(NOT LIB_ONLY)
     add_matchable_test(matchable)
     add_matchable_test(matchbox)
     add_matchable_test(sorting)
+    add_matchable_test(property_matchable)
     if(NOT OMIT_BY_INDEX)
         add_matchable_test(cards)
         add_matchable_test(matchable_usage)
