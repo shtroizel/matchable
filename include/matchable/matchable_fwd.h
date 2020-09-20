@@ -33,12 +33,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
+namespace matchable
+{
+    template<typename M, typename T> class MatchBox;
+    template<typename M> class MatchBox<M, void>;
+}
+
 
 #define MATCHABLE_FWD(_t)                                                                                  \
-    template<typename M, typename T> class MatchBox;                                                       \
-    template<typename M> class MatchBox<M, void>;                                                          \
     namespace _t                                                                                           \
     {                                                                                                      \
         template<class T> class MatchableType;                                                             \
         using Type = MatchableType<class I##_t>;                                                           \
+        using Flags = matchable::MatchBox<Type, void>;                                                     \
     }
