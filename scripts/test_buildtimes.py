@@ -49,7 +49,7 @@ def run_test(mode, use_clang, debug, minimal):
 
     # copy IncludedAllOverThePlace
     shutil.copy(prep_dir + '/' + mode + '/IncludedAllOverThePlace.h', src_dir)
-    shutil.copy(prep_dir + '/' + mode + '/IncludedAllOverThePlace.cpp', src_dir)
+    shutil.copy(prep_dir + '/IncludedAllOverThePlace.cpp', src_dir)
 
     # create main.cpp and LikesIncludedAllOverThePlace_i.h/cpp for i in [0..107]
     main_content_start = '#include "matchables.h"\n'
