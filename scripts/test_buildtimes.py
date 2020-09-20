@@ -78,7 +78,7 @@ def run_test(mode, use_clang, debug, minimal):
         main_content_main += '    (void) l_' + str(i) + ';\n'
 
     main_content = main_content_start
-    main_content += 'int main()\n{    ' + main_content_main
+    main_content += 'int main()\n{\n    ' + main_content_main
     main_content += '}\n\n'
 
     main_file = open(src_dir + '/main.cpp', 'w')
