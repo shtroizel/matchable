@@ -189,6 +189,7 @@ namespace matchable
         void clear();
         void set(M const &);
         void unset(M const &);
+        void toggle(M const &);
         bool is_set(M const &) const;
         std::vector<M> currently_set() const;
         bool operator==(MatchBox const &) const;
@@ -255,6 +256,17 @@ namespace matchable
             nil_init_flag = false;
         else
             init_flags[static_cast<size_t>((match.*as_index_func)())] = false;
+    }
+
+
+    template<typename M>
+    void MatchBox<M, void>::toggle(M const & match)
+    {
+        if (match.is_nil())
+            nil_init_flag = !nil_init_flag;
+        else
+            init_flags[static_cast<size_t>((match.*as_index_func)())] =
+                    !init_flags[static_cast<size_t>((match.*as_index_func)())];
     }
 
 
