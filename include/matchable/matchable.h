@@ -800,27 +800,70 @@ namespace matchable
 
 #define _property_matchable_amend_type(_pt, _p, _t)                                                        \
     public:                                                                                                \
+        /* vector property */                                                                              \
         std::vector<_pt> const & as_##_p##_vect() const                                                    \
             { return nullptr == t ? T::nil_##_p##_vect() : t->as_##_p##_vect(); }                          \
         void set_##_p##_vect(std::vector<_pt> const & v)                                                   \
-            { if (nullptr == t) T::nil_##_p##_vect() = v; else t->set_##_p##_vect(v); }                    \
+            { if (nullptr == t) { T::nil_##_p##_vect() = v; for (auto f : T::nil_##_p##_vect_obs()) f(); } \
+              else t->set_##_p##_vect(v); }                                                                \
+                                                                                                           \
+        /* single property */                                                                              \
         _pt const & as_##_p() const { return nullptr == t ? T::nil_##_p() : t->as_##_p(); }                \
-        void set_##_p(_pt const & s) { if (nullptr == t) T::nil_##_p() = s; else t->set_##_p(s); }
+        void set_##_p(_pt const & s)                                                                       \
+            { if (nullptr == t) { T::nil_##_p() = s; for (auto f : T::nil_##_p##_obs()) f(); }             \
+              else t->set_##_p(s); }                                                                       \
+                                                                                                           \
+        /* observers */                                                                                    \
+        void add_##_p##_vect_observer(std::function<void ()> o)                                            \
+            { if (nullptr == t) T::nil_##_p##_vect_obs().push_back(o);                                     \
+              else t->add_##_p##_vect_observer(o); }                                                       \
+        void add_##_p##_observer(std::function<void ()> o)                                                 \
+            { if (nullptr == t) T::nil_##_p##_obs().push_back(o); else t->add_##_p##_observer(o); }
 
 
 #define _property_matchable_amend_declaration(_pt, _p, _t)                                                 \
     public:                                                                                                \
+        /* vector property */                                                                              \
         std::vector<_pt> const & as_##_p##_vect() const { return _p##_vect_mb().at(Type(clone())); }       \
-        void set_##_p##_vect(std::vector<_pt> const & v) { _p##_vect_mb().set(Type(clone()), v); }         \
+        void set_##_p##_vect(std::vector<_pt> const & v)                                                   \
+            { auto c = Type(clone()); _p##_vect_mb().set(c, v);                                            \
+              for (auto f : _p##_vect_obs_mb().at(c)) f(); }                                               \
+                                                                                                           \
+        /* single property */                                                                              \
         _pt const & as_##_p() const { return _p##_mb().at(Type(clone())); }                                \
-        void set_##_p(_pt const & s) { _p##_mb().set(Type(clone()), s); }                                  \
+        void set_##_p(_pt const & s)                                                                       \
+            { auto c = Type(clone()); _p##_mb().set(c, s); for (auto f : _p##_obs_mb().at(c)) f(); }       \
+                                                                                                           \
+        /* observers */                                                                                    \
+        void add_##_p##_vect_observer(std::function<void ()> f)                                            \
+            { _p##_vect_obs_mb().mut_at(Type(clone())).push_back(f); }                                     \
+        void add_##_p##_observer(std::function<void ()> f)                                                 \
+            { _p##_obs_mb().mut_at(Type(clone())).push_back(f); }                                          \
+                                                                                                           \
     private:                                                                                               \
+        /* vector property for non-nil variants */                                                         \
         static matchable::MatchBox<_t::Type, std::vector<_pt>> & _p##_vect_mb()                            \
             { static matchable::MatchBox<_t::Type, std::vector<_pt>> mb; return mb; }                      \
+        /* vector property for nil variant */                                                              \
         static std::vector<_pt> & nil_##_p##_vect() { static std::vector<_pt> v; return v; }               \
+        /* observers of vector property for non-nil variants */                                            \
+        static matchable::MatchBox<_t::Type, std::vector<std::function<void ()>>> & _p##_vect_obs_mb()     \
+            { static matchable::MatchBox<_t::Type, std::vector<std::function<void ()>>> mb; return mb; }   \
+        /* observers of vector property for nil variant */                                                 \
+        static std::vector<std::function<void ()>> & nil_##_p##_vect_obs()                                 \
+            { static std::vector<std::function<void ()>> v; return v; }                                    \
+                                                                                                           \
+        /* single property */                                                                              \
         static matchable::MatchBox<_t::Type, _pt> & _p##_mb()                                              \
             { static matchable::MatchBox<_t::Type, _pt> mb; return mb; }                                   \
-        static _pt & nil_##_p() { static _pt s; return s; }
+        /* single property for nil */                                                                      \
+        static _pt & nil_##_p() { static _pt s; return s; }                                                \
+        /* observers of single property for non-nil variants */                                            \
+        static matchable::MatchBox<_t::Type, std::vector<std::function<void ()>>> & _p##_obs_mb()          \
+            { static matchable::MatchBox<_t::Type, std::vector<std::function<void ()>>> mb; return mb; }   \
+        /* observers of single property for nil variant */                                                 \
+        static std::vector<std::function<void ()>> & nil_##_p##_obs()                                      \
+            { static std::vector<std::function<void ()>> v; return v; }
 
 
 #define PROPERTYx1_MATCHABLE(_pt0, _p0, _t, ...)                                                           \
