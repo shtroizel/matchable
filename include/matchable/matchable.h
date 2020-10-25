@@ -492,7 +492,7 @@ namespace matchable
         inline std::vector<Type> const & variants() { return I##_t::variants(); }                          \
         inline std::vector<Type> const & variants_by_string() { return I##_t::variants_by_string(); }      \
         static std::string const name{#_t};                                                                \
-        static Type const nil{};                                                                           \
+        static Type nil{};                                                                                 \
         inline Type from_by_string_index(int index)                                                        \
         {                                                                                                  \
             if (index < 0 || index >= (int) I##_t::variants_by_string().size())                            \
