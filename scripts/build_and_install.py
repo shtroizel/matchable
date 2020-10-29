@@ -61,9 +61,6 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
     os.makedirs(build_dir)
     os.chdir(build_dir)
 
-    shutil.rmtree(install_dir, ignore_errors=True)
-    os.makedirs(install_dir)
-
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
 
     if lib_only:
