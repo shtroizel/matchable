@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(matchable VERSION 11.2.0)
+project(matchable VERSION 11.3.0)
 
 option(LIB_ONLY "Build library only (no tests/examples)" OFF)
 option(OMIT_BY_INDEX "Omit by index" OFF)
