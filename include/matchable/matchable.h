@@ -645,6 +645,12 @@ namespace matchable
 #define _matchable_concat_variant(_t, _v) _t::_v::grab(),
 
 
+// these "foreach" macros call a macro expecting a type and variant, for each variant given
+//
+// _m is the macro to call (_matchable_create_variant or _matchable_concat_variant)
+// _t is the type
+// _v is the variant
+// ... for more variants
 #define   _mcv_0(_m, _t, ...)
 #define   _mcv_1(_m, _t, _v)      _m(_t, _v)
 #define   _mcv_2(_m, _t, _v, ...) _m(_t, _v)   _mcv_1(_m, _t, __VA_ARGS__)
