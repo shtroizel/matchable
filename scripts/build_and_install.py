@@ -90,10 +90,22 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
         os.chdir(matchable_root)
         exit(1)
 
-    if subprocess.run(['make', '-j' + jobs, 'install']).returncode != 0:
+    if subprocess.run(['make', '-j' + jobs]).returncode != 0:
         print('make failed')
         os.chdir(matchable_root)
         exit(1)
+
+    if os.access(install_dir, os.W_OK):
+        if subprocess.run(['make', '-j' + jobs, 'install']).returncode != 0:
+            print('make install failed')
+            os.chdir(matchable_root)
+            exit(1)
+    else:
+        if subprocess.run(['sudo', 'make', '-j' + jobs, 'install']).returncode != 0:
+            print('make install failed')
+            os.chdir(matchable_root)
+            exit(1)
+
 
     if not lib_only and run_tests:
         if subprocess.run([install_dir + '/share/matchable/test/bin/run_all.sh',
