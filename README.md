@@ -224,7 +224,6 @@ refer to help for custom build/install directories and other options:
 scripts/build_and_install.py -h
 ```
 * use of build_and_install.py is of course optional and serves as a reference or example workflow
-* build_and_install.py will remove the build and install directories before starting!
 # Running Tests / Examples
 Assuming workflow above with install directory under the project root (modify paths accordingly for your
 workflow).
@@ -267,7 +266,7 @@ both static and shared libraries can be found under install/lib/matchable
 ## MatchableMaker
 see include/MatchableMaker.h<br>
 
-example comming soon... until then see the MATCHMAKER project<br/>
+see the MATCHMAKER project<br/>
 search for "MatchableMaker" in one of these files:<br/>
 
 https://github.com/shtroizel/matchmaker/blob/master/data_reader/stage_0/src/data_reader_stage_0.cpp<br/>
