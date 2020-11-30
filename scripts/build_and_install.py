@@ -95,14 +95,10 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
         os.chdir(matchable_root)
         exit(1)
 
-    if os.access(install_dir, os.W_OK):
-        if subprocess.run(['make', '-j' + jobs, 'install']).returncode != 0:
-            print('make install failed')
-            os.chdir(matchable_root)
-            exit(1)
-    else:
+    if subprocess.run(['make', '-j' + jobs, 'install']).returncode != 0:
+        print('make install failed, trying sudo make install...')
         if subprocess.run(['sudo', 'make', '-j' + jobs, 'install']).returncode != 0:
-            print('make install failed')
+            print('sudo make install failed')
             os.chdir(matchable_root)
             exit(1)
 
