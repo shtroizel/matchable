@@ -58,7 +58,13 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
         install_dir = install_dir[:-1]
 
     shutil.rmtree(build_dir, ignore_errors=True)
-    os.makedirs(build_dir)
+    try:
+        os.makedirs(build_dir)
+    except OSError as error:
+        print("Failed to create build directory '%s'" % os.path.abspath(build_dir))
+        os.chdir(matchable_root)
+        exit(1)
+
     os.chdir(build_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
