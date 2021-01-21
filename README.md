@@ -257,21 +257,6 @@ Example code can be found under:
 test/programs
 ```
 
-# Creating Matchables at Runtime
-libmatchable provides "MatchableMaker" for creating header files with matchable definitions programmatically
-
-## libmatchable
-both static and shared libraries can be found under install/lib/matchable
-
-## MatchableMaker
-see include/MatchableMaker.h<br>
-
-see the MATCHMAKER project<br/>
-search for "MatchableMaker" in one of these files:<br/>
-
-https://github.com/shtroizel/matchmaker/blob/master/data_reader/stage_0/src/data_reader_stage_0.cpp<br/>
-https://github.com/shtroizel/matchmaker/blob/master/data_reader/stage_1/src/data_reader_stage_1.cpp<br/>
-
 # Versioning
 For the versions available, see the [tags on this repository](https://github.com/shtroizel/matchable/tags).
 
