@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 MATCHABLE(Color, Black, Red)
 PROPERTYx1_MATCHABLE(Color::Type, color, Suit, Clubs, Diamonds, Hearts, Spades)
 
-// There are two syntaxes for this. The SET_SPREAD() macro is used here for the black suits.
+// There are two syntaxes for this. The SET_PROPERTY() macro is used here for the black suits.
 // To demonstrate the other syntax we use the run-time interface within main() to set the red suits.
 SET_PROPERTY(Suit, Clubs, color, Color::Black::grab())
 SET_PROPERTY(Suit, Spades, color, Color::Black::grab())
@@ -89,7 +89,7 @@ int main()
 {
     test_ok ok;
 
-    // accomplishes the same as SET_SPREAD() above, but at run-time...
+    // accomplishes the same as SET_PROPERTY() above, but at run-time...
     Suit::Diamonds::grab().set_color(Color::Red::grab());
     Suit::Hearts::grab().set_color(Color::Red::grab());
 
