@@ -327,10 +327,10 @@ namespace matchable
             {
                 prev_variants_by_string = M::interface_type::variants_by_string();
                 auto i = std::remove_if(
-                    M::interface_type::by_string().begin(),
-                    M::interface_type::by_string().end(),
-                    [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
-                );
+                             M::interface_type::by_string().begin(),
+                             M::interface_type::by_string().end(),
+                             [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
+                         );
                 M::interface_type::by_string().erase(i, M::interface_type::by_string().end());
             }
 
@@ -338,10 +338,10 @@ namespace matchable
             {
                 prev_variants_by_index = M::interface_type::variants_by_index();
                 auto i = std::remove_if(
-                    M::interface_type::by_index().begin(),
-                    M::interface_type::by_index().end(),
-                    [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
-                );
+                             M::interface_type::by_index().begin(),
+                             M::interface_type::by_index().end(),
+                             [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
+                         );
                 M::interface_type::by_index().erase(i, M::interface_type::by_index().end());
             }
 #endif
@@ -603,7 +603,8 @@ namespace matchable
             std::string const & as_string() const override                                                 \
             {                                                                                              \
                 static std::string const s =                                                               \
-                    [&](){                                                                                 \
+                    [&]()                                                                                  \
+                    {                                                                                      \
                         std::string s{#v};                                                                 \
                         if (t::name == "escapable")                                                        \
                             return s;                                                                      \
