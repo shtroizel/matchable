@@ -241,6 +241,96 @@ PROPERTYx17_MATCHABLE(
     int, p17,
     matchable_17, variant
 );
+PROPERTYx18_MATCHABLE(
+    int, p1,
+    int, p2,
+    int, p3,
+    int, p4,
+    int, p5,
+    int, p6,
+    int, p7,
+    int, p8,
+    int, p9,
+    int, p10,
+    int, p11,
+    int, p12,
+    int, p13,
+    int, p14,
+    int, p15,
+    int, p16,
+    int, p17,
+    int, p18,
+    matchable_18, variant
+);
+PROPERTYx19_MATCHABLE(
+    int, p1,
+    int, p2,
+    int, p3,
+    int, p4,
+    int, p5,
+    int, p6,
+    int, p7,
+    int, p8,
+    int, p9,
+    int, p10,
+    int, p11,
+    int, p12,
+    int, p13,
+    int, p14,
+    int, p15,
+    int, p16,
+    int, p17,
+    int, p18,
+    int, p19,
+    matchable_19, variant
+);
+PROPERTYx20_MATCHABLE(
+    int, p1,
+    int, p2,
+    int, p3,
+    int, p4,
+    int, p5,
+    int, p6,
+    int, p7,
+    int, p8,
+    int, p9,
+    int, p10,
+    int, p11,
+    int, p12,
+    int, p13,
+    int, p14,
+    int, p15,
+    int, p16,
+    int, p17,
+    int, p18,
+    int, p19,
+    int, p20,
+    matchable_20, variant
+);
+PROPERTYx21_MATCHABLE(
+    int, p1,
+    int, p2,
+    int, p3,
+    int, p4,
+    int, p5,
+    int, p6,
+    int, p7,
+    int, p8,
+    int, p9,
+    int, p10,
+    int, p11,
+    int, p12,
+    int, p13,
+    int, p14,
+    int, p15,
+    int, p16,
+    int, p17,
+    int, p18,
+    int, p19,
+    int, p20,
+    int, p21,
+    matchable_21, variant
+);
 
 
 int main()
@@ -569,6 +659,166 @@ int main()
     TEST_EQ(ok, matchable_17::variant::grab().as_p15(), 15);
     TEST_EQ(ok, matchable_17::variant::grab().as_p16(), 16);
     TEST_EQ(ok, matchable_17::variant::grab().as_p17(), 17);
+
+    matchable_18::variant::grab().set_p1(1);
+    matchable_18::variant::grab().set_p2(2);
+    matchable_18::variant::grab().set_p3(3);
+    matchable_18::variant::grab().set_p4(4);
+    matchable_18::variant::grab().set_p5(5);
+    matchable_18::variant::grab().set_p6(6);
+    matchable_18::variant::grab().set_p7(7);
+    matchable_18::variant::grab().set_p8(8);
+    matchable_18::variant::grab().set_p9(9);
+    matchable_18::variant::grab().set_p10(10);
+    matchable_18::variant::grab().set_p11(11);
+    matchable_18::variant::grab().set_p12(12);
+    matchable_18::variant::grab().set_p13(13);
+    matchable_18::variant::grab().set_p14(14);
+    matchable_18::variant::grab().set_p15(15);
+    matchable_18::variant::grab().set_p16(16);
+    matchable_18::variant::grab().set_p17(17);
+    matchable_18::variant::grab().set_p18(18);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p1(), 1);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p2(), 2);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p3(), 3);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p4(), 4);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p5(), 5);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p6(), 6);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p7(), 7);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p8(), 8);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p9(), 9);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p10(), 10);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p11(), 11);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p12(), 12);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p13(), 13);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p14(), 14);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p15(), 15);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p16(), 16);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p17(), 17);
+    TEST_EQ(ok, matchable_18::variant::grab().as_p18(), 18);
+
+    matchable_19::variant::grab().set_p1(1);
+    matchable_19::variant::grab().set_p2(2);
+    matchable_19::variant::grab().set_p3(3);
+    matchable_19::variant::grab().set_p4(4);
+    matchable_19::variant::grab().set_p5(5);
+    matchable_19::variant::grab().set_p6(6);
+    matchable_19::variant::grab().set_p7(7);
+    matchable_19::variant::grab().set_p8(8);
+    matchable_19::variant::grab().set_p9(9);
+    matchable_19::variant::grab().set_p10(10);
+    matchable_19::variant::grab().set_p11(11);
+    matchable_19::variant::grab().set_p12(12);
+    matchable_19::variant::grab().set_p13(13);
+    matchable_19::variant::grab().set_p14(14);
+    matchable_19::variant::grab().set_p15(15);
+    matchable_19::variant::grab().set_p16(16);
+    matchable_19::variant::grab().set_p17(17);
+    matchable_19::variant::grab().set_p18(18);
+    matchable_19::variant::grab().set_p19(19);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p1(), 1);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p2(), 2);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p3(), 3);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p4(), 4);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p5(), 5);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p6(), 6);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p7(), 7);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p8(), 8);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p9(), 9);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p10(), 10);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p11(), 11);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p12(), 12);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p13(), 13);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p14(), 14);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p15(), 15);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p16(), 16);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p17(), 17);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p18(), 18);
+    TEST_EQ(ok, matchable_19::variant::grab().as_p19(), 19);
+
+    matchable_20::variant::grab().set_p1(1);
+    matchable_20::variant::grab().set_p2(2);
+    matchable_20::variant::grab().set_p3(3);
+    matchable_20::variant::grab().set_p4(4);
+    matchable_20::variant::grab().set_p5(5);
+    matchable_20::variant::grab().set_p6(6);
+    matchable_20::variant::grab().set_p7(7);
+    matchable_20::variant::grab().set_p8(8);
+    matchable_20::variant::grab().set_p9(9);
+    matchable_20::variant::grab().set_p10(10);
+    matchable_20::variant::grab().set_p11(11);
+    matchable_20::variant::grab().set_p12(12);
+    matchable_20::variant::grab().set_p13(13);
+    matchable_20::variant::grab().set_p14(14);
+    matchable_20::variant::grab().set_p15(15);
+    matchable_20::variant::grab().set_p16(16);
+    matchable_20::variant::grab().set_p17(17);
+    matchable_20::variant::grab().set_p18(18);
+    matchable_20::variant::grab().set_p19(19);
+    matchable_20::variant::grab().set_p20(20);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p1(), 1);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p2(), 2);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p3(), 3);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p4(), 4);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p5(), 5);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p6(), 6);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p7(), 7);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p8(), 8);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p9(), 9);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p10(), 10);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p11(), 11);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p12(), 12);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p13(), 13);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p14(), 14);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p15(), 15);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p16(), 16);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p17(), 17);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p18(), 18);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p19(), 19);
+    TEST_EQ(ok, matchable_20::variant::grab().as_p20(), 20);
+
+    matchable_21::variant::grab().set_p1(1);
+    matchable_21::variant::grab().set_p2(2);
+    matchable_21::variant::grab().set_p3(3);
+    matchable_21::variant::grab().set_p4(4);
+    matchable_21::variant::grab().set_p5(5);
+    matchable_21::variant::grab().set_p6(6);
+    matchable_21::variant::grab().set_p7(7);
+    matchable_21::variant::grab().set_p8(8);
+    matchable_21::variant::grab().set_p9(9);
+    matchable_21::variant::grab().set_p10(10);
+    matchable_21::variant::grab().set_p11(11);
+    matchable_21::variant::grab().set_p12(12);
+    matchable_21::variant::grab().set_p13(13);
+    matchable_21::variant::grab().set_p14(14);
+    matchable_21::variant::grab().set_p15(15);
+    matchable_21::variant::grab().set_p16(16);
+    matchable_21::variant::grab().set_p17(17);
+    matchable_21::variant::grab().set_p18(18);
+    matchable_21::variant::grab().set_p19(19);
+    matchable_21::variant::grab().set_p20(20);
+    matchable_21::variant::grab().set_p21(21);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p1(), 1);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p2(), 2);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p3(), 3);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p4(), 4);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p5(), 5);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p6(), 6);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p7(), 7);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p8(), 8);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p9(), 9);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p10(), 10);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p11(), 11);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p12(), 12);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p13(), 13);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p14(), 14);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p15(), 15);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p16(), 16);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p17(), 17);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p18(), 18);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p19(), 19);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p20(), 20);
+    TEST_EQ(ok, matchable_21::variant::grab().as_p21(), 21);
 
     return ok();
 }
