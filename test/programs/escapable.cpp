@@ -149,7 +149,7 @@ int main()
 {
     test_ok ok;
 
-    std::cout << "special:" << std::endl;
+    std::cout << "special by index:" << std::endl;
     for (auto s : special::variants())
     {
         std::cout << "    " << s << std::endl;
@@ -157,6 +157,9 @@ int main()
         TEST_EQ(ok, s.as_identifier_string().substr(4, s.as_identifier_string().size()), s.as_string());
         TEST_EQ(ok, matchable::escapable::unescape_all(s.as_identifier_string()), s.as_string());
     }
+    std::cout << std::endl << "special by string:" << std::endl;
+    for (auto s : special::variants_by_string())
+        std::cout << "    " << s << std::endl;
 
     std::cout << "\nescape codes:" << std::endl;
     for (auto const & [code, symbol] : matchable::escapable::code_symbol_pairs())

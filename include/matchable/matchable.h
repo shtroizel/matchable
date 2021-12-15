@@ -457,7 +457,30 @@ namespace matchable
                 { return T::variants_by_string(); }                                                        \
             bool operator==(MatchableType const & m) const { return as_string() == m.as_string(); }        \
             bool operator!=(MatchableType const & m) const { return as_string() != m.as_string(); }        \
-            bool lt_by_string(MatchableType const & m) const { return as_string() < m.as_string(); }       \
+            bool lt_by_string(MatchableType const & m) const { return lt_by_string(m.as_string()); }       \
+            bool lt_by_string(std::string const & str) const                                               \
+            {                                                                                              \
+                size_t const min_len = std::min(as_string().length(), str.length());                       \
+                for (size_t i = 0; i < min_len; ++i)                                                       \
+                {                                                                                          \
+                    bool this_alpha = (as_string()[i] >= 'A' && as_string()[i] <= 'Z') ||                  \
+                                      (as_string()[i] >= 'a' && as_string()[i] <= 'z');                    \
+                    bool other_alpha = (str[i] >= 'A' && str[i] <= 'Z') ||                                 \
+                                       (str[i] >= 'a' && str[i] <= 'z');                                   \
+                    if (this_alpha ^ other_alpha)                                                          \
+                    {                                                                                      \
+                        return other_alpha;                                                                \
+                    }                                                                                      \
+                    else                                                                                   \
+                    {                                                                                      \
+                        if (as_string()[i] < str[i])                                                       \
+                            return true;                                                                   \
+                        else if (str[i] < as_string()[i])                                                  \
+                            return false;                                                                  \
+                    }                                                                                      \
+                }                                                                                          \
+                return as_string().length() < str.length();                                                \
+            }                                                                                              \
             friend std::ostream & operator<<(std::ostream & o, MatchableType const & m)                    \
             {                                                                                              \
                 return o << m.as_string();                                                                 \
@@ -505,7 +528,7 @@ namespace matchable
                 I##t::variants_by_string().begin(),                                                        \
                 I##t::variants_by_string().end(),                                                          \
                 str,                                                                                       \
-                [](t::Type const & v, std::string const & s){ return v.as_string() < s; }                  \
+                [](t::Type const & v, std::string const & s){ return v.lt_by_string(s); }                  \
             );                                                                                             \
             if (it == I##t::variants_by_string().end())                                                    \
             {                                                                                              \
@@ -523,7 +546,7 @@ namespace matchable
                 I##t::variants_by_string().begin(),                                                        \
                 I##t::variants_by_string().end(),                                                          \
                 str,                                                                                       \
-                [](t::Type const & v, std::string const & s){ return v.as_string() < s; }                  \
+                [](t::Type const & v, std::string const & s){ return v.lt_by_string(s); }                  \
             );                                                                                             \
             if (it != I##t::variants_by_string().end() && str == it->as_string())                          \
                 return *it;                                                                                \
