@@ -1139,9 +1139,14 @@ load_end:
                     ret += variant.variant_name;
                     ret += ", ";
                     ret += s_name;
+                    int element_count{0};
                     for (auto const & v : s_values)
                     {
-                        ret += ", ";
+                        ++element_count;
+                        if (element_count % 17 == 0)
+                            ret += ",\n                  ";
+                        else
+                            ret += ", ";
                         ret += v;
                     }
                     ret += ")\n";
