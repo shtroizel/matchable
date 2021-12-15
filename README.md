@@ -18,7 +18,7 @@ status::Type foo()
 {
     static int magic;
     magic++;
-    if (magic % 107 == 0) // get variant by grabbing (constant complexity)
+    if (magic % 116 == 0) // get variant by grabbing (constant complexity)
         return status::success::grab();
 
     if (magic % 42 == 0) // get variant from string (log2(n) complexity)
@@ -58,7 +58,7 @@ int main()
                 }},
             {status::success::grab(),
                 [](matchable::FlowControl & fc){ // explicit type instead of auto for FlowControl
-                    std::cout << "107" << std::endl;
+                    std::cout << "116" << std::endl;
                     fc.brk();
                 }},
             {status::nothing_to_do::grab(),       [](auto & fc){ fc.cont(); }},
@@ -196,7 +196,7 @@ scripts/test_buildtimes.py
 Forward declare a matchable<br/>
 Example:
 ```
-#include "matchable_fwd.h"
+#include "matchable/matchable_fwd.h"
 MATCHABLE_FWD(DayOfWeek)
 ```
 
