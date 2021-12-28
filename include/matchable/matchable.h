@@ -1380,6 +1380,16 @@ namespace matchable
         [](decltype(t::v::grab().as_##p##_vect()) sv)                                                      \
             { t::v::grab().set_##p##_##vect(sv); return true; }({__VA_ARGS__});
 
+#define SET_NIL_PROPERTY(t, p, pv)                                                                         \
+    static bool const SET_PROPERTY_init_##t##_nil_##p =                                                    \
+        [](){t::nil.set_##p(pv); return true;}();
+
+
+#define SET_NIL_PROPERTY_VECT(t, p, ...)                                                                   \
+    static bool const SET_PROPERTY_VECT_init_##t##_nil_##p =                                               \
+        [](decltype(t::nil.as_##p##_vect()) sv)                                                            \
+            { t::nil.set_##p##_##vect(sv); return true; }({__VA_ARGS__});
+
 
 // Remove variants for the current scope (when the scope exits the removed variants are restored).
 #define UNMATCHABLE(t, ...)                                                                                \
