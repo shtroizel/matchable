@@ -831,7 +831,7 @@ namespace matchable
 // pt: property type
 //  p: property
 //  t: matchable type to amend
-#define property_matchable_amend_type(pt, p, t)                                                            \
+#define matchable_type_property_amendment(pt, p, t)                                                        \
     public:                                                                                                \
         /* vector property */                                                                              \
         std::vector<pt> const & as_##p##_vect() const                                                      \
@@ -857,7 +857,7 @@ namespace matchable
             { if (nullptr == t) T::nil_##p##_obs().push_back(o); else t->add_##p##_observer(o); }
 
 
-#define property_matchable_amend_declaration(pt, p, t)                                                     \
+#define matchable_declaration_property_amendment(pt, p, t)                                                 \
     public:                                                                                                \
         /* vector property */                                                                              \
         std::vector<pt> const & as_##p##_vect() const { return p##_vect_mb().at(Type(clone())); }          \
@@ -906,10 +906,10 @@ namespace matchable
 
 #define PROPERTYx1_MATCHABLE(pt0, p0, t, ...)                                                              \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -917,12 +917,12 @@ namespace matchable
 
 #define PROPERTYx2_MATCHABLE(pt0, p0, pt1, p1, t, ...)                                                     \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -930,14 +930,14 @@ namespace matchable
 
 #define PROPERTYx3_MATCHABLE(pt0, p0, pt1, p1, pt2, p2, t, ...)                                            \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -945,16 +945,16 @@ namespace matchable
 
 #define PROPERTYx4_MATCHABLE(pt0, p0, pt1, p1, pt2, p2, pt3, p3, t, ...)                                   \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -962,18 +962,18 @@ namespace matchable
 
 #define PROPERTYx5_MATCHABLE(pt0, p0, pt1, p1, pt2, p2, pt3, p3, pt4, p4, t, ...)                          \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -981,20 +981,20 @@ namespace matchable
 
 #define PROPERTYx6_MATCHABLE(pt0, p0, pt1, p1, pt2, p2, pt3, p3, pt4, p4, pt5, p5, t, ...)                 \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1002,22 +1002,22 @@ namespace matchable
 
 #define PROPERTYx7_MATCHABLE(pt0, p0, pt1, p1, pt2, p2, pt3, p3, pt4, p4, pt5, p5, pt6, p6, t, ...)        \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1026,24 +1026,24 @@ namespace matchable
 #define PROPERTYx8_MATCHABLE(pt0, p0, pt1, p1, pt2, p2, pt3, p3, pt4, p4, pt5, p5, pt6, p6, pt7, p7, t,    \
                              ...)                                                                          \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1052,26 +1052,26 @@ namespace matchable
 #define PROPERTYx9_MATCHABLE(pt0, p0, pt1, p1, pt2, p2, pt3, p3, pt4, p4, pt5, p5, pt6, p6, pt7, p7, pt8,  \
                              p8, t, ...)                                                                   \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
-    property_matchable_amend_type(pt8, p8, t)                                                              \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
+    matchable_type_property_amendment(pt8, p8, t)                                                          \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
-    property_matchable_amend_declaration(pt8, p8, t)                                                       \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
+    matchable_declaration_property_amendment(pt8, p8, t)                                                   \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1080,28 +1080,28 @@ namespace matchable
 #define PROPERTYx10_MATCHABLE(pt0, p0, pt1, p1, pt2, p2, pt3, p3, pt4, p4, pt5, p5, pt6, p6, pt7, p7, pt8, \
                               p8, pt9, p9, t, ...)                                                         \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
-    property_matchable_amend_type(pt8, p8, t)                                                              \
-    property_matchable_amend_type(pt9, p9, t)                                                              \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
+    matchable_type_property_amendment(pt8, p8, t)                                                          \
+    matchable_type_property_amendment(pt9, p9, t)                                                          \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
-    property_matchable_amend_declaration(pt8, p8, t)                                                       \
-    property_matchable_amend_declaration(pt9, p9, t)                                                       \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
+    matchable_declaration_property_amendment(pt8, p8, t)                                                   \
+    matchable_declaration_property_amendment(pt9, p9, t)                                                   \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1110,30 +1110,30 @@ namespace matchable
 #define PROPERTYx11_MATCHABLE(pt0, p0, pt1, p1, pt2, p2, pt3, p3, pt4, p4, pt5, p5, pt6, p6, pt7, p7, pt8, \
                               p8, pt9, p9, pt10, p10, t, ...)                                              \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
-    property_matchable_amend_type(pt8, p8, t)                                                              \
-    property_matchable_amend_type(pt9, p9, t)                                                              \
-    property_matchable_amend_type(pt10, p10, t)                                                            \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
+    matchable_type_property_amendment(pt8, p8, t)                                                          \
+    matchable_type_property_amendment(pt9, p9, t)                                                          \
+    matchable_type_property_amendment(pt10, p10, t)                                                        \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
-    property_matchable_amend_declaration(pt8, p8, t)                                                       \
-    property_matchable_amend_declaration(pt9, p9, t)                                                       \
-    property_matchable_amend_declaration(pt10, p10, t)                                                     \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
+    matchable_declaration_property_amendment(pt8, p8, t)                                                   \
+    matchable_declaration_property_amendment(pt9, p9, t)                                                   \
+    matchable_declaration_property_amendment(pt10, p10, t)                                                 \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1142,32 +1142,32 @@ namespace matchable
 #define PROPERTYx12_MATCHABLE(pt0, p0, pt1, p1, pt2, p2, pt3, p3, pt4, p4, pt5, p5, pt6, p6, pt7, p7, pt8, \
                               p8, pt9, p9, pt10, p10, pt11, p11, t, ...)                                   \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
-    property_matchable_amend_type(pt8, p8, t)                                                              \
-    property_matchable_amend_type(pt9, p9, t)                                                              \
-    property_matchable_amend_type(pt10, p10, t)                                                            \
-    property_matchable_amend_type(pt11, p11, t)                                                            \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
+    matchable_type_property_amendment(pt8, p8, t)                                                          \
+    matchable_type_property_amendment(pt9, p9, t)                                                          \
+    matchable_type_property_amendment(pt10, p10, t)                                                        \
+    matchable_type_property_amendment(pt11, p11, t)                                                        \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
-    property_matchable_amend_declaration(pt8, p8, t)                                                       \
-    property_matchable_amend_declaration(pt9, p9, t)                                                       \
-    property_matchable_amend_declaration(pt10, p10, t)                                                     \
-    property_matchable_amend_declaration(pt11, p11, t)                                                     \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
+    matchable_declaration_property_amendment(pt8, p8, t)                                                   \
+    matchable_declaration_property_amendment(pt9, p9, t)                                                   \
+    matchable_declaration_property_amendment(pt10, p10, t)                                                 \
+    matchable_declaration_property_amendment(pt11, p11, t)                                                 \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1176,34 +1176,34 @@ namespace matchable
 #define PROPERTYx13_MATCHABLE(pt0, p0, pt1, p1, pt2, p2, pt3, p3, pt4, p4, pt5, p5, pt6, p6, pt7, p7, pt8, \
                               p8, pt9, p9, pt10, p10, pt11, p11, pt12, p12, t, ...)                        \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
-    property_matchable_amend_type(pt8, p8, t)                                                              \
-    property_matchable_amend_type(pt9, p9, t)                                                              \
-    property_matchable_amend_type(pt10, p10, t)                                                            \
-    property_matchable_amend_type(pt11, p11, t)                                                            \
-    property_matchable_amend_type(pt12, p12, t)                                                            \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
+    matchable_type_property_amendment(pt8, p8, t)                                                          \
+    matchable_type_property_amendment(pt9, p9, t)                                                          \
+    matchable_type_property_amendment(pt10, p10, t)                                                        \
+    matchable_type_property_amendment(pt11, p11, t)                                                        \
+    matchable_type_property_amendment(pt12, p12, t)                                                        \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
-    property_matchable_amend_declaration(pt8, p8, t)                                                       \
-    property_matchable_amend_declaration(pt9, p9, t)                                                       \
-    property_matchable_amend_declaration(pt10, p10, t)                                                     \
-    property_matchable_amend_declaration(pt11, p11, t)                                                     \
-    property_matchable_amend_declaration(pt12, p12, t)                                                     \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
+    matchable_declaration_property_amendment(pt8, p8, t)                                                   \
+    matchable_declaration_property_amendment(pt9, p9, t)                                                   \
+    matchable_declaration_property_amendment(pt10, p10, t)                                                 \
+    matchable_declaration_property_amendment(pt11, p11, t)                                                 \
+    matchable_declaration_property_amendment(pt12, p12, t)                                                 \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1212,36 +1212,36 @@ namespace matchable
 #define PROPERTYx14_MATCHABLE(pt0, p0, pt1, p1, pt2, p2, pt3, p3, pt4, p4, pt5, p5, pt6, p6, pt7, p7, pt8, \
                               p8, pt9, p9, pt10, p10, pt11, p11, pt12, p12, pt13, p13, t, ...)             \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
-    property_matchable_amend_type(pt8, p8, t)                                                              \
-    property_matchable_amend_type(pt9, p9, t)                                                              \
-    property_matchable_amend_type(pt10, p10, t)                                                            \
-    property_matchable_amend_type(pt11, p11, t)                                                            \
-    property_matchable_amend_type(pt12, p12, t)                                                            \
-    property_matchable_amend_type(pt13, p13, t)                                                            \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
+    matchable_type_property_amendment(pt8, p8, t)                                                          \
+    matchable_type_property_amendment(pt9, p9, t)                                                          \
+    matchable_type_property_amendment(pt10, p10, t)                                                        \
+    matchable_type_property_amendment(pt11, p11, t)                                                        \
+    matchable_type_property_amendment(pt12, p12, t)                                                        \
+    matchable_type_property_amendment(pt13, p13, t)                                                        \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
-    property_matchable_amend_declaration(pt8, p8, t)                                                       \
-    property_matchable_amend_declaration(pt9, p9, t)                                                       \
-    property_matchable_amend_declaration(pt10, p10, t)                                                     \
-    property_matchable_amend_declaration(pt11, p11, t)                                                     \
-    property_matchable_amend_declaration(pt12, p12, t)                                                     \
-    property_matchable_amend_declaration(pt13, p13, t)                                                     \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
+    matchable_declaration_property_amendment(pt8, p8, t)                                                   \
+    matchable_declaration_property_amendment(pt9, p9, t)                                                   \
+    matchable_declaration_property_amendment(pt10, p10, t)                                                 \
+    matchable_declaration_property_amendment(pt11, p11, t)                                                 \
+    matchable_declaration_property_amendment(pt12, p12, t)                                                 \
+    matchable_declaration_property_amendment(pt13, p13, t)                                                 \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1250,38 +1250,38 @@ namespace matchable
 #define PROPERTYx15_MATCHABLE(pt0, p0, pt1, p1, pt2, p2, pt3, p3, pt4, p4, pt5, p5, pt6, p6, pt7, p7, pt8, \
                               p8, pt9, p9, pt10, p10, pt11, p11, pt12, p12, pt13, p13, pt14, p14, t, ...)  \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
-    property_matchable_amend_type(pt8, p8, t)                                                              \
-    property_matchable_amend_type(pt9, p9, t)                                                              \
-    property_matchable_amend_type(pt10, p10, t)                                                            \
-    property_matchable_amend_type(pt11, p11, t)                                                            \
-    property_matchable_amend_type(pt12, p12, t)                                                            \
-    property_matchable_amend_type(pt13, p13, t)                                                            \
-    property_matchable_amend_type(pt14, p14, t)                                                            \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
+    matchable_type_property_amendment(pt8, p8, t)                                                          \
+    matchable_type_property_amendment(pt9, p9, t)                                                          \
+    matchable_type_property_amendment(pt10, p10, t)                                                        \
+    matchable_type_property_amendment(pt11, p11, t)                                                        \
+    matchable_type_property_amendment(pt12, p12, t)                                                        \
+    matchable_type_property_amendment(pt13, p13, t)                                                        \
+    matchable_type_property_amendment(pt14, p14, t)                                                        \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
-    property_matchable_amend_declaration(pt8, p8, t)                                                       \
-    property_matchable_amend_declaration(pt9, p9, t)                                                       \
-    property_matchable_amend_declaration(pt10, p10, t)                                                     \
-    property_matchable_amend_declaration(pt11, p11, t)                                                     \
-    property_matchable_amend_declaration(pt12, p12, t)                                                     \
-    property_matchable_amend_declaration(pt13, p13, t)                                                     \
-    property_matchable_amend_declaration(pt14, p14, t)                                                     \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
+    matchable_declaration_property_amendment(pt8, p8, t)                                                   \
+    matchable_declaration_property_amendment(pt9, p9, t)                                                   \
+    matchable_declaration_property_amendment(pt10, p10, t)                                                 \
+    matchable_declaration_property_amendment(pt11, p11, t)                                                 \
+    matchable_declaration_property_amendment(pt12, p12, t)                                                 \
+    matchable_declaration_property_amendment(pt13, p13, t)                                                 \
+    matchable_declaration_property_amendment(pt14, p14, t)                                                 \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1291,40 +1291,40 @@ namespace matchable
                               p8, pt9, p9, pt10, p10, pt11, p11, pt12, p12, pt13, p13, pt14, p14, pt15,    \
                               p15, t, ...)                                                                 \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
-    property_matchable_amend_type(pt8, p8, t)                                                              \
-    property_matchable_amend_type(pt9, p9, t)                                                              \
-    property_matchable_amend_type(pt10, p10, t)                                                            \
-    property_matchable_amend_type(pt11, p11, t)                                                            \
-    property_matchable_amend_type(pt12, p12, t)                                                            \
-    property_matchable_amend_type(pt13, p13, t)                                                            \
-    property_matchable_amend_type(pt14, p14, t)                                                            \
-    property_matchable_amend_type(pt15, p15, t)                                                            \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
+    matchable_type_property_amendment(pt8, p8, t)                                                          \
+    matchable_type_property_amendment(pt9, p9, t)                                                          \
+    matchable_type_property_amendment(pt10, p10, t)                                                        \
+    matchable_type_property_amendment(pt11, p11, t)                                                        \
+    matchable_type_property_amendment(pt12, p12, t)                                                        \
+    matchable_type_property_amendment(pt13, p13, t)                                                        \
+    matchable_type_property_amendment(pt14, p14, t)                                                        \
+    matchable_type_property_amendment(pt15, p15, t)                                                        \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
-    property_matchable_amend_declaration(pt8, p8, t)                                                       \
-    property_matchable_amend_declaration(pt9, p9, t)                                                       \
-    property_matchable_amend_declaration(pt10, p10, t)                                                     \
-    property_matchable_amend_declaration(pt11, p11, t)                                                     \
-    property_matchable_amend_declaration(pt12, p12, t)                                                     \
-    property_matchable_amend_declaration(pt13, p13, t)                                                     \
-    property_matchable_amend_declaration(pt14, p14, t)                                                     \
-    property_matchable_amend_declaration(pt15, p15, t)                                                     \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
+    matchable_declaration_property_amendment(pt8, p8, t)                                                   \
+    matchable_declaration_property_amendment(pt9, p9, t)                                                   \
+    matchable_declaration_property_amendment(pt10, p10, t)                                                 \
+    matchable_declaration_property_amendment(pt11, p11, t)                                                 \
+    matchable_declaration_property_amendment(pt12, p12, t)                                                 \
+    matchable_declaration_property_amendment(pt13, p13, t)                                                 \
+    matchable_declaration_property_amendment(pt14, p14, t)                                                 \
+    matchable_declaration_property_amendment(pt15, p15, t)                                                 \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1334,42 +1334,42 @@ namespace matchable
                               p8, pt9, p9, pt10, p10, pt11, p11, pt12, p12, pt13, p13, pt14, p14, pt15,    \
                               p15, pt16, p16, t, ...)                                                      \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
-    property_matchable_amend_type(pt8, p8, t)                                                              \
-    property_matchable_amend_type(pt9, p9, t)                                                              \
-    property_matchable_amend_type(pt10, p10, t)                                                            \
-    property_matchable_amend_type(pt11, p11, t)                                                            \
-    property_matchable_amend_type(pt12, p12, t)                                                            \
-    property_matchable_amend_type(pt13, p13, t)                                                            \
-    property_matchable_amend_type(pt14, p14, t)                                                            \
-    property_matchable_amend_type(pt15, p15, t)                                                            \
-    property_matchable_amend_type(pt16, p16, t)                                                            \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
+    matchable_type_property_amendment(pt8, p8, t)                                                          \
+    matchable_type_property_amendment(pt9, p9, t)                                                          \
+    matchable_type_property_amendment(pt10, p10, t)                                                        \
+    matchable_type_property_amendment(pt11, p11, t)                                                        \
+    matchable_type_property_amendment(pt12, p12, t)                                                        \
+    matchable_type_property_amendment(pt13, p13, t)                                                        \
+    matchable_type_property_amendment(pt14, p14, t)                                                        \
+    matchable_type_property_amendment(pt15, p15, t)                                                        \
+    matchable_type_property_amendment(pt16, p16, t)                                                        \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
-    property_matchable_amend_declaration(pt8, p8, t)                                                       \
-    property_matchable_amend_declaration(pt9, p9, t)                                                       \
-    property_matchable_amend_declaration(pt10, p10, t)                                                     \
-    property_matchable_amend_declaration(pt11, p11, t)                                                     \
-    property_matchable_amend_declaration(pt12, p12, t)                                                     \
-    property_matchable_amend_declaration(pt13, p13, t)                                                     \
-    property_matchable_amend_declaration(pt14, p14, t)                                                     \
-    property_matchable_amend_declaration(pt15, p15, t)                                                     \
-    property_matchable_amend_declaration(pt16, p16, t)                                                     \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
+    matchable_declaration_property_amendment(pt8, p8, t)                                                   \
+    matchable_declaration_property_amendment(pt9, p9, t)                                                   \
+    matchable_declaration_property_amendment(pt10, p10, t)                                                 \
+    matchable_declaration_property_amendment(pt11, p11, t)                                                 \
+    matchable_declaration_property_amendment(pt12, p12, t)                                                 \
+    matchable_declaration_property_amendment(pt13, p13, t)                                                 \
+    matchable_declaration_property_amendment(pt14, p14, t)                                                 \
+    matchable_declaration_property_amendment(pt15, p15, t)                                                 \
+    matchable_declaration_property_amendment(pt16, p16, t)                                                 \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1379,44 +1379,44 @@ namespace matchable
                               p8, pt9, p9, pt10, p10, pt11, p11, pt12, p12, pt13, p13, pt14, p14, pt15,    \
                               p15, pt16, p16, pt17, p17, t, ...)                                           \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
-    property_matchable_amend_type(pt8, p8, t)                                                              \
-    property_matchable_amend_type(pt9, p9, t)                                                              \
-    property_matchable_amend_type(pt10, p10, t)                                                            \
-    property_matchable_amend_type(pt11, p11, t)                                                            \
-    property_matchable_amend_type(pt12, p12, t)                                                            \
-    property_matchable_amend_type(pt13, p13, t)                                                            \
-    property_matchable_amend_type(pt14, p14, t)                                                            \
-    property_matchable_amend_type(pt15, p15, t)                                                            \
-    property_matchable_amend_type(pt16, p16, t)                                                            \
-    property_matchable_amend_type(pt17, p17, t)                                                            \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
+    matchable_type_property_amendment(pt8, p8, t)                                                          \
+    matchable_type_property_amendment(pt9, p9, t)                                                          \
+    matchable_type_property_amendment(pt10, p10, t)                                                        \
+    matchable_type_property_amendment(pt11, p11, t)                                                        \
+    matchable_type_property_amendment(pt12, p12, t)                                                        \
+    matchable_type_property_amendment(pt13, p13, t)                                                        \
+    matchable_type_property_amendment(pt14, p14, t)                                                        \
+    matchable_type_property_amendment(pt15, p15, t)                                                        \
+    matchable_type_property_amendment(pt16, p16, t)                                                        \
+    matchable_type_property_amendment(pt17, p17, t)                                                        \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
-    property_matchable_amend_declaration(pt8, p8, t)                                                       \
-    property_matchable_amend_declaration(pt9, p9, t)                                                       \
-    property_matchable_amend_declaration(pt10, p10, t)                                                     \
-    property_matchable_amend_declaration(pt11, p11, t)                                                     \
-    property_matchable_amend_declaration(pt12, p12, t)                                                     \
-    property_matchable_amend_declaration(pt13, p13, t)                                                     \
-    property_matchable_amend_declaration(pt14, p14, t)                                                     \
-    property_matchable_amend_declaration(pt15, p15, t)                                                     \
-    property_matchable_amend_declaration(pt16, p16, t)                                                     \
-    property_matchable_amend_declaration(pt17, p17, t)                                                     \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
+    matchable_declaration_property_amendment(pt8, p8, t)                                                   \
+    matchable_declaration_property_amendment(pt9, p9, t)                                                   \
+    matchable_declaration_property_amendment(pt10, p10, t)                                                 \
+    matchable_declaration_property_amendment(pt11, p11, t)                                                 \
+    matchable_declaration_property_amendment(pt12, p12, t)                                                 \
+    matchable_declaration_property_amendment(pt13, p13, t)                                                 \
+    matchable_declaration_property_amendment(pt14, p14, t)                                                 \
+    matchable_declaration_property_amendment(pt15, p15, t)                                                 \
+    matchable_declaration_property_amendment(pt16, p16, t)                                                 \
+    matchable_declaration_property_amendment(pt17, p17, t)                                                 \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1426,46 +1426,46 @@ namespace matchable
                               p8, pt9, p9, pt10, p10, pt11, p11, pt12, p12, pt13, p13, pt14, p14, pt15,    \
                               p15, pt16, p16, pt17, p17, pt18, p18, t, ...)                                \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
-    property_matchable_amend_type(pt8, p8, t)                                                              \
-    property_matchable_amend_type(pt9, p9, t)                                                              \
-    property_matchable_amend_type(pt10, p10, t)                                                            \
-    property_matchable_amend_type(pt11, p11, t)                                                            \
-    property_matchable_amend_type(pt12, p12, t)                                                            \
-    property_matchable_amend_type(pt13, p13, t)                                                            \
-    property_matchable_amend_type(pt14, p14, t)                                                            \
-    property_matchable_amend_type(pt15, p15, t)                                                            \
-    property_matchable_amend_type(pt16, p16, t)                                                            \
-    property_matchable_amend_type(pt17, p17, t)                                                            \
-    property_matchable_amend_type(pt18, p18, t)                                                            \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
+    matchable_type_property_amendment(pt8, p8, t)                                                          \
+    matchable_type_property_amendment(pt9, p9, t)                                                          \
+    matchable_type_property_amendment(pt10, p10, t)                                                        \
+    matchable_type_property_amendment(pt11, p11, t)                                                        \
+    matchable_type_property_amendment(pt12, p12, t)                                                        \
+    matchable_type_property_amendment(pt13, p13, t)                                                        \
+    matchable_type_property_amendment(pt14, p14, t)                                                        \
+    matchable_type_property_amendment(pt15, p15, t)                                                        \
+    matchable_type_property_amendment(pt16, p16, t)                                                        \
+    matchable_type_property_amendment(pt17, p17, t)                                                        \
+    matchable_type_property_amendment(pt18, p18, t)                                                        \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
-    property_matchable_amend_declaration(pt8, p8, t)                                                       \
-    property_matchable_amend_declaration(pt9, p9, t)                                                       \
-    property_matchable_amend_declaration(pt10, p10, t)                                                     \
-    property_matchable_amend_declaration(pt11, p11, t)                                                     \
-    property_matchable_amend_declaration(pt12, p12, t)                                                     \
-    property_matchable_amend_declaration(pt13, p13, t)                                                     \
-    property_matchable_amend_declaration(pt14, p14, t)                                                     \
-    property_matchable_amend_declaration(pt15, p15, t)                                                     \
-    property_matchable_amend_declaration(pt16, p16, t)                                                     \
-    property_matchable_amend_declaration(pt17, p17, t)                                                     \
-    property_matchable_amend_declaration(pt18, p18, t)                                                     \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
+    matchable_declaration_property_amendment(pt8, p8, t)                                                   \
+    matchable_declaration_property_amendment(pt9, p9, t)                                                   \
+    matchable_declaration_property_amendment(pt10, p10, t)                                                 \
+    matchable_declaration_property_amendment(pt11, p11, t)                                                 \
+    matchable_declaration_property_amendment(pt12, p12, t)                                                 \
+    matchable_declaration_property_amendment(pt13, p13, t)                                                 \
+    matchable_declaration_property_amendment(pt14, p14, t)                                                 \
+    matchable_declaration_property_amendment(pt15, p15, t)                                                 \
+    matchable_declaration_property_amendment(pt16, p16, t)                                                 \
+    matchable_declaration_property_amendment(pt17, p17, t)                                                 \
+    matchable_declaration_property_amendment(pt18, p18, t)                                                 \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1475,48 +1475,48 @@ namespace matchable
                               p8, pt9, p9, pt10, p10, pt11, p11, pt12, p12, pt13, p13, pt14, p14, pt15,    \
                               p15, pt16, p16, pt17, p17, pt18, p18, pt19, p19, t, ...)                     \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
-    property_matchable_amend_type(pt8, p8, t)                                                              \
-    property_matchable_amend_type(pt9, p9, t)                                                              \
-    property_matchable_amend_type(pt10, p10, t)                                                            \
-    property_matchable_amend_type(pt11, p11, t)                                                            \
-    property_matchable_amend_type(pt12, p12, t)                                                            \
-    property_matchable_amend_type(pt13, p13, t)                                                            \
-    property_matchable_amend_type(pt14, p14, t)                                                            \
-    property_matchable_amend_type(pt15, p15, t)                                                            \
-    property_matchable_amend_type(pt16, p16, t)                                                            \
-    property_matchable_amend_type(pt17, p17, t)                                                            \
-    property_matchable_amend_type(pt18, p18, t)                                                            \
-    property_matchable_amend_type(pt19, p19, t)                                                            \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
+    matchable_type_property_amendment(pt8, p8, t)                                                          \
+    matchable_type_property_amendment(pt9, p9, t)                                                          \
+    matchable_type_property_amendment(pt10, p10, t)                                                        \
+    matchable_type_property_amendment(pt11, p11, t)                                                        \
+    matchable_type_property_amendment(pt12, p12, t)                                                        \
+    matchable_type_property_amendment(pt13, p13, t)                                                        \
+    matchable_type_property_amendment(pt14, p14, t)                                                        \
+    matchable_type_property_amendment(pt15, p15, t)                                                        \
+    matchable_type_property_amendment(pt16, p16, t)                                                        \
+    matchable_type_property_amendment(pt17, p17, t)                                                        \
+    matchable_type_property_amendment(pt18, p18, t)                                                        \
+    matchable_type_property_amendment(pt19, p19, t)                                                        \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
-    property_matchable_amend_declaration(pt8, p8, t)                                                       \
-    property_matchable_amend_declaration(pt9, p9, t)                                                       \
-    property_matchable_amend_declaration(pt10, p10, t)                                                     \
-    property_matchable_amend_declaration(pt11, p11, t)                                                     \
-    property_matchable_amend_declaration(pt12, p12, t)                                                     \
-    property_matchable_amend_declaration(pt13, p13, t)                                                     \
-    property_matchable_amend_declaration(pt14, p14, t)                                                     \
-    property_matchable_amend_declaration(pt15, p15, t)                                                     \
-    property_matchable_amend_declaration(pt16, p16, t)                                                     \
-    property_matchable_amend_declaration(pt17, p17, t)                                                     \
-    property_matchable_amend_declaration(pt18, p18, t)                                                     \
-    property_matchable_amend_declaration(pt19, p19, t)                                                     \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
+    matchable_declaration_property_amendment(pt8, p8, t)                                                   \
+    matchable_declaration_property_amendment(pt9, p9, t)                                                   \
+    matchable_declaration_property_amendment(pt10, p10, t)                                                 \
+    matchable_declaration_property_amendment(pt11, p11, t)                                                 \
+    matchable_declaration_property_amendment(pt12, p12, t)                                                 \
+    matchable_declaration_property_amendment(pt13, p13, t)                                                 \
+    matchable_declaration_property_amendment(pt14, p14, t)                                                 \
+    matchable_declaration_property_amendment(pt15, p15, t)                                                 \
+    matchable_declaration_property_amendment(pt16, p16, t)                                                 \
+    matchable_declaration_property_amendment(pt17, p17, t)                                                 \
+    matchable_declaration_property_amendment(pt18, p18, t)                                                 \
+    matchable_declaration_property_amendment(pt19, p19, t)                                                 \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
@@ -1526,50 +1526,50 @@ namespace matchable
                               p8, pt9, p9, pt10, p10, pt11, p11, pt12, p12, pt13, p13, pt14, p14, pt15,    \
                               p15, pt16, p16, pt17, p17, pt18, p18, pt19, p19, pt20, p20, t, ...)          \
     matchable_create_type_begin(t)                                                                         \
-    property_matchable_amend_type(pt0, p0, t)                                                              \
-    property_matchable_amend_type(pt1, p1, t)                                                              \
-    property_matchable_amend_type(pt2, p2, t)                                                              \
-    property_matchable_amend_type(pt3, p3, t)                                                              \
-    property_matchable_amend_type(pt4, p4, t)                                                              \
-    property_matchable_amend_type(pt5, p5, t)                                                              \
-    property_matchable_amend_type(pt6, p6, t)                                                              \
-    property_matchable_amend_type(pt7, p7, t)                                                              \
-    property_matchable_amend_type(pt8, p8, t)                                                              \
-    property_matchable_amend_type(pt9, p9, t)                                                              \
-    property_matchable_amend_type(pt10, p10, t)                                                            \
-    property_matchable_amend_type(pt11, p11, t)                                                            \
-    property_matchable_amend_type(pt12, p12, t)                                                            \
-    property_matchable_amend_type(pt13, p13, t)                                                            \
-    property_matchable_amend_type(pt14, p14, t)                                                            \
-    property_matchable_amend_type(pt15, p15, t)                                                            \
-    property_matchable_amend_type(pt16, p16, t)                                                            \
-    property_matchable_amend_type(pt17, p17, t)                                                            \
-    property_matchable_amend_type(pt18, p18, t)                                                            \
-    property_matchable_amend_type(pt19, p19, t)                                                            \
-    property_matchable_amend_type(pt20, p20, t)                                                            \
+    matchable_type_property_amendment(pt0, p0, t)                                                          \
+    matchable_type_property_amendment(pt1, p1, t)                                                          \
+    matchable_type_property_amendment(pt2, p2, t)                                                          \
+    matchable_type_property_amendment(pt3, p3, t)                                                          \
+    matchable_type_property_amendment(pt4, p4, t)                                                          \
+    matchable_type_property_amendment(pt5, p5, t)                                                          \
+    matchable_type_property_amendment(pt6, p6, t)                                                          \
+    matchable_type_property_amendment(pt7, p7, t)                                                          \
+    matchable_type_property_amendment(pt8, p8, t)                                                          \
+    matchable_type_property_amendment(pt9, p9, t)                                                          \
+    matchable_type_property_amendment(pt10, p10, t)                                                        \
+    matchable_type_property_amendment(pt11, p11, t)                                                        \
+    matchable_type_property_amendment(pt12, p12, t)                                                        \
+    matchable_type_property_amendment(pt13, p13, t)                                                        \
+    matchable_type_property_amendment(pt14, p14, t)                                                        \
+    matchable_type_property_amendment(pt15, p15, t)                                                        \
+    matchable_type_property_amendment(pt16, p16, t)                                                        \
+    matchable_type_property_amendment(pt17, p17, t)                                                        \
+    matchable_type_property_amendment(pt18, p18, t)                                                        \
+    matchable_type_property_amendment(pt19, p19, t)                                                        \
+    matchable_type_property_amendment(pt20, p20, t)                                                        \
     matchable_create_type_end(t)                                                                           \
     matchable_declare_begin(t)                                                                             \
-    property_matchable_amend_declaration(pt0, p0, t)                                                       \
-    property_matchable_amend_declaration(pt1, p1, t)                                                       \
-    property_matchable_amend_declaration(pt2, p2, t)                                                       \
-    property_matchable_amend_declaration(pt3, p3, t)                                                       \
-    property_matchable_amend_declaration(pt4, p4, t)                                                       \
-    property_matchable_amend_declaration(pt5, p5, t)                                                       \
-    property_matchable_amend_declaration(pt6, p6, t)                                                       \
-    property_matchable_amend_declaration(pt7, p7, t)                                                       \
-    property_matchable_amend_declaration(pt8, p8, t)                                                       \
-    property_matchable_amend_declaration(pt9, p9, t)                                                       \
-    property_matchable_amend_declaration(pt10, p10, t)                                                     \
-    property_matchable_amend_declaration(pt11, p11, t)                                                     \
-    property_matchable_amend_declaration(pt12, p12, t)                                                     \
-    property_matchable_amend_declaration(pt13, p13, t)                                                     \
-    property_matchable_amend_declaration(pt14, p14, t)                                                     \
-    property_matchable_amend_declaration(pt15, p15, t)                                                     \
-    property_matchable_amend_declaration(pt16, p16, t)                                                     \
-    property_matchable_amend_declaration(pt17, p17, t)                                                     \
-    property_matchable_amend_declaration(pt18, p18, t)                                                     \
-    property_matchable_amend_declaration(pt19, p19, t)                                                     \
-    property_matchable_amend_declaration(pt20, p20, t)                                                     \
+    matchable_declaration_property_amendment(pt0, p0, t)                                                   \
+    matchable_declaration_property_amendment(pt1, p1, t)                                                   \
+    matchable_declaration_property_amendment(pt2, p2, t)                                                   \
+    matchable_declaration_property_amendment(pt3, p3, t)                                                   \
+    matchable_declaration_property_amendment(pt4, p4, t)                                                   \
+    matchable_declaration_property_amendment(pt5, p5, t)                                                   \
+    matchable_declaration_property_amendment(pt6, p6, t)                                                   \
+    matchable_declaration_property_amendment(pt7, p7, t)                                                   \
+    matchable_declaration_property_amendment(pt8, p8, t)                                                   \
+    matchable_declaration_property_amendment(pt9, p9, t)                                                   \
+    matchable_declaration_property_amendment(pt10, p10, t)                                                 \
+    matchable_declaration_property_amendment(pt11, p11, t)                                                 \
+    matchable_declaration_property_amendment(pt12, p12, t)                                                 \
+    matchable_declaration_property_amendment(pt13, p13, t)                                                 \
+    matchable_declaration_property_amendment(pt14, p14, t)                                                 \
+    matchable_declaration_property_amendment(pt15, p15, t)                                                 \
+    matchable_declaration_property_amendment(pt16, p16, t)                                                 \
+    matchable_declaration_property_amendment(pt17, p17, t)                                                 \
+    matchable_declaration_property_amendment(pt18, p18, t)                                                 \
+    matchable_declaration_property_amendment(pt19, p19, t)                                                 \
+    matchable_declaration_property_amendment(pt20, p20, t)                                                 \
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
