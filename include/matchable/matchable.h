@@ -836,12 +836,15 @@ namespace matchable
         /* vector property */                                                                              \
         std::vector<pt> const & as_##p##_vect() const                                                      \
             { return nullptr == t ? T::nil_##p##_vect() : t->as_##p##_vect(); }                            \
+        std::vector<pt> & as_mutable_##p##_vect()                                                          \
+            { return nullptr == t ? T::nil_##p##_vect() : t->as_mutable_##p##_vect(); }                    \
         void set_##p##_vect(std::vector<pt> const & v)                                                     \
             { if (nullptr == t) { T::nil_##p##_vect() = v; for (auto f : T::nil_##p##_vect_obs()) f(); }   \
               else t->set_##p##_vect(v); }                                                                 \
                                                                                                            \
         /* single property */                                                                              \
         pt const & as_##p() const { return nullptr == t ? T::nil_##p() : t->as_##p(); }                    \
+        pt & as_mutable_##p() { return nullptr == t ? T::nil_##p() : t->as_mutable_##p(); }                \
         void set_##p(pt const & s)                                                                         \
             { if (nullptr == t) { T::nil_##p() = s; for (auto f : T::nil_##p##_obs()) f(); }               \
               else t->set_##p(s); }                                                                        \
@@ -858,12 +861,14 @@ namespace matchable
     public:                                                                                                \
         /* vector property */                                                                              \
         std::vector<pt> const & as_##p##_vect() const { return p##_vect_mb().at(Type(clone())); }          \
+        std::vector<pt> & as_mutable_##p##_vect() { return p##_vect_mb().mut_at(Type(clone())); }          \
         void set_##p##_vect(std::vector<pt> const & v)                                                     \
             { auto c = Type(clone()); p##_vect_mb().set(c, v);                                             \
               for (auto f : p##_vect_obs_mb().at(c)) f(); }                                                \
                                                                                                            \
         /* single property */                                                                              \
         pt const & as_##p() const { return p##_mb().at(Type(clone())); }                                   \
+        pt & as_mutable_##p() { return p##_mb().mut_at(Type(clone())); }                                   \
         void set_##p(pt const & s)                                                                         \
             { auto c = Type(clone()); p##_mb().set(c, s); for (auto f : p##_obs_mb().at(c)) f(); }         \
                                                                                                            \
