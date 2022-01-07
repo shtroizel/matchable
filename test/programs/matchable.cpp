@@ -51,7 +51,7 @@ enum class Task { Task0, Task1, Task2 };
 
 Result::Type foo(int number)
 {
-    if (number == 107)
+    if (number == 116)
         return Result::Ok::grab();
     return Result::Err::grab();
 }
@@ -114,14 +114,14 @@ int main()
     TEST_EQ(ok, TimeUnit::Type().as_string(), std::string("nil"));
 
     // from_string()
-    TEST_EQ(ok, TimeUnit::from_string("107"), TimeUnit::nil);
+    TEST_EQ(ok, TimeUnit::from_string("116"), TimeUnit::nil);
     TEST_EQ(ok, TimeUnit::from_string("nil"), TimeUnit::nil);
     TEST_EQ(ok, TimeUnit::from_string("Weeks"), TimeUnit::Weeks::grab());
 
     // variants_by_string_index_of()
     {
         bool found;
-        auto tu = TimeUnit::from_by_string_index(TimeUnit::variants_by_string_index_of("107", &found));
+        auto tu = TimeUnit::from_by_string_index(TimeUnit::variants_by_string_index_of("116", &found));
         TEST_EQ(ok, tu, TimeUnit::Days::grab());
         TEST_EQ(ok, found, false);
         int index = TimeUnit::variants_by_string_index_of("Years", &found);
@@ -149,13 +149,13 @@ int main()
     TEST_EQ(ok, TimeUnit::Hours::grab().as_index(), 2);
     TEST_EQ(ok, TimeUnit::Days::grab().as_index(), 3);
     TEST_EQ(ok, TimeUnit::Weeks::grab().as_index(), 4);
-    TEST_EQ(ok, NIL::from_string("107").as_index(), -1);
+    TEST_EQ(ok, NIL::from_string("116").as_index(), -1);
 
     // from_index()
     TEST_EQ(ok, TimeUnit::from_index(-1), TimeUnit::nil);
     for (auto tu : TimeUnit::variants())
         TEST_EQ(ok, tu, TimeUnit::from_index(tu.as_index()));
-    TEST_EQ(ok, TimeUnit::from_index(107), TimeUnit::nil);
+    TEST_EQ(ok, TimeUnit::from_index(116), TimeUnit::nil);
 #endif
 
     // as_by_string_index()
@@ -193,7 +193,7 @@ int main()
     TEST_EQ(ok, more_flags.is_set(TimeUnit::Seconds::grab()), false);
 
     // match() by its self - not used within switch or loop...
-    int magic{107};
+    int magic{116};
     foo(magic).match({
         {Result::Ok::grab(), [&]() {std::cout << "foo(" << magic << ") is ok!" << std::endl;}},
         {Result::Err::grab(), [&](){std::cout << "foo(" << magic << ") error" << std::endl; TEST_FAIL(ok);}}
@@ -205,28 +205,28 @@ int main()
     {
         magic++;
         MATCH_WITH_FLOW_CONTROL foo(magic).match({
-            {Result::Ok::grab(),  [](matchable::FlowControl & lc){ lc.brk();}}, // break
-            {Result::Err::grab(), [&](matchable::FlowControl & lc)
+            {Result::Ok::grab(),  [](matchable::FlowControl & fc){ fc.brk();}}, // break
+            {Result::Err::grab(), [&](matchable::FlowControl & fc)
                                   {
                                       if (magic < 105)
                                       {
-                                          lc.cont();
+                                          fc.cont();
                                           // note need to return here
-                                          // since lc is evaluateded after this function returns
+                                          // since fc is evaluateded after this function returns
                                           return;
                                       }
                                       std::cout << magic << " failed..." << std::endl;
                                   }}
         }); EVAL_FLOW_CONTROL // apply break or continue requested from lambda above
     }
-    TEST_EQ(ok, magic, 107);
+    TEST_EQ(ok, magic, 116);
 
     // match used within a switch
     Task task = Task::Task0;
     switch (task)
     {
-        case Task::Task0: MATCH_WITH_FLOW_CONTROL foo(107).match({
-                              {Result::Ok::grab(), [](matchable::FlowControl & lc) { lc.brk(); }},
+        case Task::Task0: MATCH_WITH_FLOW_CONTROL foo(116).match({
+                              {Result::Ok::grab(), [](matchable::FlowControl & fc) { fc.brk(); }},
                           }); EVAL_BREAK_ONLY // not in loop here so continue is invalid - eval break only
                           [[fallthrough]];
         case Task::Task1: TEST_FAIL(ok); break;
@@ -240,12 +240,12 @@ int main()
         switch (task)
         {
             case Task::Task0: MATCH_WITH_FLOW_CONTROL foo(magic).match({
-                                  {Result::Ok::grab(), [](matchable::FlowControl & lc) { lc.brk(); }},
-                                  {Result::Err::grab(), [](matchable::FlowControl & lc) { lc.cont(); }},
+                                  {Result::Ok::grab(), [](matchable::FlowControl & fc) { fc.brk(); }},
+                                  {Result::Err::grab(), [](matchable::FlowControl & fc) { fc.cont(); }},
                               }); EVAL_FLOW_CONTROL
                               [[fallthrough]];
-            case Task::Task1: MATCH_WITH_FLOW_CONTROL foo(107).match({
-                                  {Result::Ok::grab(), [](matchable::FlowControl & lc) { lc.cont(); }},
+            case Task::Task1: MATCH_WITH_FLOW_CONTROL foo(116).match({
+                                  {Result::Ok::grab(), [](matchable::FlowControl & fc) { fc.cont(); }},
                               }); EVAL_FLOW_CONTROL
                               [[fallthrough]];
             case Task::Task2: TEST_FAIL(ok);
