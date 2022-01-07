@@ -67,15 +67,15 @@ PROPERTYx1_MATCHABLE(
     smashes,
     vaporizes
 )
-SET_PROPERTY(Attack, covers, past_tense, AttackPastTense::covered::grab())
-SET_PROPERTY(Attack, crushes, past_tense, AttackPastTense::crushed::grab())
-SET_PROPERTY(Attack, cuts, past_tense, AttackPastTense::cut::grab())
-SET_PROPERTY(Attack, decapitates, past_tense, AttackPastTense::decapitated::grab())
-SET_PROPERTY(Attack, disproves, past_tense, AttackPastTense::disproved::grab())
-SET_PROPERTY(Attack, eats, past_tense, AttackPastTense::ate::grab())
-SET_PROPERTY(Attack, poisons, past_tense, AttackPastTense::poisoned::grab())
-SET_PROPERTY(Attack, smashes, past_tense, AttackPastTense::smashed::grab())
-SET_PROPERTY(Attack, vaporizes, past_tense, AttackPastTense::vaporized::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Attack, covers, past_tense, AttackPastTense::covered::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Attack, crushes, past_tense, AttackPastTense::crushed::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Attack, cuts, past_tense, AttackPastTense::cut::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Attack, decapitates, past_tense, AttackPastTense::decapitated::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Attack, disproves, past_tense, AttackPastTense::disproved::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Attack, eats, past_tense, AttackPastTense::ate::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Attack, poisons, past_tense, AttackPastTense::poisoned::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Attack, smashes, past_tense, AttackPastTense::smashed::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Attack, vaporizes, past_tense, AttackPastTense::vaporized::grab())
 
 static matchable::MatchBox<Actor::Type, Attack::Type> const rock_attack({
     { Actor::Lizard::grab(), Attack::crushes::grab() },

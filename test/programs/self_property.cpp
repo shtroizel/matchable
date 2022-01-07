@@ -26,8 +26,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-// demo spread to self and spread of non-matchable types
-
 
 #include <iostream>
 
@@ -41,10 +39,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 MATCHABLE_FWD(ppl)
 
 PROPERTYx2_MATCHABLE(ppl::Type, friends, int, favorite_number, ppl, Alice, Bob, Charlie)
-SET_PROPERTY_VECT(ppl, Alice, friends, ppl::Bob::grab(), ppl::Charlie::grab())
-SET_PROPERTY(ppl, Alice, favorite_number, 478)
-SET_PROPERTY(ppl, Bob, favorite_number, 275)
-SET_PROPERTY(ppl, Charlie, favorite_number, 696)
+MATCHABLE_VARIANT_PROPERTY_VALUES(ppl, Alice, friends, ppl::Bob::grab(), ppl::Charlie::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(ppl, Alice, favorite_number, 478)
+MATCHABLE_VARIANT_PROPERTY_VALUE(ppl, Bob, favorite_number, 275)
+MATCHABLE_VARIANT_PROPERTY_VALUE(ppl, Charlie, favorite_number, 696)
 
 
 

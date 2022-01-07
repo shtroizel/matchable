@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 MATCHABLE(Color, Magenta, Cyan, Yellow)
 PROPERTYx1_MATCHABLE(Color::Type, color, GlobalSetting, FeatureX)
-SET_PROPERTY(GlobalSetting, FeatureX, color, Color::Yellow::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(GlobalSetting, FeatureX, color, Color::Yellow::grab())
 
 
 

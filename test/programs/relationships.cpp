@@ -40,7 +40,7 @@ MATCHABLE(DayOfWeekOccurrence, first, second, third, fourth, last)
 MATCHABLE(DayOfWeek, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday);
 
 PROPERTYx1_MATCHABLE(DayOfWeek::Type, day_of_week, Days, Weekdays, Weekend)
-SET_PROPERTY_VECT(
+MATCHABLE_VARIANT_PROPERTY_VALUES(
     Days,
     Weekdays,
     day_of_week,
@@ -50,7 +50,7 @@ SET_PROPERTY_VECT(
     DayOfWeek::Thursday::grab(),
     DayOfWeek::Friday::grab()
 )
-SET_PROPERTY_VECT(Days, Weekend, day_of_week, DayOfWeek::Sunday::grab(), DayOfWeek::Saturday::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUES(Days, Weekend, day_of_week, DayOfWeek::Sunday::grab(), DayOfWeek::Saturday::grab())
 
 MATCHABLE(
     DayOfMonth,
@@ -99,50 +99,50 @@ PROPERTYx4_MATCHABLE(
     Veterans_spc_Day,
     Christmas_spc_Day
 )
-SET_PROPERTY(Holiday, Mothers_spc_Day, day_of_week, DayOfWeek::Sunday::grab())
-SET_PROPERTY(Holiday, Mothers_spc_Day, occurrence, DayOfWeekOccurrence::second::grab())
-SET_PROPERTY(Holiday, Mothers_spc_Day, month, Month::May::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Mothers_spc_Day, day_of_week, DayOfWeek::Sunday::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Mothers_spc_Day, occurrence, DayOfWeekOccurrence::second::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Mothers_spc_Day, month, Month::May::grab())
 
-SET_PROPERTY(Holiday, Fathers_spc_Day, day_of_week, DayOfWeek::Sunday::grab())
-SET_PROPERTY(Holiday, Fathers_spc_Day, occurrence, DayOfWeekOccurrence::third::grab())
-SET_PROPERTY(Holiday, Fathers_spc_Day, month, Month::June::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Fathers_spc_Day, day_of_week, DayOfWeek::Sunday::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Fathers_spc_Day, occurrence, DayOfWeekOccurrence::third::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Fathers_spc_Day, month, Month::June::grab())
 
-SET_PROPERTY(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, day_of_week, DayOfWeek::Monday::grab())
-SET_PROPERTY(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day,
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day,
              occurrence, DayOfWeekOccurrence::third::grab())
-SET_PROPERTY(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, month, Month::January::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Martin_spc_Luther_spc_King_spc_Jr_spc_Day, month, Month::January::grab())
 
-SET_PROPERTY(Holiday, Lincoln_spc_Washington_spc_Day, day_of_week, DayOfWeek::Monday::grab())
-SET_PROPERTY(Holiday, Lincoln_spc_Washington_spc_Day, occurrence, DayOfWeekOccurrence::third::grab())
-SET_PROPERTY(Holiday, Lincoln_spc_Washington_spc_Day, month, Month::Februrary::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Lincoln_spc_Washington_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Lincoln_spc_Washington_spc_Day, occurrence, DayOfWeekOccurrence::third::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Lincoln_spc_Washington_spc_Day, month, Month::Februrary::grab())
 
-SET_PROPERTY(Holiday, Memorial_spc_Day, day_of_week, DayOfWeek::Monday::grab())
-SET_PROPERTY(Holiday, Memorial_spc_Day, occurrence, DayOfWeekOccurrence::last::grab())
-SET_PROPERTY(Holiday, Memorial_spc_Day, month, Month::May::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Memorial_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Memorial_spc_Day, occurrence, DayOfWeekOccurrence::last::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Memorial_spc_Day, month, Month::May::grab())
 
-SET_PROPERTY(Holiday, Labor_spc_Day, day_of_week, DayOfWeek::Monday::grab())
-SET_PROPERTY(Holiday, Labor_spc_Day, occurrence, DayOfWeekOccurrence::first::grab())
-SET_PROPERTY(Holiday, Labor_spc_Day, month, Month::September::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Labor_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Labor_spc_Day, occurrence, DayOfWeekOccurrence::first::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Labor_spc_Day, month, Month::September::grab())
 
-SET_PROPERTY(Holiday, Columbus_spc_Day, day_of_week, DayOfWeek::Monday::grab())
-SET_PROPERTY(Holiday, Columbus_spc_Day, occurrence, DayOfWeekOccurrence::second::grab())
-SET_PROPERTY(Holiday, Columbus_spc_Day, month, Month::October::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Columbus_spc_Day, day_of_week, DayOfWeek::Monday::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Columbus_spc_Day, occurrence, DayOfWeekOccurrence::second::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Columbus_spc_Day, month, Month::October::grab())
 
-SET_PROPERTY(Holiday, Thanksgiving_spc_Day, day_of_week, DayOfWeek::Thursday::grab())
-SET_PROPERTY(Holiday, Thanksgiving_spc_Day, occurrence, DayOfWeekOccurrence::fourth::grab())
-SET_PROPERTY(Holiday, Thanksgiving_spc_Day, month, Month::November::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Thanksgiving_spc_Day, day_of_week, DayOfWeek::Thursday::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Thanksgiving_spc_Day, occurrence, DayOfWeekOccurrence::fourth::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Thanksgiving_spc_Day, month, Month::November::grab())
 
-SET_PROPERTY(Holiday, New_spc_Years_spc_Day, day_of_month, DayOfMonth::esc_1st::grab())
-SET_PROPERTY(Holiday, New_spc_Years_spc_Day, month, Month::January::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, New_spc_Years_spc_Day, day_of_month, DayOfMonth::esc_1st::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, New_spc_Years_spc_Day, month, Month::January::grab())
 
-SET_PROPERTY(Holiday, Independence_spc_Day, day_of_month, DayOfMonth::esc_4th::grab())
-SET_PROPERTY(Holiday, Independence_spc_Day, month, Month::July::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Independence_spc_Day, day_of_month, DayOfMonth::esc_4th::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Independence_spc_Day, month, Month::July::grab())
 
-SET_PROPERTY(Holiday, Veterans_spc_Day, day_of_month, DayOfMonth::esc_11th::grab())
-SET_PROPERTY(Holiday, Veterans_spc_Day, month, Month::November::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Veterans_spc_Day, day_of_month, DayOfMonth::esc_11th::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Veterans_spc_Day, month, Month::November::grab())
 
-SET_PROPERTY(Holiday, Christmas_spc_Day, day_of_month, DayOfMonth::esc_25th::grab())
-SET_PROPERTY(Holiday, Christmas_spc_Day, month, Month::December::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Christmas_spc_Day, day_of_month, DayOfMonth::esc_25th::grab())
+MATCHABLE_VARIANT_PROPERTY_VALUE(Holiday, Christmas_spc_Day, month, Month::December::grab())
 
 
 

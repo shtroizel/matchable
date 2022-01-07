@@ -469,8 +469,8 @@ save_as_cleanup:
         esc_PROPERTYx20_MATCHABLE,
         esc_PROPERTYx21_MATCHABLE,
         esc_SPREAD_MATCHABLE,
-        esc_SET_PROPERTY,
-        esc_SET_PROPERTY_VECT
+        esc_MATCHABLE_VARIANT_PROPERTY_VALUE,
+        esc_MATCHABLE_VARIANT_PROPERTY_VALUES
     );
 
 
@@ -1148,7 +1148,7 @@ save_as_cleanup:
                             m->add_variant(args[i]);
                     }},
 
-                {MatchableKeyword::esc_SET_PROPERTY::grab(),
+                {MatchableKeyword::esc_MATCHABLE_VARIANT_PROPERTY_VALUE::grab(),
                     [&](){
                         if (args.size() != 4)
                         {
@@ -1161,7 +1161,7 @@ save_as_cleanup:
                         m->set_property(args[1], args[2], args[3]);
                     }},
 
-                {MatchableKeyword::esc_SET_PROPERTY_VECT::grab(),
+                {MatchableKeyword::esc_MATCHABLE_VARIANT_PROPERTY_VALUES::grab(),
                     [&](){
                         if (args.size() < 3)
                         {
@@ -1259,7 +1259,7 @@ load_end:
             {
                 if (s_value.size() > 0)
                 {
-                    ret += "SET_PROPERTY(";
+                    ret += "MATCHABLE_VARIANT_PROPERTY_VALUE(";
                     ret += m.name;
                     ret += ", ";
                     ret += variant.variant_name;
@@ -1271,7 +1271,7 @@ load_end:
                 }
                 if (s_values.size() > 0)
                 {
-                    ret += "SET_PROPERTY_VECT(";
+                    ret += "MATCHABLE_VARIANT_PROPERTY_VALUES(";
                     ret += m.name;
                     ret += ", ";
                     ret += variant.variant_name;

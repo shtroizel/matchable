@@ -1575,22 +1575,21 @@ namespace matchable
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
 
 
-#define SET_PROPERTY(t, v, p, pv)                                                                          \
-    static bool const SET_PROPERTY_init_##t##_##v##_##p =                                                  \
+#define MATCHABLE_VARIANT_PROPERTY_VALUE(t, v, p, pv)                                                      \
+    static bool const MATCHABLE_VARIANT_PROPERTY_VALUE_init_##t##_##v##_##p =                              \
         [](){t::v::grab().set_##p(pv); return true;}();
 
-
-#define SET_PROPERTY_VECT(t, v, p, ...)                                                                    \
-    static bool const SET_PROPERTY_VECT_init_##t##_##v##_##p =                                             \
+#define MATCHABLE_VARIANT_PROPERTY_VALUES(t, v, p, ...)                                                    \
+    static bool const MATCHABLE_VARIANT_PROPERTY_VALUES_init_##t##_##v##_##p =                             \
         [](decltype(t::v::grab().as_##p##_vect()) sv)                                                      \
             { t::v::grab().set_##p##_##vect(sv); return true; }({__VA_ARGS__});
 
-#define SET_NIL_PROPERTY(t, p, pv)                                                                         \
+
+#define MATCHABLE_NIL_PROPERTY_VALUE(t, p, pv)                                                             \
     static bool const SET_PROPERTY_init_##t##_nil_##p =                                                    \
         [](){t::nil.set_##p(pv); return true;}();
 
-
-#define SET_NIL_PROPERTY_VECT(t, p, ...)                                                                   \
+#define MATCHABLE_NIL_PROPERTY_VALUES(t, p, ...)                                                           \
     static bool const SET_PROPERTY_VECT_init_##t##_nil_##p =                                               \
         [](decltype(t::nil.as_##p##_vect()) sv)                                                            \
             { t::nil.set_##p##_##vect(sv); return true; }({__VA_ARGS__});
