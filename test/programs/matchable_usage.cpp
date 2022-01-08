@@ -84,7 +84,7 @@ Status::Type foo(std::string day_string)
 
     // lets try to assign the variant from the day_string parameter
     // note the complexity for from_string() is O(log N)
-    // if day_string is equal to the output of "as_string()" for any defined variant (its unescaped string)
+    // if day_string is equal to the output of "as_string()" for any defined variant,
     // then day_of_week will be set to that variant
     // if no variant is found then nil will be assigned instead
     day_of_week = DayOfWeek::from_string(day_string);
