@@ -334,6 +334,6 @@ See also the list of [contributors](https://github.com/shtroizel/matchable/contr
 # License
 This project is licensed under the "BSD 3-Clause License" - see the [LICENSE](LICENSE) file for details
 
-# donating to this project
+# Donating To This Project
 donations are greatly appreciated, thank you!<br>
 * monero: 89VkK94RMHSTjSsR28wGR2PLyMt4i6jndYmQb3xWSVoKBMaLAVMYXkSL7Eoe3ES9rDKFar5XNQMw7ZmUF9PNJ4WwFaNgebx<br>
