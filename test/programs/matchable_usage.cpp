@@ -96,7 +96,7 @@ Status::Type foo(std::string day_string)
     for (int i = 0; i < 3; ++i)
         favorite_days.set(DayOfWeek::from_index(i)); // note the complexity for from_index is O(1)
 
-    // oops, actually we don't like Wednessday afterall
+    // oops, actually we don't like Wednessday after all
     favorite_days.unset(DayOfWeek::Wednessday::grab());
 
     // to get all flagged variants we can use currently_set()
