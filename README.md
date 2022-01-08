@@ -90,6 +90,10 @@ Status::Type foo(std::string day_string)
         if (day == day_of_week)
             std::cout << day << " is one of my favorite days! ";
 
+    // we can also use is_set() to check for flagged variants
+    if (favorite_days.is_set(DayOfWeek::Friday::grab()))
+        return Status::esc_17::grab();
+
     // we could also use MATCHABLE_INSTANCE_IN()
     if (!MATCHABLE_INSTANCE_IN(DayOfWeek, day_of_week, Monday, Tuesday))
         return Status::nothing_spc_to_spc_do::grab();
