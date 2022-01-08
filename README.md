@@ -139,7 +139,7 @@ Example: test/programs/max_variants.cpp
 
 ## Macros for setting properties at link-time
 
-#### SET_PROPERTY(type, variant, property_name, property_value)
+#### MATCHABLE_VARIANT_PROPERTY_VALUE(type, variant, property_name, property_value)
 Params:
 * **type** A matchable type
 * **variant** A variant of **type**
@@ -151,7 +151,7 @@ Examples:<br/>
 test/programs/cards.cpp<br/>
 test/programs/relationships.cpp<br/>
 
-#### SET_PROPERTY_VECT(type, variant, property_name, property_values...)
+#### MATCHABLE_VARIANT_PROPERTY_VALUES(type, variant, property_name, property_values...)
 Params:
 * **type** A matchable type
 * **variant** A variant of **type**
@@ -199,12 +199,6 @@ Example:
 #include "matchable/matchable_fwd.h"
 MATCHABLE_FWD(DayOfWeek)
 ```
-
-# Prerequisites
-
-clang >= 7.0.1<br/>
-or<br/>
-g++ >= 8.3.0
 
 # Building, Installing and Running Tests
 ```
@@ -262,7 +256,7 @@ For the versions available, see the [tags on this repository](https://github.com
 
 # Authors
 
-* **Eric Hyer**
+* **shtroizel**
 
 See also the list of [contributors](https://github.com/shtroizel/matchable/contributors) who participated in this project.
 

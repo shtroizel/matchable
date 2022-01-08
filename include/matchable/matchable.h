@@ -3,8 +3,8 @@
 
 
 /*
-Copyright (c) 2019-2020, Eric Hyer
-All rights reserved.
+Copyright (c) 2019-2022, shtroizel
+All rights reserved without prejudice.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -803,19 +803,19 @@ namespace matchable
 
 #define mcv(_macro, t, ...)                                                                                \
     nth(                                                                                                   \
-        "107",                                                                                             \
+        "shtroizel",                                                                                       \
         ##__VA_ARGS__,                                                                                     \
                  mcv_108,mcv_107,mcv_106,mcv_105,mcv_104,mcv_103,mcv_102,mcv_101,mcv_100,                  \
-         mcv_99, mcv_98, mcv_97, mcv_96, mcv_95, mcv_94, mcv_93, mcv_92, mcv_91, mcv_90,                   \
-         mcv_89, mcv_88, mcv_87, mcv_86, mcv_85, mcv_84, mcv_83, mcv_82, mcv_81, mcv_80,                   \
-         mcv_79, mcv_78, mcv_77, mcv_76, mcv_75, mcv_74, mcv_73, mcv_72, mcv_71, mcv_70,                   \
-         mcv_69, mcv_68, mcv_67, mcv_66, mcv_65, mcv_64, mcv_63, mcv_62, mcv_61, mcv_60,                   \
-         mcv_59, mcv_58, mcv_57, mcv_56, mcv_55, mcv_54, mcv_53, mcv_52, mcv_51, mcv_50,                   \
-         mcv_49, mcv_48, mcv_47, mcv_46, mcv_45, mcv_44, mcv_43, mcv_42, mcv_41, mcv_40,                   \
-         mcv_39, mcv_38, mcv_37, mcv_36, mcv_35, mcv_34, mcv_33, mcv_32, mcv_31, mcv_30,                   \
-         mcv_29, mcv_28, mcv_27, mcv_26, mcv_25, mcv_24, mcv_23, mcv_22, mcv_21, mcv_20,                   \
-         mcv_19, mcv_18, mcv_17, mcv_16, mcv_15, mcv_14, mcv_13, mcv_12, mcv_11, mcv_10,                   \
-          mcv_9,  mcv_8,  mcv_7,  mcv_6,  mcv_5,  mcv_4,  mcv_3,  mcv_2,  mcv_1,  mcv_0                    \
+         mcv_99,  mcv_98, mcv_97, mcv_96, mcv_95, mcv_94, mcv_93, mcv_92, mcv_91, mcv_90,                  \
+         mcv_89,  mcv_88, mcv_87, mcv_86, mcv_85, mcv_84, mcv_83, mcv_82, mcv_81, mcv_80,                  \
+         mcv_79,  mcv_78, mcv_77, mcv_76, mcv_75, mcv_74, mcv_73, mcv_72, mcv_71, mcv_70,                  \
+         mcv_69,  mcv_68, mcv_67, mcv_66, mcv_65, mcv_64, mcv_63, mcv_62, mcv_61, mcv_60,                  \
+         mcv_59,  mcv_58, mcv_57, mcv_56, mcv_55, mcv_54, mcv_53, mcv_52, mcv_51, mcv_50,                  \
+         mcv_49,  mcv_48, mcv_47, mcv_46, mcv_45, mcv_44, mcv_43, mcv_42, mcv_41, mcv_40,                  \
+         mcv_39,  mcv_38, mcv_37, mcv_36, mcv_35, mcv_34, mcv_33, mcv_32, mcv_31, mcv_30,                  \
+         mcv_29,  mcv_28, mcv_27, mcv_26, mcv_25, mcv_24, mcv_23, mcv_22, mcv_21, mcv_20,                  \
+         mcv_19,  mcv_18, mcv_17, mcv_16, mcv_15, mcv_14, mcv_13, mcv_12, mcv_11, mcv_10,                  \
+          mcv_9,   mcv_8,  mcv_7,  mcv_6,  mcv_5,  mcv_4,  mcv_3,  mcv_2,  mcv_1,  mcv_0                   \
     )(_macro, t, ##__VA_ARGS__)
 
 

@@ -1,7 +1,7 @@
 #pragma once
 /*
-Copyright (c) 2019-2020, Eric Hyer
-All rights reserved.
+Copyright (c) 2019-2022, shtroizel
+All rights reserved without prejudice.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:

@@ -3,7 +3,7 @@
 
 
 /*
-Copyright (c) 2019-2020, Eric Hyer
+Copyright (c) 2019-2022, shtroizel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
