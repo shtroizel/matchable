@@ -1,82 +1,145 @@
-# Matchable Header Library
-* include/matchable/matchable.h<br/>
-* include/matchable/matchable_fwd.h
-# Complete Example
-The following program can be found at: test/programs/matchable_usage.cpp
-```cpp
-#include <random>
-#include <iostream>
+# MATCHABLE
+Matchable is the C++ header library that I wish I had many years ago...<br>
+Only recently were we blessed with the language standards and compilers that make matchable possible<br>
 
+## Files Needed For Getting Started
+Matchable is primarily a header-only library. To get started quickly you could just copy the following
+two files into your project:
+
+* include/matchable/matchable.h<br/>
+* include/matchable/matchable_fwd.h<br/>
+
+If using cmake then you could instead install matchable, set matchable_DIR and use find_package()
+within your project.<br>
+
+
+# Hello Matchable
+The following program can be found at: test/programs/matchable_usage.cpp<br>
+```cpp
+#include <iostream>
 #include "matchable/matchable.h"
 
 
+MATCHABLE(
+    // type
+    DayOfWeek,
 
-MATCHABLE(status, success, invalid_input, nothing_to_do, insufficient_memory, timed_out);
+    // variants
+    Monday,
+    Tuesday,
+    Wednessday,
+    Thursday,
+    Friday,
+    Saturday,
+    Sunday
+)
 
 
-status::Type foo()
+MATCHABLE(
+    Status,
+
+    // escape codes can be used for characters that are invalid for identifiers
+    success_bng_,              // Status::success_bng_::grab().as_string() == "success!"
+    invalid_spc_input,         // Status::invalid_spc_input::grab().as_string() == "invalid input"
+    timed_spc_out,             // Status::from_string("timed out") == Status::timed_spc_out::grab()
+    nothing_spc_to_spc_do,
+    insufficient_spc_memory,
+    index_spc_out_spc_of_spc_bounds,
+
+    // optionally, variants can be prefixed with esc_ as needed
+    esc_17                     // Status::esc_17::grab().as_string() == "17"
+
+    // see bottom of matchable/matchable.h for all the escape codes
+    // also reference test/programs/escapable.cpp for more on this
+);
+
+
+Status::Type foo(std::string day_string)
 {
-    static int magic;
-    magic++;
-    if (magic % 116 == 0) // get variant by grabbing (constant complexity)
-        return status::success::grab();
+    // create an instance of the DayOfWeek matchable
+    DayOfWeek::Type day_of_week;
 
-    if (magic % 42 == 0) // get variant from string (log2(n) complexity)
-        return status::from_string("invalid_input");
+    // all matchable types have a hidden "nil" variant
+    // at this point day_of_week == DayOfWeek::nil
+    assert(day_of_week == DayOfWeek::nil);
 
-    static std::mt19937 engine{std::random_device()()};
+    // nil is a valid and usable variant but its syntax is a bit different
+    // notice how we don't "grab()" nil like we do for the other variants
+    // also, to test for nil we could alternatively do:
+    assert(day_of_week.is_nil());
 
-    // get index from variant
-    // get std::vector of all variants
-    static std::uniform_int_distribution<int> status_distribution{
-        status::nothing_to_do::grab().as_index(),
-        static_cast<int>(status::variants().size()) - 1
-    };
+    // lets try to assign the variant from the day_string parameter
+    // note the complexity for from_string() is O(log N)
+    // if day_string is equal to the output of "as_string()" for any defined variant (its unescaped string)
+    // then day_of_week will be set to that variant
+    // if no variant is found then nil will be assigned instead
+    day_of_week = DayOfWeek::from_string(day_string);
+    if (day_of_week.is_nil())
+        return Status::invalid_spc_input::grab();
 
-    // get variant from index (constant complexity)
-    status::Type ret{status::from_index(status_distribution(engine))};
-    assert(!ret.is_nil()); // index out of range would mean bug creating status_distribution
+    // to show how flags work, we'll create a flags instance and flag our favorite days
+    DayOfWeek::Flags favorite_days;
+    for (int i = 0; i < 3; ++i)
+        favorite_days.set(DayOfWeek::from_index(i)); // note the complexity for from_index is O(1)
 
-    return ret;
+    // oops, actually we don't like Wednessday afterall
+    favorite_days.unset(DayOfWeek::Wednessday::grab());
+
+    // to get all flagged variants we can use currently_set()
+    for (auto day : favorite_days.currently_set())
+        if (day == day_of_week)
+            std::cout << day << " is one of my favorite days! ";
+
+    // we could also use MATCHABLE_INSTANCE_IN()
+    if (!MATCHABLE_INSTANCE_IN(DayOfWeek, day_of_week, Monday, Tuesday))
+        return Status::nothing_spc_to_spc_do::grab();
+
+    return Status::success_bng_::grab();
 }
 
 
 int main()
 {
-    status::Type foo_status;
-    assert(foo_status.is_nil());
+    std::cout << "variant iteration by index:" << std::endl;
+    for (auto day_of_week : DayOfWeek::variants_by_index())
+        std::cout << "    " << day_of_week << std::endl;
 
-    while (true)
-    {
-        std::cout << "." << std::flush;
+    std::cout << "\nvariant iteration by string (alphabetic):" << std::endl;
+    for (auto day_of_week : DayOfWeek::variants_by_string())
+        std::cout << "    " << day_of_week << std::endl;
 
-        foo_status = foo();
-        MATCH_WITH_FLOW_CONTROL foo_status.match({
-            {status::nil,
-                [](auto &){
-                    std::cout << status::nil.as_string() << "!" << std::endl;
-                }},
-            {status::success::grab(),
-                [](matchable::FlowControl & fc){ // explicit type instead of auto for FlowControl
-                    std::cout << "116" << std::endl;
-                    fc.brk();
-                }},
-            {status::nothing_to_do::grab(),       [](auto & fc){ fc.cont(); }},
-            {status::invalid_input::grab(),       [](auto & fc){ fc.cont(); }},
-            {status::insufficient_memory::grab(), [](auto & fc){ fc.cont(); }},
-            {status::timed_out::grab(),           [](auto & fc){ fc.cont(); }},
-        }); EVAL_FLOW_CONTROL
+    std::cout << "\noutput of foo(\"bad input\") --> " << foo("bad input") << std::endl;
+    std::cout << "output of foo(\"Saturday\") --> " << foo("Saturday") << std::endl;
+    std::cout << "output of foo(\"Tuesday\") --> " << foo("Tuesday") << std::endl;
 
-        // only happens if foo_status == status::nil, which is never
-        // operator<<() is provided, so as_string() can be omitted...
-        std::cout << "match: " << status::nil << "!" << std::endl;
-    }
-
-    std::cout << foo_status << std::endl;
-
-    return foo_status.as_index();
+    return 0;
 }
 
+```
+Output for the program above:<br>
+```
+$  ./matchable_usage
+variant iteration by index:
+    Monday
+    Tuesday
+    Wednessday
+    Thursday
+    Friday
+    Saturday
+    Sunday
+
+variant iteration by string (alphabetic):
+    Friday
+    Monday
+    Saturday
+    Sunday
+    Thursday
+    Tuesday
+    Wednessday
+
+output of foo("bad input") --> invalid input
+output of foo("Saturday") --> nothing to do
+output of foo("Tuesday") --> Tuesday is one of my favorite days! success!
 ```
 
 # Macro-API<a name="macro_api"></a>
@@ -127,6 +190,10 @@ PROPERTYx14_MATCHABLE()<br/>
 PROPERTYx15_MATCHABLE()<br/>
 PROPERTYx16_MATCHABLE()<br/>
 PROPERTYx17_MATCHABLE()<br/>
+PROPERTYx18_MATCHABLE()<br/>
+PROPERTYx19_MATCHABLE()<br/>
+PROPERTYx20_MATCHABLE()<br/>
+PROPERTYx21_MATCHABLE()<br/>
 
 Example: test/programs/relationships.cpp
 
@@ -261,5 +328,8 @@ For the versions available, see the [tags on this repository](https://github.com
 See also the list of [contributors](https://github.com/shtroizel/matchable/contributors) who participated in this project.
 
 # License
-
 This project is licensed under the "BSD 3-Clause License" - see the [LICENSE](LICENSE) file for details
+
+# donating to this project
+donations are greatly appreciated, thank you!<br>
+* monero: 89VkK94RMHSTjSsR28wGR2PLyMt4i6jndYmQb3xWSVoKBMaLAVMYXkSL7Eoe3ES9rDKFar5XNQMw7ZmUF9PNJ4WwFaNgebx<br>

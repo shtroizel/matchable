@@ -9,7 +9,7 @@ matchable_usage_filename = repo_root + 'test/programs/matchable_usage.cpp'
 with open(readme_filename) as f:
     orig_content = f.readlines()
 
-complete_example = '# Complete Example'
+complete_example = '# Hello Matchable'
 new_content = []
 
 # skip to getting started heading
