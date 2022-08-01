@@ -322,7 +322,7 @@ Example code can be found under:
 test/programs
 ```
 
-# Supported Operating Systems & hardware
+# Supported Systems
 Artix Linux, amd64<br/>
 Gentoo Linux, sparc64<br/>
 <br/>
