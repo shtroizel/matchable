@@ -322,8 +322,12 @@ Example code can be found under:
 test/programs
 ```
 
-# Versioning
-For the versions available, see the [tags on this repository](https://github.com/shtroizel/matchable/tags).
+# Supported Operating Systems & hardware
+Artix Linux, amd64<br/>
+Gentoo Linux, sparc64<br/>
+<br/>
+Matchable should work on any unix-like system but only Artix and Gentoo are supported.
+OpenBSD, sparc64 is also known to work but you may need to use the "-c" option when building.
 
 # Authors
 
