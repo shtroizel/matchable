@@ -1,6 +1,7 @@
 # MATCHABLE
-Matchable is the C++ header library that I wish I had many years ago...<br>
-Only recently were we blessed with the language standards and compilers that make matchable possible<br>
+Matchable provides string-convertable and flaggable enumerated types<br/>
+These types can have properties, and these properties can have observers<br/>
+Examples can be found under test/programs<br/>
 
 ## Files Needed For Getting Started
 Matchable is primarily a header-only library. To get started quickly you could just copy the following
@@ -10,11 +11,11 @@ two files into your project:
 * include/matchable/matchable_fwd.h<br/>
 
 If using cmake then you could instead install matchable, set matchable_DIR and use find_package()
-within your project.<br>
+within your project.<br/>
 
 
 # Hello Matchable
-The following program can be found at: test/programs/matchable_usage.cpp<br>
+The following program can be found at: test/programs/matchable_usage.cpp<br/>
 ```cpp
 #include <iostream>
 #include "matchable/matchable.h"
@@ -120,7 +121,7 @@ int main()
 }
 
 ```
-Output for the program above:<br>
+Output for the program above:<br/>
 ```
 $  ./matchable_usage
 variant iteration by index:
@@ -170,7 +171,7 @@ void set_**property_name**(**property_type** const &)<br/>
 void set_**property_name**_vect(std::vector<**property_type**> const &)<br/>
 
 
-Examples:<br>
+Examples:<br/>
 test/programs/cards.cpp<br/>
 test/programs/matchbox.cpp<br/>
 test/programs/sorting.cpp<br/>
@@ -319,7 +320,6 @@ install/share/matchable/test/bin/run_all.sh quietly
 # Example Source Code
 Example code can be found under:
 ```
-test/programs
 ```
 
 # Supported Systems
@@ -339,5 +339,5 @@ See also the list of [contributors](https://github.com/shtroizel/matchable/contr
 This project is licensed under the "BSD 3-Clause License" - see the [LICENSE](LICENSE) file for details
 
 # Donating To This Project
-donations are greatly appreciated, thank you!<br>
-* monero: 89VkK94RMHSTjSsR28wGR2PLyMt4i6jndYmQb3xWSVoKBMaLAVMYXkSL7Eoe3ES9rDKFar5XNQMw7ZmUF9PNJ4WwFaNgebx<br>
+donations are greatly appreciated, thank you!<br/>
+* monero: 89VkK94RMHSTjSsR28wGR2PLyMt4i6jndYmQb3xWSVoKBMaLAVMYXkSL7Eoe3ES9rDKFar5XNQMw7ZmUF9PNJ4WwFaNgebx<br/>
