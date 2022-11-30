@@ -1742,6 +1742,10 @@ namespace matchable
             static std::array<std::string, 128 - offset> const escapables =
                 [&](){
                     std::array<std::string, 128 - offset> e;
+
+                    for (int i = 0; i < (int) e.size(); ++i)
+                        e[i] = std::string(1, (char) (i + offset));
+
                     e[(int) ' ' - offset] = "_spc_";
                     e[(int) '!' - offset] = "_bng_";
                     e[(int) '"' - offset] = "_quot_";
@@ -1793,8 +1797,7 @@ namespace matchable
             for (size_t i = 0; i < input.size(); ++i)
             {
                 char_as_str = std::string(1, input[i]);
-                escapable = escapable::escape(char_as_str);
-                escaped += escapable == "" ? char_as_str : escapable;
+                escaped += escapable::escape(char_as_str);
             }
             return escaped;
         }

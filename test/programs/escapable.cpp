@@ -169,5 +169,14 @@ int main()
     TEST_EQ(ok, s, special::esc_xor_eq::grab());
     TEST_EQ(ok, s, special::from_identifier_string("esc_xor_eq"));
 
+    std::string esc{"_"};
+    TEST_EQ(ok, esc, matchable::escapable::escape(esc));
+
+    esc = "1";
+    TEST_EQ(ok, esc, matchable::escapable::escape(esc));
+
+    esc = "s";
+    TEST_EQ(ok, esc, matchable::escapable::escape(esc));
+
     return ok();
 }
