@@ -34,9 +34,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace matchable
 {
-    MATCHABLE(save_as__status, success, no_content, no_spread_mode, io_error, cyclic_dependencies);
-    MATCHABLE(save_as__content, generated_matchable, matchables);
-    MATCHABLE(save_as__spread_mode, wrap, always);
+    MATCHABLE(save__status, success, no_content, no_grow_mode, io_error, cyclic_dependencies);
+    MATCHABLE(save__content, generated_matchable, matchables);
+    MATCHABLE(save__grow_mode, wrap, always);
     MATCHABLE(load__status, success, io_error, syntax_error);
     MATCHABLE(set_property_status, success, variant_lookup_failed, property_lookup_failed);
     namespace set_propertyvect_status = set_property_status;
@@ -92,18 +92,19 @@ namespace matchable
     class MatchableMaker
     {
     public:
+        MatchableMaker();
         ~MatchableMaker();
         Matchable * grab(std::string const & m);
-        save_as__status::Type save_as(
+        save__status::Type save_as(
             std::string const & filename,
-            save_as__content::Flags const & content,
-            save_as__spread_mode::Type mode
+            save__content::Flags const & content,
+            save__grow_mode::Type mode
         );
         load__status::Type load(std::string const & filename);
         std::map<std::string, Matchable *> matchables;
     private:
         std::string print_matchable_fwd(Matchable const & m);
-        std::string print_matchable(Matchable const & m, save_as__spread_mode::Type mode);
+        std::string print_matchable(Matchable const & m, save__grow_mode::Type mode);
         std::string print_set_property(Matchable const & m);
     };
 }

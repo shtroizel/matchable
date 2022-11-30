@@ -1634,7 +1634,7 @@ namespace matchable
 
 
 // Add variants to existing matchable
-#define SPREAD_MATCHABLE(t, ...) mcv(matchable_create_variant, t, ##__VA_ARGS__)
+#define GROW_MATCHABLE(t, ...) mcv(matchable_create_variant, t, ##__VA_ARGS__)
 
 
 // FLOW CONTROL MACROS

@@ -236,6 +236,9 @@ namespace matchable
 
 
 
+    MatchableMaker::MatchableMaker()
+    {
+    }
 
 
     MatchableMaker::~MatchableMaker()
@@ -260,45 +263,45 @@ namespace matchable
     }
 
 
-    save_as__status::Type MatchableMaker::save_as(
+    save__status::Type MatchableMaker::save_as(
         std::string const & filename,
-        save_as__content::Flags const & content,
-        save_as__spread_mode::Type mode
+        save__content::Flags const & content,
+        save__grow_mode::Type mode
     )
     {
         if (content.currently_set().size() == 0)
-            return save_as__status::no_content::grab();
+            return save__status::no_content::grab();
 
         if (mode.is_nil())
-            return save_as__status::no_spread_mode::grab();
+            return save__status::no_grow_mode::grab();
 
         FILE * f = fopen(filename.c_str(), "w");
         if (nullptr == f)
-            return save_as__status::io_error::grab();
+            return save__status::io_error::grab();
 
-        save_as__status::Type ret{save_as__status::success::grab()};
+        save__status::Type ret{save__status::success::grab()};
 
         if (fputs("#pragma once\n\n\n#include <matchable/matchable.h>\n"
                   "#include <matchable/matchable_fwd.h>\n\n\n\n", f) == EOF)
-            goto save_as_io_error;
+            goto save_io_error;
 
         // if we need matchable 'generated_matchable' with variants for each matchable in the maker
-        if (content.is_set(save_as__content::generated_matchable::grab()))
+        if (content.is_set(save__content::generated_matchable::grab()))
         {
-            if (mode == save_as__spread_mode::wrap::grab())
+            if (mode == save__grow_mode::wrap::grab())
             {
                 if (fputs("MATCHABLE(generated_matchable", f) == EOF)
-                    goto save_as_io_error;
+                    goto save_io_error;
             }
-            else if (mode == save_as__spread_mode::always::grab())
+            else if (mode == save__grow_mode::always::grab())
             {
-                if (fputs("SPREAD_MATCHABLE(generated_matchable", f) == EOF)
-                    goto save_as_io_error;
+                if (fputs("GROW_MATCHABLE(generated_matchable", f) == EOF)
+                    goto save_io_error;
             }
             else
             {
-                ret = save_as__status::no_spread_mode::grab();
-                goto save_as_cleanup;
+                ret = save__status::no_grow_mode::grab();
+                goto save_cleanup;
             }
             int matchable_count{0};
             for (auto const & [name, m] : matchables)
@@ -306,32 +309,32 @@ namespace matchable
                 ++matchable_count;
                 if (matchable_count % 17 == 0)
                 {
-                    if (fputs(")\nSPREAD_MATCHABLE(", f) == EOF)
-                        goto save_as_io_error;
+                    if (fputs(")\nGROW_MATCHABLE(", f) == EOF)
+                        goto save_io_error;
 
                     if (fputs(name.c_str(), f) == EOF)
-                        goto save_as_io_error;
+                        goto save_io_error;
                 }
                 if (fputs(", ", f) == EOF)
-                    goto save_as_io_error;
+                    goto save_io_error;
 
                 if (fputs(name.c_str(), f) == EOF)
-                    goto save_as_io_error;
+                    goto save_io_error;
             }
             if (fputs(")\n", f) == EOF)
-                goto save_as_io_error;
+                goto save_io_error;
         }
 
-        if (content.is_set(save_as__content::matchables::grab()))
+        if (content.is_set(save__content::matchables::grab()))
         {
             // table recording whether each matchable has been written/saved (processed)
             std::map<std::string, bool> processed;
             for (auto const & [name, m] : matchables)
                 processed.insert({name, false});
 
-            // if just spreading then the order does not matter,
-            // so just go through them all and spread spread spread
-            if (mode == save_as__spread_mode::always::grab())
+            // if just growing then the order does not matter,
+            // so just go through them all and grow grow grow
+            if (mode == save__grow_mode::always::grab())
             {
                 for (auto const & [name, m] : matchables)
                 {
@@ -339,10 +342,10 @@ namespace matchable
                     assert(printed_matchable.size());
                     processed[name] = true;
                     if (fputs(printed_matchable.c_str(), f) == EOF)
-                        goto save_as_io_error;
+                        goto save_io_error;
                 }
             }
-            // not always spreading means we provide definitions
+            // not always growing means we provide definitions
             // initial definitions must be resolved so that dependency definitions occur first
             //   - this is an issue when matchables and their matchable properties are saved together
             else
@@ -350,7 +353,7 @@ namespace matchable
                 // first forward declare all matchables resolving any dependency to self
                 for (auto const & [name, m] : matchables)
                     if (fputs(print_matchable_fwd(*m).c_str(), f) == EOF)
-                        goto save_as_io_error;
+                        goto save_io_error;
 
                 // for each iteration of the following while(), processed_count must be incremented...
                 // unchanged processed_count at end of iteration means we have cyclic dependencies!
@@ -399,7 +402,7 @@ namespace matchable
                         // we are ready so write the matchable and record that we did so...
                         std::string const printed_matchable{print_matchable(*m, mode)};
                         if (fputs(printed_matchable.c_str(), f) == EOF)
-                            goto save_as_io_error;
+                            goto save_io_error;
 
                         processed[name] = true;
                         processed_count++;
@@ -408,7 +411,7 @@ namespace matchable
                     // if we went through all the matchables and none of them were ready
                     if (prev_processed_count == processed_count)
                     {
-                        ret = save_as__status::cyclic_dependencies::grab();
+                        ret = save__status::cyclic_dependencies::grab();
                         std::cout << "WARNING! cyclic dependencies detected and omitted!" << std::endl;
                         for (auto const & [name, p] : processed)
                         {
@@ -423,21 +426,21 @@ namespace matchable
                         break;
                     }
                 } // while matchables still need to be processed
-            } // not always spreading
+            } // not always growing
 
             // initialize properties
             for (auto const & [name, m] : matchables)
                 if (processed[name])
                     if (fputs(print_set_property(*m).c_str(), f) == EOF)
-                        return save_as__status::io_error::grab();
+                        return save__status::io_error::grab();
         }
 
-        goto save_as_cleanup;
+        goto save_cleanup;
 
-save_as_io_error:
-        ret = save_as__status::io_error::grab();
+save_io_error:
+        ret = save__status::io_error::grab();
 
-save_as_cleanup:
+save_cleanup:
         fclose(f);
         return ret;
     }
@@ -468,7 +471,7 @@ save_as_cleanup:
         esc_PROPERTYx19_MATCHABLE,
         esc_PROPERTYx20_MATCHABLE,
         esc_PROPERTYx21_MATCHABLE,
-        esc_SPREAD_MATCHABLE,
+        esc_GROW_MATCHABLE,
         esc_MATCHABLE_VARIANT_PROPERTY_VALUE,
         esc_MATCHABLE_VARIANT_PROPERTY_VALUES
     );
@@ -1004,7 +1007,7 @@ save_as_cleanup:
                     [&](){
                         if (args.size() < 37)
                         {
-                            std::cout << "Error loading PROPERTYx17_MATCHABLE(), expected >= 35 args (got "
+                            std::cout << "Error loading PROPERTYx18_MATCHABLE(), expected >= 37 args (got "
                                       << args.size() << ")" << std::endl;
                             ret = load__status::syntax_error::grab();
                             return;
@@ -1036,7 +1039,7 @@ save_as_cleanup:
                     [&](){
                         if (args.size() < 39)
                         {
-                            std::cout << "Error loading PROPERTYx17_MATCHABLE(), expected >= 35 args (got "
+                            std::cout << "Error loading PROPERTYx19_MATCHABLE(), expected >= 39 args (got "
                                       << args.size() << ")" << std::endl;
                             ret = load__status::syntax_error::grab();
                             return;
@@ -1069,7 +1072,7 @@ save_as_cleanup:
                     [&](){
                         if (args.size() < 41)
                         {
-                            std::cout << "Error loading PROPERTYx17_MATCHABLE(), expected >= 35 args (got "
+                            std::cout << "Error loading PROPERTYx20_MATCHABLE(), expected >= 41 args (got "
                                       << args.size() << ")" << std::endl;
                             ret = load__status::syntax_error::grab();
                             return;
@@ -1103,7 +1106,7 @@ save_as_cleanup:
                     [&](){
                         if (args.size() < 43)
                         {
-                            std::cout << "Error loading PROPERTYx17_MATCHABLE(), expected >= 35 args (got "
+                            std::cout << "Error loading PROPERTYx21_MATCHABLE(), expected >= 21 args (got "
                                       << args.size() << ")" << std::endl;
                             ret = load__status::syntax_error::grab();
                             return;
@@ -1134,11 +1137,11 @@ save_as_cleanup:
                             m->add_variant(args[i]);
                     }},
 
-                {MatchableKeyword::esc_SPREAD_MATCHABLE::grab(),
+                {MatchableKeyword::esc_GROW_MATCHABLE::grab(),
                     [&](){
                         if (args.size() < 1)
                         {
-                            std::cout << "Error loading SPREAD_MATCHABLE(), expected >= 1 arg (got "
+                            std::cout << "Error loading GROW_MATCHABLE(), expected >= 1 arg (got "
                                       << args.size() << ")" << std::endl;
                             ret = load__status::syntax_error::grab();
                             return;
@@ -1196,7 +1199,7 @@ load_end:
 
     std::string MatchableMaker::print_matchable(
         matchable::Matchable const & m,
-        save_as__spread_mode::Type mode
+        save__grow_mode::Type mode
     )
     {
         std::string ret;
@@ -1204,7 +1207,7 @@ load_end:
         if (mode.is_nil())
             return ret;
 
-        if (mode == save_as__spread_mode::wrap::grab())
+        if (mode == save__grow_mode::wrap::grab())
         {
             if (m.property_types_and_names.size() > 0)
             {
@@ -1221,9 +1224,9 @@ load_end:
                 ret += ", ";
             }
         }
-        else if (mode == save_as__spread_mode::always::grab())
+        else if (mode == save__grow_mode::always::grab())
         {
-            ret += "SPREAD_MATCHABLE(";
+            ret += "GROW_MATCHABLE(";
         }
         else
         {
@@ -1237,7 +1240,7 @@ load_end:
             ++variant_count;
             if (variant_count % 17 == 0)
             {
-                ret += ")\nSPREAD_MATCHABLE(";
+                ret += ")\nGROW_MATCHABLE(";
                 ret += m.name;
             }
 
