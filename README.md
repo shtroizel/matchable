@@ -203,8 +203,8 @@ PROPERTYx21_MATCHABLE()<br/>
 Example: test/programs/relationships.cpp
 
 ## Going beyond 108 variants
-Although a matchable is initially defined with up to 108 variants, it may spread to achieve variant counts higher than 108.
-#### SPREAD_MATCHABLE(type, variant...)
+Although a matchable is initially defined with up to 108 variants, it may grow to achieve variant counts higher than 108.
+#### GROW_MATCHABLE(type, variant...)
 Add up to 108 new variants to **type**.<br/>
 This may be repeated as needed...<br/>
 Example: test/programs/max_variants.cpp
