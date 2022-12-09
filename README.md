@@ -317,11 +317,6 @@ Run All Tests Quietly
 install/share/matchable/test/bin/run_all.sh quietly
 ```
 
-# Example Source Code
-Example code can be found under:
-```
-```
-
 # Supported Systems
 Artix Linux, amd64<br/>
 Gentoo Linux, sparc64<br/>
