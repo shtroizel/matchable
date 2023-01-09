@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-Copyright (c) 2019-2022, shtroizel
+Copyright (c) 2019-2023, shtroizel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -1661,10 +1661,10 @@ namespace matchable
                     csp_init.push_back(std::make_pair("_pct_", "%"));
                     csp_init.push_back(std::make_pair("_und_", "&"));
                     csp_init.push_back(std::make_pair("_sqt_", "'"));
-                    csp_init.push_back(std::make_pair("_pl_", "("));
-                    csp_init.push_back(std::make_pair("_pr_", ")"));
+                    csp_init.push_back(std::make_pair("_parl_", "("));
+                    csp_init.push_back(std::make_pair("_parr_", ")"));
                     csp_init.push_back(std::make_pair("_ast_", "*"));
-                    csp_init.push_back(std::make_pair("_pls_", "+"));
+                    csp_init.push_back(std::make_pair("_plus_", "+"));
                     csp_init.push_back(std::make_pair("_cma_", ","));
                     csp_init.push_back(std::make_pair("_mns_", "-"));
                     csp_init.push_back(std::make_pair("_dot_", "."));
@@ -1752,10 +1752,10 @@ namespace matchable
                     e[(int) '%' - offset] = "_pct_";
                     e[(int) '&' - offset] = "_und_";
                     e[(int) '\'' - offset] = "_sqt_";
-                    e[(int) '(' - offset] = "_pl_";
-                    e[(int) ')' - offset] = "_pr_";
+                    e[(int) '(' - offset] = "_parl_";
+                    e[(int) ')' - offset] = "_parr_";
                     e[(int) '*' - offset] = "_ast_";
-                    e[(int) '+' - offset] = "_pls_";
+                    e[(int) '+' - offset] = "_plus_";
                     e[(int) ',' - offset] = "_cma_";
                     e[(int) '-' - offset] = "_mns_";
                     e[(int) '.' - offset] = "_dot_";
