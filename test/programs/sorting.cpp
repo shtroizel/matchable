@@ -10,11 +10,11 @@
 MATCHABLE(Stability, Stable, Unstable)
 MATCHABLE(
     SpaceComplexity,
-    O_pl_1_pr_,
-    O_pl_k_pr_,
-    O_pl_log_pl_n_pr__pr_,
-    O_pl_n_pr_,
-    O_pl_n_pls_k_pr_
+    O_parl_1_parr_,
+    O_parl_k_parr_,
+    O_parl_log_parl_n_parr__parr_,
+    O_parl_n_parr_,
+    O_parl_n_plus_k_parr_
 )
 PROPERTYx2_MATCHABLE(
     Stability::Type,
@@ -55,19 +55,19 @@ int main()
     SortingAlgorithm::TimSort::grab().set_stability(Stability::Stable::grab());
     SortingAlgorithm::QuickSort::grab().set_stability(Stability::Unstable::grab());
 
-    SortingAlgorithm::BubbleSort::grab().set_space_complexity(SpaceComplexity::O_pl_1_pr_::grab());
-    SortingAlgorithm::BucketSort::grab().set_space_complexity(SpaceComplexity::O_pl_n_pr_::grab());
-    SortingAlgorithm::CountingSort::grab().set_space_complexity(SpaceComplexity::O_pl_k_pr_::grab());
-    SortingAlgorithm::CubeSort::grab().set_space_complexity(SpaceComplexity::O_pl_n_pr_::grab());
-    SortingAlgorithm::HeapSort::grab().set_space_complexity(SpaceComplexity::O_pl_1_pr_::grab());
-    SortingAlgorithm::InsertionSort::grab().set_space_complexity(SpaceComplexity::O_pl_1_pr_::grab());
-    SortingAlgorithm::MergeSort::grab().set_space_complexity(SpaceComplexity::O_pl_n_pr_::grab());
-    SortingAlgorithm::RadixSort::grab().set_space_complexity(SpaceComplexity::O_pl_n_pls_k_pr_::grab());
-    SortingAlgorithm::SelectionSort::grab().set_space_complexity(SpaceComplexity::O_pl_1_pr_::grab());
-    SortingAlgorithm::ShellSort::grab().set_space_complexity(SpaceComplexity::O_pl_1_pr_::grab());
-    SortingAlgorithm::TimSort::grab().set_space_complexity(SpaceComplexity::O_pl_n_pr_::grab());
+    SortingAlgorithm::BubbleSort::grab().set_space_complexity(SpaceComplexity::O_parl_1_parr_::grab());
+    SortingAlgorithm::BucketSort::grab().set_space_complexity(SpaceComplexity::O_parl_n_parr_::grab());
+    SortingAlgorithm::CountingSort::grab().set_space_complexity(SpaceComplexity::O_parl_k_parr_::grab());
+    SortingAlgorithm::CubeSort::grab().set_space_complexity(SpaceComplexity::O_parl_n_parr_::grab());
+    SortingAlgorithm::HeapSort::grab().set_space_complexity(SpaceComplexity::O_parl_1_parr_::grab());
+    SortingAlgorithm::InsertionSort::grab().set_space_complexity(SpaceComplexity::O_parl_1_parr_::grab());
+    SortingAlgorithm::MergeSort::grab().set_space_complexity(SpaceComplexity::O_parl_n_parr_::grab());
+    SortingAlgorithm::RadixSort::grab().set_space_complexity(SpaceComplexity::O_parl_n_plus_k_parr_::grab());
+    SortingAlgorithm::SelectionSort::grab().set_space_complexity(SpaceComplexity::O_parl_1_parr_::grab());
+    SortingAlgorithm::ShellSort::grab().set_space_complexity(SpaceComplexity::O_parl_1_parr_::grab());
+    SortingAlgorithm::TimSort::grab().set_space_complexity(SpaceComplexity::O_parl_n_parr_::grab());
     SortingAlgorithm::QuickSort::grab().set_space_complexity(
-        SpaceComplexity::O_pl_log_pl_n_pr__pr_::grab()
+        SpaceComplexity::O_parl_log_parl_n_parr__parr_::grab()
     );
 
     std::vector<SortingAlgorithm::Type> stable_algorithms_by_space_complexity{
