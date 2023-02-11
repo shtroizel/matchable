@@ -10,7 +10,10 @@ MATCHABLE(TimeUnit, Seconds, Minutes, Hours, Days, Weeks)
 MATCHABLE(Result, Ok, Err)
 
 // matchable without variants?
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-const-variable"
 MATCHABLE(NIL)
+#pragma GCC diagnostic pop
 
 
 enum class Task { Task0, Task1, Task2 };
