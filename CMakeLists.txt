@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.21)
 
 project(matchable VERSION 14.0.0)
 
@@ -9,10 +9,15 @@ if(OMIT_BY_INDEX)
     add_definitions(-DMATCHABLE_OMIT_BY_INDEX)
 endif()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
+if("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:preprocessor")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
+endif()
 
+include_directories(include)
 install(DIRECTORY include/matchable DESTINATION include)
 
 
@@ -52,39 +57,16 @@ endif()
 
 
 ####### libmatchable #######################################################################################
-# create both static and shared libraries
-# to avoid compiling twice first create a reusable "object" target
-
-# reusable "object"
-add_library(matchablemaker_object OBJECT src/MatchableMaker.cpp)
-target_include_directories(matchablemaker_object PUBLIC include)
-target_include_directories(matchablemaker_object PUBLIC "${PROJECT_BINARY_DIR}")
-set_target_properties(matchablemaker_object PROPERTIES POSITION_INDEPENDENT_CODE 1)
-
-# as shared library
-add_library(matchablemaker_shared SHARED $<TARGET_OBJECTS:matchablemaker_object>)
-set_target_properties(matchablemaker_shared PROPERTIES OUTPUT_NAME matchable CLEAN_DIRECT_OUTPUT 1)
-target_include_directories(matchablemaker_object PUBLIC "${PROJECT_BINARY_DIR}")
-target_include_directories(
-    matchablemaker_shared
-    INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
-# as static library
-add_library(matchablemaker_static STATIC $<TARGET_OBJECTS:matchablemaker_object>)
-set_target_properties(matchablemaker_static PROPERTIES OUTPUT_NAME matchable CLEAN_DIRECT_OUTPUT 1)
-target_include_directories(matchablemaker_object PUBLIC "${PROJECT_BINARY_DIR}")
-target_include_directories(
-    matchablemaker_static
-    INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
+add_library(matchablemaker_shared SHARED src/MatchableMaker.cpp)
 install(
-    TARGETS matchablemaker_shared matchablemaker_static
+    TARGETS matchablemaker_shared
+    DESTINATION lib/matchable
+    EXPORT matchable
+)
+
+add_library(matchablemaker_static STATIC src/MatchableMaker.cpp)
+install(
+    TARGETS matchablemaker_static
     DESTINATION lib/matchable
     EXPORT matchable
 )

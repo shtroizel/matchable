@@ -69,6 +69,9 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
 
+    if os.name == 'nt':
+        cmake_cmd.append('-G Ninja')
+
     if lib_only:
         cmake_cmd.append('-DLIB_ONLY=ON')
 
@@ -96,15 +99,15 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
         os.chdir(matchable_root)
         exit(1)
 
-    if subprocess.run(['make', '-j' + jobs]).returncode != 0:
+    if subprocess.run(['cmake', '--build', '.', '-j ' + jobs]).returncode != 0:
         print('make failed')
         os.chdir(matchable_root)
         exit(1)
 
-    if subprocess.run(['make', '-j' + jobs, 'install']).returncode != 0:
-        print('make install failed, trying sudo make install...')
-        if subprocess.run(['sudo', 'make', '-j' + jobs, 'install']).returncode != 0:
-            print('sudo make install failed')
+    if subprocess.run(['cmake', '--install', '.']).returncode != 0:
+        print('build failed, trying sudo')
+        if subprocess.run(['sudo', 'cmake', '--install', '.']).returncode != 0:
+            print('"sudo cmake --install ." failed')
             os.chdir(matchable_root)
             exit(1)
 
