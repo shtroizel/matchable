@@ -512,7 +512,10 @@ namespace matchable
         using Flags = matchable::MatchBox<Type, void>;                                                     \
         inline std::vector<Type> const & variants() { return I##t::variants(); }                           \
         inline std::vector<Type> const & variants_by_string() { return I##t::variants_by_string(); }       \
+        _Pragma("GCC diagnostic push") /* work around compiler bug */                                      \
+        _Pragma("GCC diagnostic ignored \"-Wunused-const-variable\"")                                      \
         static std::string const name{#t};                                                                 \
+        _Pragma("GCC diagnostic pop")                                                                      \
         static Type nil{};                                                                                 \
         inline Type from_by_string_index(int index)                                                        \
         {                                                                                                  \
