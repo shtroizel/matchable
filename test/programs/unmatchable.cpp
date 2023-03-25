@@ -68,6 +68,21 @@ namespace outer_ns
 }
 
 
+MATCHABLE(
+    Digit,
+
+    Zero,
+    One,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine
+)
+
 
 int main()
 {
@@ -419,6 +434,53 @@ int main()
         outer_ns::middle_outer_ns::middle_ns::middle_inner_ns
                 ::inner_ns::core_ns::CoreMatchable::thirteen::grab()
     );
+
+
+    {
+        UNMATCHABLE(Digit, Zero, One, Two);
+
+        int i = 3;
+        for (auto d : Digit::variants())
+        {
+            TEST_EQ(ok, d, Digit::from_index(i));
+            TEST_EQ(ok, d.as_index(), i);
+            TEST_EQ(ok, d, Digit::from_string(d.as_string()));
+            ++i;
+        }
+
+        TEST_EQ(ok, Digit::from_string("Zero"), Digit::nil);
+        TEST_EQ(ok, Digit::from_string("One"), Digit::nil);
+        TEST_EQ(ok, Digit::from_string("Two"), Digit::nil);
+        TEST_EQ(ok, Digit::from_index(0), Digit::nil);
+        TEST_EQ(ok, Digit::from_index(1), Digit::nil);
+        TEST_EQ(ok, Digit::from_index(2), Digit::nil);
+    }
+
+    {
+        UNMATCHABLE(Digit, Seven, Eight);
+
+        int i = 0;
+        for (auto d : Digit::variants())
+        {
+            TEST_EQ(ok, d, Digit::from_index(i));
+            TEST_EQ(ok, d.as_index(), i);
+            TEST_EQ(ok, d, Digit::from_string(d.as_string()));
+            if (i == 6)
+                i = 9;
+            else
+                ++i;
+        }
+
+        TEST_EQ(ok, Digit::from_string("Seven"), Digit::nil);
+        TEST_EQ(ok, Digit::from_string("Eight"), Digit::nil);
+        TEST_EQ(ok, Digit::from_index(7), Digit::nil);
+        TEST_EQ(ok, Digit::from_index(8), Digit::nil);
+    }
+
+    TEST_EQ(ok, Digit::from_string("Seven"), Digit::Seven::grab());
+    TEST_EQ(ok, Digit::from_string("Eight"), Digit::Eight::grab());
+    TEST_EQ(ok, Digit::from_index(7), Digit::Seven::grab());
+    TEST_EQ(ok, Digit::from_index(8), Digit::Eight::grab());
 
     return ok();
 }

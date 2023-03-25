@@ -335,6 +335,7 @@ namespace matchable
 #ifndef MATCHABLE_OMIT_BY_INDEX
             {
                 prev_variants_by_index = M::interface_type::variants_by_index();
+                M::interface_type::all_by_index() = &prev_variants_by_index;
                 auto i = std::remove_if(
                              M::interface_type::by_index().begin(),
                              M::interface_type::by_index().end(),
@@ -349,6 +350,7 @@ namespace matchable
             M::interface_type::by_string() = prev_variants_by_string;
 #ifndef MATCHABLE_OMIT_BY_INDEX
             M::interface_type::by_index() = prev_variants_by_index;
+            M::interface_type::all_by_index() = &M::interface_type::by_index();
 #endif
         }
     private:
@@ -395,8 +397,11 @@ namespace matchable
             virtual int as_index() const = 0;                                                              \
             static std::vector<Type> const & variants() { return variants_by_index(); }                    \
             static std::vector<Type> const & variants_by_index() { return by_index(); }                    \
+            static std::vector<Type> const * all_variants_by_index() { return all_by_index(); }            \
         private:                                                                                           \
             static std::vector<Type> & by_index() { static std::vector<Type> v; return v; }                \
+            static std::vector<Type> *& all_by_index()                                                     \
+                    { static std::vector<Type> * v = &by_index(); return v; }                              \
         };                                                                                                 \
     }
 #endif
@@ -608,9 +613,11 @@ namespace matchable
         inline std::vector<Type> const & variants_by_index() { return I##t::variants_by_index(); }         \
         inline Type from_index(int index)                                                                  \
         {                                                                                                  \
-            if (index < 0 || index >= (int) I##t::variants_by_index().size())                              \
+            if (index < 0 || index >= (int) I##t::all_variants_by_index()->size())                         \
                 return nil;                                                                                \
-            return I##t::variants_by_index().at(index);                                                    \
+            if (I##t::all_variants_by_index() != &I##t::variants_by_index())                               \
+                return from_string(I##t::all_variants_by_index()->at(index).as_string());                  \
+            return I##t::all_variants_by_index()->at(index);                                               \
         }                                                                                                  \
     }
 #endif
