@@ -360,6 +360,29 @@ namespace matchable
 #endif
     };
 
+
+    inline bool str_lt_str(std::string const & l, std::string const & r)
+    {
+        size_t const min_len = std::min(l.length(), r.length());
+        for (size_t i = 0; i < min_len; ++i)
+        {
+            bool l_alpha = (l[i] >= 'A' && l[i] <= 'Z') || (l[i] >= 'a' && l[i] <= 'z');
+            bool r_alpha = (r[i] >= 'A' && r[i] <= 'Z') || (r[i] >= 'a' && r[i] <= 'z');
+            if (l_alpha ^ r_alpha)
+            {
+                return r_alpha;
+            }
+            else
+            {
+                if (l[i] < r[i])
+                    return true;
+                else if (r[i] < l[i])
+                    return false;
+            }
+        }
+        return l.length() < r.length();
+    }
+
 } // namespace matchable
 
 
@@ -460,30 +483,10 @@ namespace matchable
                 { return T::variants_by_string(); }                                                        \
             bool operator==(MatchableType const & m) const { return as_string() == m.as_string(); }        \
             bool operator!=(MatchableType const & m) const { return as_string() != m.as_string(); }        \
-            bool lt_by_string(MatchableType const & m) const { return lt_by_string(m.as_string()); }       \
+            bool lt_by_string(MatchableType const & m) const                                               \
+                    { return matchable::str_lt_str(as_string(), m.as_string()); }                          \
             bool lt_by_string(std::string const & str) const                                               \
-            {                                                                                              \
-                size_t const min_len = std::min(as_string().length(), str.length());                       \
-                for (size_t i = 0; i < min_len; ++i)                                                       \
-                {                                                                                          \
-                    bool this_alpha = (as_string()[i] >= 'A' && as_string()[i] <= 'Z') ||                  \
-                                      (as_string()[i] >= 'a' && as_string()[i] <= 'z');                    \
-                    bool other_alpha = (str[i] >= 'A' && str[i] <= 'Z') ||                                 \
-                                       (str[i] >= 'a' && str[i] <= 'z');                                   \
-                    if (this_alpha ^ other_alpha)                                                          \
-                    {                                                                                      \
-                        return other_alpha;                                                                \
-                    }                                                                                      \
-                    else                                                                                   \
-                    {                                                                                      \
-                        if (as_string()[i] < str[i])                                                       \
-                            return true;                                                                   \
-                        else if (str[i] < as_string()[i])                                                  \
-                            return false;                                                                  \
-                    }                                                                                      \
-                }                                                                                          \
-                return as_string().length() < str.length();                                                \
-            }                                                                                              \
+                    { return matchable::str_lt_str(as_string(), str); }                                    \
             friend std::ostream & operator<<(std::ostream & o, MatchableType const & m)                    \
             {                                                                                              \
                 return o << m.as_string();                                                                 \
@@ -578,7 +581,7 @@ namespace matchable
             {                                                                                              \
                 if (nullptr != index)                                                                      \
                     *index = static_cast<int>(variants().size());                                          \
-                static auto pred = [](auto a, auto b) { return a.lt_by_string(b); };                       \
+                static auto pred = [](auto const & a, auto const & b) { return a.lt_by_string(b); };       \
                 by_string().insert(                                                                        \
                     std::upper_bound(by_string().begin(), by_string().end(), variant, pred),               \
                     variant                                                                                \
