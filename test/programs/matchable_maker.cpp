@@ -108,6 +108,24 @@ int main()
         TEST_EQ(ok, (int) mm.matchables.size(), 2);
     }
 
+    {
+        matchable::MatchableMaker mm;
+        for (int i = 0; i < 18; ++i)
+            mm.grab((i < 10 ? "m0" : "m") + std::to_string(i));
+        std::filesystem::path const path = dir / "generated.h";
+        matchable::save__content::Flags const generated{
+            matchable::save__content::generated_matchable::grab()
+        };
+        for (auto const & mode : matchable::save__grow_mode::variants())
+        {
+            mm.save_as(path.string(), generated, mode);
+            std::string const saved = slurp(path);
+            TEST_EQ(ok, contains(saved, "(generated_matchable, m00,"), true);
+            TEST_EQ(ok, contains(saved, ", m15)\nGROW_MATCHABLE(generated_matchable, m16, m17)\n"), true);
+            TEST_EQ(ok, contains(saved, "GROW_MATCHABLE(m16"), false);
+        }
+    }
+
     std::filesystem::remove_all(dir);
     return ok();
 }

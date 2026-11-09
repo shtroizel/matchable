@@ -275,10 +275,7 @@ namespace matchable
                 ++matchable_count;
                 if (matchable_count % 17 == 0)
                 {
-                    if (fputs(")\nGROW_MATCHABLE(", f) == EOF)
-                        goto save_io_error;
-
-                    if (fputs(name.c_str(), f) == EOF)
+                    if (fputs(")\nGROW_MATCHABLE(generated_matchable", f) == EOF)
                         goto save_io_error;
                 }
                 if (fputs(", ", f) == EOF)
