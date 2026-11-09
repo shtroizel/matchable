@@ -209,6 +209,19 @@ Add up to 108 new variants to **type**.<br/>
 This may be repeated as needed...<br/>
 Example: test/programs/max_variants.cpp
 
+#### Growing a matchable from several translation units
+**type** may be grown from different translation units, each adding its own variants (for example a base
+header declares the type and each module grows it). Every variant registers exactly once, however many
+translation units include it, and the program sees all of them.<br/>
+* by-string order (as_by_string_index(), variants_by_string()) is always alphabetical, so it is the same in
+  every build
+* by-index order (as_index(), variants_by_index()) follows declaration order for variants declared in the
+  same header. Between variants grown in different translation units it follows static initialization
+  order, which depends on link order, so it can differ between builds. Don't persist or exchange those
+  indexes; use as_string() instead.
+
+Example: test/programs/multi_tu/
+
 ## Macros for setting properties at link-time
 
 #### MATCHABLE_VARIANT_PROPERTY_VALUE(type, variant, property_name, property_value)

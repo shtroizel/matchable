@@ -65,17 +65,13 @@ namespace matchable
         std::vector<M> currently_set() const;
 
     private:
+        void grow_to_fit(size_t index);
+
         T nil_target;
         bool nil_target_init_flag;
         T default_t;
         std::vector<T> targets;
         std::vector<bool> init_flags;
-        using as_index_func_type = int (M::*)() const;
-#ifdef MATCHABLE_OMIT_BY_INDEX
-        as_index_func_type as_index_func = &M::as_by_string_index;
-#else
-        as_index_func_type as_index_func = &M::as_index;
-#endif
     };
 
 
@@ -106,16 +102,36 @@ namespace matchable
 
 
     template<typename M, typename T>
+    void MatchBox<M, T>::grow_to_fit(size_t index)
+    {
+        if (index >= targets.size())
+        {
+            targets.resize(index + 1, default_t);
+            init_flags.resize(index + 1, false);
+        }
+    }
+
+
+    template<typename M, typename T>
     T const & MatchBox<M, T>::at(M const & match) const
     {
-        return match.is_nil() ? nil_target : targets[static_cast<size_t>((match.*as_index_func)())];
+        if (match.is_nil())
+            return nil_target;
+
+        size_t index = static_cast<size_t>(match.as_slot());
+        return index < targets.size() ? targets[index] : default_t;
     }
 
 
     template<typename M, typename T>
     T & MatchBox<M, T>::mut_at(M const & match)
     {
-        return match.is_nil() ? nil_target : targets[static_cast<size_t>((match.*as_index_func)())];
+        if (match.is_nil())
+            return nil_target;
+
+        size_t index = static_cast<size_t>(match.as_slot());
+        grow_to_fit(index);
+        return targets[index];
     }
 
 
@@ -129,7 +145,8 @@ namespace matchable
         }
         else
         {
-            size_t index = static_cast<size_t>((match.*as_index_func)());
+            size_t index = static_cast<size_t>(match.as_slot());
+            grow_to_fit(index);
             targets[index] = target;
             init_flags[index] = true;
         }
@@ -146,9 +163,12 @@ namespace matchable
         }
         else
         {
-            size_t index = static_cast<size_t>((match.*as_index_func)());
-            targets[index] = default_t;
-            init_flags[index] = false;
+            size_t index = static_cast<size_t>(match.as_slot());
+            if (index < targets.size())
+            {
+                targets[index] = default_t;
+                init_flags[index] = false;
+            }
         }
     }
 
@@ -159,7 +179,8 @@ namespace matchable
         if (match.is_nil())
             return nil_target_init_flag;
 
-        return init_flags[static_cast<size_t>((match.*as_index_func)())];
+        size_t index = static_cast<size_t>(match.as_slot());
+        return index < init_flags.size() && init_flags[index];
     }
 
 
@@ -201,14 +222,15 @@ namespace matchable
         }
 
     private:
+        bool flag_at(size_t index) const { return index < init_flags.size() && init_flags[index]; }
+        void grow_to_fit(size_t index)
+        {
+            if (index >= init_flags.size())
+                init_flags.resize(index + 1, false);
+        }
+
         bool nil_init_flag;
         std::vector<bool> init_flags;
-        using as_index_func_type = int (M::*)() const;
-#ifdef MATCHABLE_OMIT_BY_INDEX
-        as_index_func_type as_index_func = &M::as_by_string_index;
-#else
-        as_index_func_type as_index_func = &M::as_index;
-#endif
     };
 
 
@@ -242,9 +264,15 @@ namespace matchable
     void MatchBox<M, void>::set(M const & match)
     {
         if (match.is_nil())
+        {
             nil_init_flag = true;
+        }
         else
-            init_flags[static_cast<size_t>((match.*as_index_func)())] = true;
+        {
+            size_t index = static_cast<size_t>(match.as_slot());
+            grow_to_fit(index);
+            init_flags[index] = true;
+        }
     }
 
 
@@ -252,9 +280,15 @@ namespace matchable
     void MatchBox<M, void>::unset(M const & match)
     {
         if (match.is_nil())
+        {
             nil_init_flag = false;
+        }
         else
-            init_flags[static_cast<size_t>((match.*as_index_func)())] = false;
+        {
+            size_t index = static_cast<size_t>(match.as_slot());
+            if (index < init_flags.size())
+                init_flags[index] = false;
+        }
     }
 
 
@@ -262,10 +296,15 @@ namespace matchable
     void MatchBox<M, void>::toggle(M const & match)
     {
         if (match.is_nil())
+        {
             nil_init_flag = !nil_init_flag;
+        }
         else
-            init_flags[static_cast<size_t>((match.*as_index_func)())] =
-                    !init_flags[static_cast<size_t>((match.*as_index_func)())];
+        {
+            size_t index = static_cast<size_t>(match.as_slot());
+            grow_to_fit(index);
+            init_flags[index] = !init_flags[index];
+        }
     }
 
 
@@ -275,7 +314,7 @@ namespace matchable
         if (match.is_nil())
             return nil_init_flag;
 
-        return init_flags[static_cast<size_t>((match.*as_index_func)())];
+        return flag_at(static_cast<size_t>(match.as_slot()));
     }
 
 
@@ -293,7 +332,12 @@ namespace matchable
     template<typename M>
     bool MatchBox<M, void>::operator==(MatchBox<M, void> const & other) const
     {
-        return init_flags == other.init_flags;
+        // storage grows on demand, so two equal boxes can differ in size
+        size_t const n = std::max(init_flags.size(), other.init_flags.size());
+        for (size_t i = 0; i < n; ++i)
+            if (flag_at(i) != other.flag_at(i))
+                return false;
+        return true;
     }
 
 
@@ -399,6 +443,8 @@ namespace matchable
             I##t() = default;                                                                              \
             virtual ~I##t() = default;                                                                     \
             virtual int as_by_string_index() const = 0;                                                    \
+            virtual int as_slot() const = 0;                                                               \
+            static int next_slot() { static int n{0}; return n++; }                                        \
             virtual std::string const & as_string() const = 0;                                             \
             virtual std::string const & as_identifier_string() const = 0;                                  \
             static std::vector<Type> const & variants_by_string() { return by_string(); }                  \
@@ -466,6 +512,7 @@ namespace matchable
                 return nullptr == t ? nil_str : t->as_identifier_string();                                 \
             }                                                                                              \
             int as_by_string_index() const { return nullptr == t ? -1 : t->as_by_string_index(); }         \
+            int as_slot() const { return nullptr == t ? -1 : t->as_slot(); }                               \
             bool is_nil() const { return nullptr == t; }                                                   \
             matchable::FlowControl match(MatchParamWithFlowControl const & mb) const                       \
             {                                                                                              \
@@ -571,11 +618,7 @@ namespace matchable
 
 
 #define matchable_define_register_variant_common                                                           \
-            if (variant.is_nil())                                                                          \
-            {                                                                                              \
-                by_string().clear();                                                                       \
-            }                                                                                              \
-            else                                                                                           \
+            if (!variant.is_nil())                                                                         \
             {                                                                                              \
                 if (nullptr != index)                                                                      \
                     *index = static_cast<int>(variants().size());                                          \
@@ -608,7 +651,8 @@ namespace matchable
         inline bool I##t::register_variant(Type const & variant, int * index)                              \
         {                                                                                                  \
             matchable_define_register_variant_common                                                       \
-            variant.is_nil() ? by_index().clear() : by_index().push_back(variant);                         \
+            if (!variant.is_nil())                                                                         \
+                by_index().push_back(variant);                                                             \
             return true;                                                                                   \
         }                                                                                                  \
         inline std::vector<Type> const & variants_by_index() { return I##t::variants_by_index(); }         \
@@ -649,6 +693,9 @@ namespace matchable
             void set_by_string_index(int index) override { *m_by_string_index() = index; }                 \
             static Type grab() { return Type(create()); }                                                  \
             static int * m_by_string_index() { static int i{-1}; return &i; }                              \
+            int as_slot() const override { return *m_slot(); }                                             \
+            static int * m_slot() { static int i{-1}; return &i; }                                         \
+            static bool & registered() { static bool r{false}; return r; }                                 \
         private:                                                                                           \
             std::shared_ptr<I##t> clone() const  override { return create(); }                             \
             static std::shared_ptr<v> create() { return std::make_shared<v>(); }
@@ -658,7 +705,9 @@ namespace matchable
 #define matchable_create_variant_end(t, v)                                                                 \
         };                                                                                                 \
         [[maybe_unused]] static bool const register_me_##t##v =                                            \
-            I##t::register_variant(v::grab(), nullptr);                                                    \
+            v::registered() ||                                                                             \
+            (v::registered() = true, *v::m_slot() = I##t::next_slot(),                                     \
+             I##t::register_variant(v::grab(), nullptr));                                                  \
     }
 #else
 #define matchable_create_variant_end(t, v)                                                                 \
@@ -667,7 +716,9 @@ namespace matchable
             static int * m_index() { static int i{-1}; return &i; }                                        \
         };                                                                                                 \
         [[maybe_unused]] static bool const register_me_##t##v =                                            \
-            I##t::register_variant(v::grab(), v::m_index());                                               \
+            v::registered() ||                                                                             \
+            (v::registered() = true, *v::m_slot() = I##t::next_slot(),                                     \
+             I##t::register_variant(v::grab(), v::m_index()));                                             \
     }
 #endif
 
