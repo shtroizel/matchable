@@ -243,7 +243,13 @@ namespace matchable
         )
             return save__status::no_content::grab();
 
-        if (mode.is_nil())
+        bool handled{false};
+        bool grow_always{false};
+        mode.match_strict({
+            {save__grow_mode::wrap::grab(), [&](){ handled = true; }},
+            {save__grow_mode::always::grab(), [&](){ handled = true; grow_always = true; }},
+        });
+        if (!handled)
             return save__status::no_grow_mode::grab();
 
         FILE * f = fopen(filename.c_str(), "w");
@@ -259,21 +265,10 @@ namespace matchable
         // if we need matchable 'generated_matchable' with variants for each matchable in the maker
         if (content.is_set(save__content::generated_matchable::grab()))
         {
-            if (mode == save__grow_mode::wrap::grab())
-            {
-                if (fputs("MATCHABLE(generated_matchable", f) == EOF)
-                    goto save_io_error;
-            }
-            else if (mode == save__grow_mode::always::grab())
-            {
-                if (fputs("GROW_MATCHABLE(generated_matchable", f) == EOF)
-                    goto save_io_error;
-            }
-            else
-            {
-                ret = save__status::no_grow_mode::grab();
-                goto save_cleanup;
-            }
+            char const * opener =
+                    grow_always ? "GROW_MATCHABLE(generated_matchable" : "MATCHABLE(generated_matchable";
+            if (fputs(opener, f) == EOF)
+                goto save_io_error;
             int matchable_count{0};
             for (auto const & [name, m] : matchables)
             {
@@ -305,7 +300,7 @@ namespace matchable
 
             // if just growing then the order does not matter,
             // so just go through them all and grow grow grow
-            if (mode == save__grow_mode::always::grab())
+            if (grow_always)
             {
                 for (auto const & [name, m] : matchables)
                 {
@@ -1174,36 +1169,37 @@ load_end:
     )
     {
         std::string ret;
+        bool handled{false};
 
-        if (mode.is_nil())
+        mode.match_strict({
+            {save__grow_mode::wrap::grab(),
+                [&](){
+                    handled = true;
+                    if (m.property_types_and_names.size() > 0)
+                    {
+                        ret += "PROPERTYx";
+                        ret += std::to_string(m.property_types_and_names.size());
+                        ret += "_";
+                    }
+                    ret += "MATCHABLE(";
+                    for (auto const & [t, n] : m.property_types_and_names)
+                    {
+                        ret += t;
+                        ret += ", ";
+                        ret += n;
+                        ret += ", ";
+                    }
+                }},
+            {save__grow_mode::always::grab(),
+                [&](){
+                    handled = true;
+                    ret += "GROW_MATCHABLE(";
+                }},
+        });
+
+        if (!handled)
             return ret;
 
-        if (mode == save__grow_mode::wrap::grab())
-        {
-            if (m.property_types_and_names.size() > 0)
-            {
-                ret += "PROPERTYx";
-                ret += std::to_string(m.property_types_and_names.size());
-                ret += "_";
-            }
-            ret += "MATCHABLE(";
-            for (auto const & [t, n] : m.property_types_and_names)
-            {
-                ret += t;
-                ret += ", ";
-                ret += n;
-                ret += ", ";
-            }
-        }
-        else if (mode == save__grow_mode::always::grab())
-        {
-            ret += "GROW_MATCHABLE(";
-        }
-        else
-        {
-            // unhandled mode
-            assert(107);
-        }
         ret += m.name;
         int variant_count{0};
         for (auto const & v : m.variants)

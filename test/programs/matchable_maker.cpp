@@ -1,10 +1,28 @@
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <random>
+#include <sstream>
 #include <string>
 
 #include "matchable/MatchableMaker.h"
 #include "test_ok.h"
+
+
+
+static std::string slurp(std::filesystem::path const & path)
+{
+    std::ifstream in(path);
+    std::stringstream ss;
+    ss << in.rdbuf();
+    return ss.str();
+}
+
+
+static bool contains(std::string const & haystack, std::string const & needle)
+{
+    return haystack.find(needle) != std::string::npos;
+}
 
 
 
@@ -16,11 +34,17 @@ int main()
     std::filesystem::path const dir = std::filesystem::temp_directory_path() / unique;
     std::filesystem::create_directories(dir);
 
+    auto const wrap = matchable::save__grow_mode::wrap::grab();
+    auto const always = matchable::save__grow_mode::always::grab();
+    matchable::save__content::Flags const both{
+        matchable::save__content::generated_matchable::grab(),
+        matchable::save__content::matchables::grab()
+    };
+
     {
         matchable::MatchableMaker mm;
         mm.grab("A")->add_variant("x");
         std::string const path = (dir / "no_content.h").string();
-        auto const wrap = matchable::save__grow_mode::wrap::grab();
 
         matchable::save__content::Flags none;
         TEST_EQ(ok, mm.save_as(path, none, wrap), matchable::save__status::no_content::grab());
@@ -29,6 +53,27 @@ int main()
         only_nil.set(matchable::save__content::nil);
         TEST_EQ(ok, mm.save_as(path, only_nil, wrap), matchable::save__status::no_content::grab());
         TEST_EQ(ok, std::filesystem::exists(path), false);
+    }
+
+    {
+        matchable::MatchableMaker mm;
+        mm.grab("A")->add_variant("x");
+        std::filesystem::path const path = dir / "grow_mode.h";
+
+        for (auto const & mode : matchable::save__grow_mode::variants())
+        {
+            TEST_EQ(ok, mm.save_as(path.string(), both, mode), matchable::save__status::success::grab());
+            TEST_EQ(ok, contains(slurp(path), "MATCHABLE(A, x)"), true);
+            TEST_EQ(ok, contains(slurp(path), "MATCHABLE(generated_matchable, A)"), true);
+        }
+        TEST_EQ(ok, mm.save_as(path.string(), both, matchable::save__grow_mode::nil),
+                matchable::save__status::no_grow_mode::grab());
+
+        mm.save_as(path.string(), both, wrap);
+        TEST_EQ(ok, contains(slurp(path), "\nMATCHABLE(A, x)"), true);
+        mm.save_as(path.string(), both, always);
+        TEST_EQ(ok, contains(slurp(path), "\nGROW_MATCHABLE(A, x)"), true);
+        TEST_EQ(ok, contains(slurp(path), "\nGROW_MATCHABLE(generated_matchable, A)"), true);
     }
 
     std::filesystem::remove_all(dir);
