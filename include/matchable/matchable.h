@@ -558,6 +558,18 @@ namespace matchable
                 if (mb.is_set(*this))                                                                      \
                     mb.at(*this)();                                                                        \
             }                                                                                              \
+            matchable::FlowControl match_strict(MatchParamWithFlowControl const & mb) const                \
+                { return covers_all(mb) ? match(mb) : MatchableType{}.match(mb); }                         \
+            void match_strict(MatchParam const & mb) const                                                 \
+                { if (covers_all(mb)) match(mb); else MatchableType{}.match(mb); }                         \
+            template<typename MB>                                                                          \
+            static bool covers_all(MB const & mb)                                                          \
+            {                                                                                              \
+                for (auto const & v : variants())                                                          \
+                    if (!mb.is_set(v))                                                                     \
+                        return false;                                                                      \
+                return true;                                                                               \
+            }                                                                                              \
             static std::vector<MatchableType> const & variants() { return T::variants(); }                 \
             static std::vector<MatchableType> const & variants_by_string()                                 \
                 { return T::variants_by_string(); }                                                        \
