@@ -339,7 +339,12 @@ namespace matchable
                         for (auto const & [s_type, s_name] : m->property_types_and_names)
                         {
                             static std::string const matchable_type_ending{"::Type"};
-                            if (s_type.size() > matchable_type_ending.size())
+                            size_t const ending_size{matchable_type_ending.size()};
+                            size_t const ending_at{s_type.size() - ending_size};
+                            if (
+                                s_type.size() > ending_size &&
+                                s_type.compare(ending_at, ending_size, matchable_type_ending) == 0
+                            )
                             {
                                 // get the matchable's 'namespace' name (if it is indeed a matchable at all)
                                 std::string const s_type_without_ending{
@@ -351,10 +356,11 @@ namespace matchable
                                 // if this matchable dependency has yet to be written then
                                 //     we still have unprocessed dependencies
                                 //     we must wait (stop looking at properties and skip to next matchable)
+                                auto const dependency = processed.find(s_type_without_ending);
                                 if (
                                     s_type_without_ending != name &&
-                                    processed.find(s_type_without_ending) != processed.end() &&
-                                    !processed[s_name]
+                                    dependency != processed.end() &&
+                                    !dependency->second
                                 )
                                 {
                                     ready = false;

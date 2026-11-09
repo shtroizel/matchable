@@ -76,6 +76,38 @@ int main()
         TEST_EQ(ok, contains(slurp(path), "\nGROW_MATCHABLE(generated_matchable, A)"), true);
     }
 
+    {
+        matchable::MatchableMaker mm;
+        mm.grab("Color")->add_variant("red");
+        mm.grab("Car")->add_property("Color::Type", "paint");
+        mm.grab("Car")->add_variant("sedan");
+        mm.grab("Car")->set_property("sedan", "paint", "Color::red::grab()");
+        std::filesystem::path const path = dir / "dependency.h";
+        TEST_EQ(ok, mm.save_as(path.string(), {matchable::save__content::matchables::grab()}, wrap),
+                matchable::save__status::success::grab());
+        std::string const saved = slurp(path);
+        size_t const color_at = saved.find("\nMATCHABLE(Color, red)");
+        size_t const car_at = saved.find("\nPROPERTYx1_MATCHABLE(Color::Type, paint, Car, sedan)");
+        TEST_EQ(ok, color_at != std::string::npos, true);
+        TEST_EQ(ok, car_at != std::string::npos, true);
+        TEST_EQ(ok, color_at < car_at, true);
+        std::string const paint_value{
+            "MATCHABLE_VARIANT_PROPERTY_VALUE(Car, sedan, paint, Color::red::grab())"
+        };
+        TEST_EQ(ok, contains(saved, paint_value), true);
+        TEST_EQ(ok, (int) mm.matchables.size(), 2);
+    }
+
+    {
+        matchable::MatchableMaker mm;
+        mm.grab("Egg")->add_property("Hen::Type", "layer");
+        mm.grab("Hen")->add_property("Egg::Type", "origin");
+        std::filesystem::path const path = dir / "cycle.h";
+        TEST_EQ(ok, mm.save_as(path.string(), {matchable::save__content::matchables::grab()}, wrap),
+                matchable::save__status::cyclic_dependencies::grab());
+        TEST_EQ(ok, (int) mm.matchables.size(), 2);
+    }
+
     std::filesystem::remove_all(dir);
     return ok();
 }
