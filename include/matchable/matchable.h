@@ -191,6 +191,8 @@ namespace matchable
         for (auto const & m : M::variants())
             if (is_set(m))
                 ret.push_back(m);
+        if (is_set(M()))
+            ret.push_back(M());
         return ret;
     }
 
@@ -325,6 +327,8 @@ namespace matchable
         for (auto const & m : M::variants())
             if (is_set(m))
                 ret.push_back(m);
+        if (is_set(M()))
+            ret.push_back(M());
         return ret;
     }
 
