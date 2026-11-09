@@ -4,6 +4,7 @@
 #include <random>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "matchable/MatchableMaker.h"
 #include "test_ok.h"
@@ -124,6 +125,51 @@ int main()
             TEST_EQ(ok, contains(saved, ", m15)\nGROW_MATCHABLE(generated_matchable, m16, m17)\n"), true);
             TEST_EQ(ok, contains(saved, "GROW_MATCHABLE(m16"), false);
         }
+    }
+
+    {
+        std::vector<std::string> numbers;
+        for (int i = 0; i < 20; ++i)
+            numbers.push_back(std::to_string(i));
+        std::vector<std::string> const words{"\"one, two\"", "\"(three)\""};
+
+        matchable::MatchableMaker mm;
+        auto m = mm.grab("Shape");
+        m->add_property("unsigned int", "sides");
+        m->add_property("std::string", "label");
+        m->add_property("int", "counts");
+        m->add_property("std::string", "names");
+        m->add_property("int", "limit");
+        m->add_variant("square");
+        m->set_property("square", "sides", "4");
+        m->set_property("square", "limit", "std::max(1, 2)");
+        m->set_property("square", "label", "\"a big, (bold) square\"");
+        m->set_propertyvect("square", "counts", numbers);
+        m->set_propertyvect("square", "names", words);
+        std::filesystem::path const path = dir / "round_trip.h";
+        TEST_EQ(ok, mm.save_as(path.string(), {matchable::save__content::matchables::grab()}, wrap),
+                matchable::save__status::success::grab());
+
+        matchable::MatchableMaker loaded;
+        TEST_EQ(ok, loaded.load(path.string()), matchable::load__status::success::grab());
+        auto l = loaded.grab("Shape");
+        TEST_EQ(ok, l->property_types_and_names == m->property_types_and_names, true);
+        TEST_EQ(ok, l->has_variant("square"), true);
+        TEST_EQ(ok, (int) l->variants.size(), 1);
+
+        std::string value;
+        l->get_property("square", "sides", value);
+        TEST_EQ(ok, value, std::string{"4"});
+        l->get_property("square", "label", value);
+        TEST_EQ(ok, value, std::string{"\"a big, (bold) square\""});
+        l->get_property("square", "limit", value);
+        TEST_EQ(ok, value, std::string{"std::max(1, 2)"});
+
+        std::vector<std::string> values;
+        l->get_propertyvect("square", "counts", values);
+        TEST_EQ(ok, values == numbers, true);
+        l->get_propertyvect("square", "names", values);
+        TEST_EQ(ok, values == words, true);
     }
 
     std::filesystem::remove_all(dir);

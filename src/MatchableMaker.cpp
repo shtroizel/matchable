@@ -446,6 +446,19 @@ save_cleanup:
     );
 
 
+    namespace
+    {
+        std::string trim(std::string const & s)
+        {
+            static char const * const whitespace{" \t\r\n"};
+            size_t const first = s.find_first_not_of(whitespace);
+            if (first == std::string::npos)
+                return "";
+            return s.substr(first, s.find_last_not_of(whitespace) - first + 1);
+        }
+    }
+
+
     load__status::Type MatchableMaker::load(std::string const & filename)
     {
         FILE * f = fopen(filename.c_str(), "r");
@@ -460,6 +473,8 @@ save_cleanup:
         MatchableKeyword::Type keyword;
         std::vector<std::string> args;
         int paren_balance{0};
+        char quote{0};
+        bool escaped{false};
 
         // loop over header file containing matchable keywords character by character
         while (true)
@@ -492,12 +507,13 @@ save_cleanup:
                     keyword = MatchableKeyword::from_string(str);
             }
 
-            paren_balance = 0;
-
-            // read keyword's arguments (populate "args")
+            // read keyword's arguments (populate "args"), splitting where the preprocessor would
             while (true)
             {
                 str.clear();
+                paren_balance = 0;
+                quote = 0;
+                escaped = false;
 
                 while (true)
                 {
@@ -506,22 +522,36 @@ save_cleanup:
                     if (ch == EOF)
                         goto load_end;
 
-                    if (ch == '(')
-                        --paren_balance;
-
-                    if (ch == ',' || (ch == ')' && paren_balance == 0))
-                        break;
-
-                    if (ch == ')')
+                    if (quote != 0)
+                    {
+                        if (escaped)
+                            escaped = false;
+                        else if (ch == '\\')
+                            escaped = true;
+                        else if (ch == quote)
+                            quote = 0;
+                    }
+                    else if (ch == '"' || ch == '\'')
+                    {
+                        quote = (char) ch;
+                    }
+                    else if (ch == '(')
+                    {
                         ++paren_balance;
-
-                    if (ch == ' ')
-                        continue;
+                    }
+                    else if (ch == ')' && paren_balance > 0)
+                    {
+                        --paren_balance;
+                    }
+                    else if (paren_balance == 0 && (ch == ',' || ch == ')'))
+                    {
+                        break;
+                    }
 
                     str += (char) ch;
                 }
 
-                args.push_back(str);
+                args.push_back(trim(str));
 
                 if (ch == ')')
                     break;
