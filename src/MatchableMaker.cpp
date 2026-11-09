@@ -237,7 +237,10 @@ namespace matchable
         save__grow_mode::Type mode
     )
     {
-        if (content.currently_set().size() == 0)
+        if (
+            !content.is_set(save__content::generated_matchable::grab()) &&
+            !content.is_set(save__content::matchables::grab())
+        )
             return save__status::no_content::grab();
 
         if (mode.is_nil())
