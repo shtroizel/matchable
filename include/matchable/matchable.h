@@ -369,6 +369,7 @@ namespace matchable
         {
             {
                 prev_variants_by_string = M::interface_type::variants_by_string();
+                M::interface_type::all_by_string() = &prev_variants_by_string;
                 auto i = std::remove_if(
                              M::interface_type::by_string().begin(),
                              M::interface_type::by_string().end(),
@@ -393,6 +394,7 @@ namespace matchable
         ~Unmatchable()
         {
             M::interface_type::by_string() = prev_variants_by_string;
+            M::interface_type::all_by_string() = &M::interface_type::by_string();
 #ifndef MATCHABLE_OMIT_BY_INDEX
             M::interface_type::by_index() = prev_variants_by_index;
             M::interface_type::all_by_index() = &M::interface_type::by_index();
@@ -448,11 +450,14 @@ namespace matchable
             virtual std::string const & as_string() const = 0;                                             \
             virtual std::string const & as_identifier_string() const = 0;                                  \
             static std::vector<Type> const & variants_by_string() { return by_string(); }                  \
+            static std::vector<Type> const * all_variants_by_string() { return all_by_string(); }          \
             static bool register_variant(Type const & variant, int * i);                                   \
         private:                                                                                           \
             virtual void set_by_string_index(int index) = 0;                                               \
             virtual std::shared_ptr<I##t> clone() const = 0;                                               \
-            static std::vector<Type> & by_string() { static std::vector<Type> v; return v; }
+            static std::vector<Type> & by_string() { static std::vector<Type> v; return v; }               \
+            static std::vector<Type> *& all_by_string()                                                    \
+                    { static std::vector<Type> * v = &by_string(); return v; }
 
 
 #ifdef MATCHABLE_OMIT_BY_INDEX
@@ -570,12 +575,6 @@ namespace matchable
         inline std::vector<Type> const & variants_by_string() { return I##t::variants_by_string(); }       \
         [[maybe_unused]] static std::string const name{#t};                                                \
         static Type nil{};                                                                                 \
-        inline Type from_by_string_index(int index)                                                        \
-        {                                                                                                  \
-            if (index < 0 || index >= (int) I##t::variants_by_string().size())                             \
-                return nil;                                                                                \
-            return I##t::variants_by_string().at(index);                                                   \
-        }                                                                                                  \
         inline int variants_by_string_index_of(std::string const & str, bool * found)                      \
         {                                                                                                  \
             auto it = std::lower_bound(                                                                    \
@@ -605,6 +604,14 @@ namespace matchable
             if (it != I##t::variants_by_string().end() && str == it->as_string())                          \
                 return *it;                                                                                \
             return nil;                                                                                    \
+        }                                                                                                  \
+        inline Type from_by_string_index(int index)                                                        \
+        {                                                                                                  \
+            if (index < 0 || index >= (int) I##t::all_variants_by_string()->size())                        \
+                return nil;                                                                                \
+            if (I##t::all_variants_by_string() != &I##t::variants_by_string())                             \
+                return from_string(I##t::all_variants_by_string()->at(index).as_string());                 \
+            return I##t::all_variants_by_string()->at(index);                                              \
         }                                                                                                  \
         inline Type from_identifier_string(std::string const & str)                                        \
         {                                                                                                  \
