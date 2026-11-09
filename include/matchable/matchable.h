@@ -361,6 +361,26 @@ namespace matchable
     };
 
 
+    template<typename O>
+    void call_observers(O const & live)
+    {
+        O const snapshot = live;
+        for (auto const & o : snapshot)
+            if (live.count(o.first) > 0)
+                o.second();
+    }
+
+
+    template<typename M, typename O>
+    void call_observers(MatchBox<M, O> const & live, M const & m)
+    {
+        O const snapshot = live.at(m);
+        for (auto const & o : snapshot)
+            if (live.at(m).count(o.first) > 0)
+                o.second();
+    }
+
+
     template<typename M>
     class Unmatchable
     {
@@ -912,8 +932,7 @@ namespace matchable
             if (nullptr == t)                                                                              \
             {                                                                                              \
                 T::nil_##p##_vect() = v;                                                                   \
-                for (auto const & o : T::nil_##p##_vect_obs())                                             \
-                    o.second();                                                                            \
+                matchable::call_observers(T::nil_##p##_vect_obs());                                        \
             }                                                                                              \
             else { t->set_##p##_vect(v); }                                                                 \
         }                                                                                                  \
@@ -922,7 +941,7 @@ namespace matchable
         pt const & as_##p() const { return nullptr == t ? T::nil_##p() : t->as_##p(); }                    \
         pt & as_mutable_##p() { return nullptr == t ? T::nil_##p() : t->as_mutable_##p(); }                \
         void set_##p(pt const & s)                                                                         \
-            { if (nullptr == t) { T::nil_##p() = s; for (auto const & o : T::nil_##p##_obs()) o.second(); }\
+            { if (nullptr == t) { T::nil_##p() = s; matchable::call_observers(T::nil_##p##_obs()); }       \
               else t->set_##p(s); }                                                                        \
                                                                                                            \
         /* observers */                                                                                    \
@@ -970,8 +989,7 @@ namespace matchable
         {                                                                                                  \
             if (nullptr == t)                                                                              \
             {                                                                                              \
-                for (auto const & o : T::nil_##p##_vect_obs())                                             \
-                    o.second();                                                                            \
+                matchable::call_observers(T::nil_##p##_vect_obs());                                        \
             }                                                                                              \
             else { t->call_##p##_vect_observers(); }                                                       \
         }                                                                                                  \
@@ -979,8 +997,7 @@ namespace matchable
         {                                                                                                  \
             if (nullptr == t)                                                                              \
             {                                                                                              \
-                for (auto const & o : T::nil_##p##_obs())                                                  \
-                    o.second();                                                                            \
+                matchable::call_observers(T::nil_##p##_obs());                                             \
             }                                                                                              \
             else { t->call_##p##_observers(); }                                                            \
         }
@@ -993,13 +1010,13 @@ namespace matchable
         std::vector<pt> & as_mutable_##p##_vect() { return p##_vect_mb().mut_at(Type(clone())); }          \
         void set_##p##_vect(std::vector<pt> const & v)                                                     \
             { auto c = Type(clone()); p##_vect_mb().set(c, v);                                             \
-              for (auto o : p##_vect_obs_mb().at(c)) o.second(); }                                         \
+              matchable::call_observers(p##_vect_obs_mb(), c); }                                           \
                                                                                                            \
         /* single property */                                                                              \
         pt const & as_##p() const { return p##_mb().at(Type(clone())); }                                   \
         pt & as_mutable_##p() { return p##_mb().mut_at(Type(clone())); }                                   \
         void set_##p(pt const & s)                                                                         \
-            { auto c = Type(clone()); p##_mb().set(c, s); for (auto o : p##_obs_mb().at(c)) o.second(); }  \
+            { auto c = Type(clone()); p##_mb().set(c, s); matchable::call_observers(p##_obs_mb(), c); }    \
                                                                                                            \
         /* observers */                                                                                    \
         void add_##p##_vect_observer(std::string const & id, std::function<void ()> f)                     \
@@ -1023,12 +1040,12 @@ namespace matchable
         void call_##p##_vect_observers()                                                                   \
         {                                                                                                  \
             auto c = Type(clone());                                                                        \
-            for (auto o : p##_vect_obs_mb().at(c)) o.second();                                             \
+            matchable::call_observers(p##_vect_obs_mb(), c);                                               \
         }                                                                                                  \
         void call_##p##_observers()                                                                        \
         {                                                                                                  \
             auto c = Type(clone());                                                                        \
-            for (auto o : p##_obs_mb().at(c)) o.second();                                                  \
+            matchable::call_observers(p##_obs_mb(), c);                                                    \
         }                                                                                                  \
                                                                                                            \
     private:                                                                                               \
