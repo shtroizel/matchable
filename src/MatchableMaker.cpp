@@ -401,7 +401,7 @@ namespace matchable
             for (auto const & [name, m] : matchables)
                 if (processed[name])
                     if (fputs(print_set_property(*m).c_str(), f) == EOF)
-                        return save__status::io_error::grab();
+                        goto save_io_error;
         }
 
         goto save_cleanup;
@@ -410,7 +410,8 @@ save_io_error:
         ret = save__status::io_error::grab();
 
 save_cleanup:
-        fclose(f);
+        if (fclose(f) == EOF)
+            ret = save__status::io_error::grab();
         return ret;
     }
 

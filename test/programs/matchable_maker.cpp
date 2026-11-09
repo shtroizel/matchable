@@ -172,6 +172,30 @@ int main()
         TEST_EQ(ok, values == words, true);
     }
 
+    if (std::filesystem::exists("/dev/full") && std::filesystem::exists("/proc/self/fd"))
+    {
+        auto const open_files = []() {
+            return std::distance(std::filesystem::directory_iterator("/proc/self/fd"),
+                                 std::filesystem::directory_iterator{});
+        };
+        auto const before = open_files();
+
+        matchable::MatchableMaker small;
+        small.grab("A")->add_variant("x");
+        TEST_EQ(ok, small.save_as("/dev/full", {matchable::save__content::matchables::grab()}, wrap),
+                matchable::save__status::io_error::grab());
+
+        matchable::MatchableMaker big;
+        auto m = big.grab("A");
+        m->add_property("int", "n");
+        m->add_variant("x");
+        m->set_propertyvect("x", "n", std::vector<std::string>(4000, "1"));
+        TEST_EQ(ok, big.save_as("/dev/full", {matchable::save__content::matchables::grab()}, wrap),
+                matchable::save__status::io_error::grab());
+
+        TEST_EQ(ok, open_files(), before);
+    }
+
     std::filesystem::remove_all(dir);
     return ok();
 }
