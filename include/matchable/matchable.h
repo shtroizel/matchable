@@ -332,6 +332,9 @@ namespace matchable
     template<typename M>
     bool MatchBox<M, void>::operator==(MatchBox<M, void> const & other) const
     {
+        if (nil_init_flag != other.nil_init_flag)
+            return false;
+
         // storage grows on demand, so two equal boxes can differ in size
         size_t const n = std::max(init_flags.size(), other.init_flags.size());
         for (size_t i = 0; i < n; ++i)
