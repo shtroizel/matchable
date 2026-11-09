@@ -39,9 +39,9 @@ struct test_ok
 
 
 template<>
-void test_ok::test_eq<double>(double const & l, double const & r, std::string const & where)
+inline void test_ok::test_eq<double>(double const & l, double const & r, std::string const & where)
 {
-    if (fabs(l) - fabs(r) > 0.0001)
+    if (fabs(l - r) > 0.0001)
     {
         ok = false;
         std::cout << l << " != " << r << "     <---- failed ---->     " << where << std::endl;
@@ -50,9 +50,9 @@ void test_ok::test_eq<double>(double const & l, double const & r, std::string co
 
 
 template<>
-void test_ok::test_ne<double>(double const & l, double const & r, std::string const & where)
+inline void test_ok::test_ne<double>(double const & l, double const & r, std::string const & where)
 {
-    if (fabs(l) - fabs(r) < 0.0001)
+    if (fabs(l - r) <= 0.0001)
     {
         ok = false;
         std::cout << l << " == " << r << "     <---- failed ---->     " << where << std::endl;
