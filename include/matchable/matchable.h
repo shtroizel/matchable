@@ -368,23 +368,40 @@ namespace matchable
     };
 
 
-    template<typename O>
-    void call_observers(O const & live)
+    using Observers = std::map<std::string, std::shared_ptr<std::function<void ()>>>;
+
+
+    inline std::vector<std::string> observer_ids(Observers const & observers)
     {
-        O const snapshot = live;
-        for (auto const & o : snapshot)
-            if (live.count(o.first) > 0)
-                o.second();
+        std::vector<std::string> ids;
+        for (auto const & o : observers)
+            ids.push_back(o.first);
+        return ids;
     }
 
 
-    template<typename M, typename O>
-    void call_observers(MatchBox<M, O> const & live, M const & m)
+    inline void call_observer(Observers const & live, std::string const & id)
     {
-        O const snapshot = live.at(m);
-        for (auto const & o : snapshot)
-            if (live.at(m).count(o.first) > 0)
-                o.second();
+        auto it = live.find(id);
+        if (it == live.end())
+            return;
+        auto f = it->second;
+        (*f)();
+    }
+
+
+    inline void call_observers(Observers const & live)
+    {
+        for (auto const & id : observer_ids(live))
+            call_observer(live, id);
+    }
+
+
+    template<typename M>
+    void call_observers(MatchBox<M, Observers> const & live, M const & m)
+    {
+        for (auto const & id : observer_ids(live.at(m)))
+            call_observer(live.at(m), id);
     }
 
 
@@ -967,14 +984,14 @@ namespace matchable
         void add_##p##_vect_observer(std::string const & id, std::function<void ()> o)                     \
         {                                                                                                  \
             if (nullptr == t)                                                                              \
-                T::nil_##p##_vect_obs()[id] = o;                                                           \
+                T::nil_##p##_vect_obs()[id] = std::make_shared<std::function<void ()>>(o);                 \
             else                                                                                           \
                 t->add_##p##_vect_observer(id, o);                                                         \
         }                                                                                                  \
         void add_##p##_observer(std::string const & id, std::function<void ()> o)                          \
         {                                                                                                  \
             if (nullptr == t)                                                                              \
-                T::nil_##p##_obs()[id] = o;                                                                \
+                T::nil_##p##_obs()[id] = std::make_shared<std::function<void ()>>(o);                      \
             else                                                                                           \
                 t->add_##p##_observer(id, o);                                                              \
         }                                                                                                  \
@@ -1039,9 +1056,9 @@ namespace matchable
                                                                                                            \
         /* observers */                                                                                    \
         void add_##p##_vect_observer(std::string const & id, std::function<void ()> f)                     \
-            { p##_vect_obs_mb().mut_at(Type(clone()))[id] = f; }                                           \
+            { p##_vect_obs_mb().mut_at(Type(clone()))[id] = std::make_shared<std::function<void ()>>(f); } \
         void add_##p##_observer(std::string const & id, std::function<void ()> f)                          \
-            { p##_obs_mb().mut_at(Type(clone()))[id] = f; }                                                \
+            { p##_obs_mb().mut_at(Type(clone()))[id] = std::make_shared<std::function<void ()>>(f); }      \
         void del_##p##_vect_observer(std::string const & id)                                               \
         {                                                                                                  \
             auto c = Type(clone());                                                                        \
@@ -1074,15 +1091,10 @@ namespace matchable
         /* vector property for nil variant */                                                              \
         static std::vector<pt> & nil_##p##_vect() { static std::vector<pt> v; return v; }                  \
         /* observers of vector property for non-nil variants */                                            \
-        static matchable::MatchBox<t::Type, std::map<std::string,                                          \
-                                                     std::function<void ()>>> & p##_vect_obs_mb()          \
-        {                                                                                                  \
-            static matchable::MatchBox<t::Type, std::map<std::string, std::function<void ()>>> mb;         \
-            return mb;                                                                                     \
-        }                                                                                                  \
+        static matchable::MatchBox<t::Type, matchable::Observers> & p##_vect_obs_mb()                      \
+            { static matchable::MatchBox<t::Type, matchable::Observers> mb; return mb; }                   \
         /* observers of vector property for nil variant */                                                 \
-        static std::map<std::string, std::function<void ()>> & nil_##p##_vect_obs()                        \
-            { static std::map<std::string, std::function<void ()>> m; return m; }                          \
+        static matchable::Observers & nil_##p##_vect_obs() { static matchable::Observers m; return m; }    \
                                                                                                            \
         /* single property */                                                                              \
         static matchable::MatchBox<t::Type, pt> & p##_mb()                                                 \
@@ -1090,14 +1102,10 @@ namespace matchable
         /* single property for nil */                                                                      \
         static pt & nil_##p() { static pt s; return s; }                                                   \
         /* observers of single property for non-nil variants */                                            \
-        static matchable::MatchBox<t::Type, std::map<std::string, std::function<void ()>>> & p##_obs_mb()  \
-        {                                                                                                  \
-            static matchable::MatchBox<t::Type, std::map<std::string, std::function<void ()>>> mb;         \
-            return mb;                                                                                     \
-        }                                                                                                  \
+        static matchable::MatchBox<t::Type, matchable::Observers> & p##_obs_mb()                           \
+            { static matchable::MatchBox<t::Type, matchable::Observers> mb; return mb; }                   \
         /* observers of single property for nil variant */                                                 \
-        static std::map<std::string, std::function<void ()>> & nil_##p##_obs()                             \
-            { static std::map<std::string, std::function<void ()>> v; return v; }
+        static matchable::Observers & nil_##p##_obs() { static matchable::Observers v; return v; }
 
 
 #define PROPERTYx1_MATCHABLE(pt0, p0, t, ...)                                                              \

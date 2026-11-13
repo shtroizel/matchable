@@ -55,6 +55,7 @@ int main()
         one.set_n_vect({2});
         TEST_EQ(ok, once, 1);
         TEST_EQ(ok, after, 2);
+        one.del_n_vect_observer("z_after");
     }
 
     {
@@ -67,6 +68,7 @@ int main()
         nil.set_n(2);
         TEST_EQ(ok, once, 1);
         TEST_EQ(ok, after, 2);
+        nil.del_n_observer("z_after");
     }
 
     {
@@ -79,6 +81,103 @@ int main()
         nil.set_n_vect({2});
         TEST_EQ(ok, once, 1);
         TEST_EQ(ok, after, 2);
+        nil.del_n_vect_observer("z_after");
+    }
+
+    {
+        int old_target{0};
+        int new_target{0};
+        one.add_n_observer(
+            "a_replacer",
+            [&]() { one.add_n_observer("b_target", [&]() { ++new_target; }); }
+        );
+        one.add_n_observer("b_target", [&]() { ++old_target; });
+        one.set_n(6);
+        TEST_EQ(ok, old_target, 0);
+        TEST_EQ(ok, new_target, 1);
+        one.del_n_observer("a_replacer");
+        one.set_n(7);
+        TEST_EQ(ok, old_target, 0);
+        TEST_EQ(ok, new_target, 2);
+        one.del_n_observer("b_target");
+    }
+
+    {
+        int old_target{0};
+        int new_target{0};
+        one.add_n_vect_observer(
+            "a_readder",
+            [&]()
+            {
+                one.del_n_vect_observer("b_target");
+                one.add_n_vect_observer("b_target", [&]() { ++new_target; });
+            }
+        );
+        one.add_n_vect_observer("b_target", [&]() { ++old_target; });
+        one.set_n_vect({3});
+        TEST_EQ(ok, old_target, 0);
+        TEST_EQ(ok, new_target, 1);
+        one.del_n_vect_observer("a_readder");
+        one.set_n_vect({4});
+        TEST_EQ(ok, old_target, 0);
+        TEST_EQ(ok, new_target, 2);
+        one.del_n_vect_observer("b_target");
+    }
+
+    {
+        int old_self{0};
+        int new_self{0};
+        one.add_n_observer(
+            "self",
+            [&]()
+            {
+                one.add_n_observer("self", [&]() { ++new_self; });
+                ++old_self;
+            }
+        );
+        one.set_n(8);
+        one.set_n(9);
+        TEST_EQ(ok, old_self, 1);
+        TEST_EQ(ok, new_self, 1);
+        one.del_n_observer("self");
+    }
+
+    {
+        int old_target{0};
+        int new_target{0};
+        Obs::Type nil;
+        nil.add_n_observer(
+            "a_replacer",
+            [&]() { Obs::Type{}.add_n_observer("b_target", [&]() { ++new_target; }); }
+        );
+        nil.add_n_observer("b_target", [&]() { ++old_target; });
+        nil.set_n(3);
+        TEST_EQ(ok, old_target, 0);
+        TEST_EQ(ok, new_target, 1);
+        nil.del_n_observer("a_replacer");
+        nil.set_n(4);
+        TEST_EQ(ok, old_target, 0);
+        TEST_EQ(ok, new_target, 2);
+        nil.del_n_observer("b_target");
+    }
+
+    {
+        int old_target{0};
+        int new_target{0};
+        Obs::Type nil;
+        nil.add_n_vect_observer(
+            "a_replacer",
+            [&]() { Obs::Type{}.add_n_vect_observer("b_target", [&]() { ++new_target; }); }
+        );
+        nil.add_n_vect_observer("b_target", [&]() { ++old_target; });
+        nil.set_n_vect({3});
+        TEST_EQ(ok, old_target, 0);
+        TEST_EQ(ok, new_target, 1);
+        nil.del_n_vect_observer("a_replacer");
+        nil.set_n_vect({4});
+        TEST_EQ(ok, old_target, 0);
+        TEST_EQ(ok, new_target, 2);
+        nil.del_n_vect_observer("b_target");
     }
 
     return ok();
