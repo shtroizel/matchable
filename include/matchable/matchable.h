@@ -974,7 +974,8 @@ namespace matchable
         }                                                                                                  \
                                                                                                            \
         /* single property */                                                                              \
-        pt const & as_##p() const { return nullptr == t ? T::nil_##p() : t->as_##p(); }                    \
+        pt const & as_##p() const                                                                          \
+            { return nullptr == t ? static_cast<pt const &>(T::nil_##p()) : t->as_##p(); }                 \
         pt & as_mutable_##p() { return nullptr == t ? T::nil_##p() : t->as_mutable_##p(); }                \
         void set_##p(pt const & s)                                                                         \
             { if (nullptr == t) { T::nil_##p() = s; matchable::call_observers(T::nil_##p##_obs()); }       \
