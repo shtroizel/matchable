@@ -35,11 +35,7 @@ jobs:
         run: |
           opts=(-t $MODE -b "$RUNNER_TEMP/build" -i "$RUNNER_TEMP/install")
           if [ "${{ matrix.compiler }}" = clang ]; then opts+=(-c); fi
-          if [ "${{ matrix.build }}" = sanitize ]
-          then
-              export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=all"
-              opts+=(-d)
-          fi
+          if [ "${{ matrix.build }}" = sanitize ]; then opts+=(-s -d); fi
           python3 scripts/build_and_install.py "${opts[@]}"
       - name: C++14 tests
         run: |
@@ -55,6 +51,8 @@ jobs:
       matrix:
         build: [Debug, Release]
         mode: ['', '-a']
+    env:
+      MODE: ${{ matrix.mode }}
     defaults:
       run:
         shell: bash
@@ -62,12 +60,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: build and run tests
         run: |
-          opts=()
-          if [ "${{ matrix.mode }}" = -a ]; then opts+=(-DOMIT_BY_INDEX=ON); fi
-          cmake -S . -B "$RUNNER_TEMP/build" "${opts[@]}"
-          cmake --build "$RUNNER_TEMP/build" --config ${{ matrix.build }} --parallel
-          cmake --install "$RUNNER_TEMP/build" --config ${{ matrix.build }} --prefix "$RUNNER_TEMP/install"
-          "$RUNNER_TEMP/install/share/matchable/test/bin/run_all.sh" again_quietly
+          opts=(-t $MODE -b "$RUNNER_TEMP/build" -i "$RUNNER_TEMP/install")
+          if [ "${{ matrix.build }}" = Debug ]; then opts+=(-d); fi
+          python scripts/build_and_install.py "${opts[@]}"
 
   gcc48:
     name: gcc 4.8 C++14 ${{ matrix.mode }}

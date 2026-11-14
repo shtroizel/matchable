@@ -4,9 +4,18 @@ project(matchable VERSION 14.0.0)
 
 option(LIB_ONLY "Build library only (no tests/examples)" OFF)
 option(OMIT_BY_INDEX "Omit by index" OFF)
+option(SANITIZE "Build with AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 
 if(OMIT_BY_INDEX)
     add_definitions(-DMATCHABLE_OMIT_BY_INDEX)
+endif()
+
+if(SANITIZE)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        message(FATAL_ERROR "SANITIZE needs gcc or clang")
+    endif()
+    add_compile_options(-fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address,undefined)
 endif()
 
 set(CMAKE_CXX_STANDARD 20)

@@ -31,6 +31,8 @@ def usage():
     print('    -d  --debug                  debug build')
     print('                                   * use -DCMAKE_BUILD_TYPE=Debug (default is: '                \
             + '-DCMAKE_BUILD_TYPE=Release)\n')
+    print('    -s  --sanitize               build with AddressSanitizer and UndefinedBehaviorSanitizer')
+    print('                                   * gcc and clang only\n')
     print('    -a  --alphabetical_only      variants \'by string\' only (omit \'by index\')')
     print('                                   * adds definition MATCHABLE_OMIT_BY_INDEX which will:')
     print('                                     - omit variants_by_index()')
@@ -41,7 +43,7 @@ def usage():
 
 
 def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tests, debug,
-                      alphabetical_only):
+                      alphabetical_only, sanitize):
     start_dir = os.getcwd()
 
     matchable_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
@@ -68,9 +70,7 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
     os.chdir(build_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
-
-    if os.name == 'nt':
-        cmake_cmd.append('-G Ninja')
+    config = 'Debug' if debug else 'Release'
 
     if lib_only:
         cmake_cmd.append('-DLIB_ONLY=ON')
@@ -92,6 +92,9 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
     if alphabetical_only:
         cmake_cmd.append('-DOMIT_BY_INDEX=ON')
 
+    if sanitize:
+        cmake_cmd.append('-DSANITIZE=ON')
+
     cmake_cmd.append(matchable_root)
 
     if subprocess.run(cmake_cmd).returncode != 0:
@@ -99,22 +102,28 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
         os.chdir(matchable_root)
         exit(1)
 
-    if subprocess.run(['cmake', '--build', '.', '-j ' + jobs]).returncode != 0:
+    if subprocess.run(['cmake', '--build', '.', '--config', config, '--parallel', jobs]).returncode != 0:
         print('make failed')
         os.chdir(matchable_root)
         exit(1)
 
-    if subprocess.run(['cmake', '--install', '.']).returncode != 0:
+    if subprocess.run(['cmake', '--install', '.', '--config', config]).returncode != 0:
+        if os.name == 'nt':
+            print('install failed')
+            os.chdir(matchable_root)
+            exit(1)
         print('build failed, trying sudo')
-        if subprocess.run(['sudo', 'cmake', '--install', '.']).returncode != 0:
+        if subprocess.run(['sudo', 'cmake', '--install', '.', '--config', config]).returncode != 0:
             print('"sudo cmake --install ." failed')
             os.chdir(matchable_root)
             exit(1)
 
 
     if not lib_only and run_tests:
-        if subprocess.run([install_dir + '/share/matchable/test/bin/run_all.sh',
-                           'again_quietly']).returncode != 0:
+        run_all = [install_dir + '/share/matchable/test/bin/run_all.sh', 'again_quietly']
+        if os.name == 'nt':
+            run_all.insert(0, which('bash'))
+        if subprocess.run(run_all).returncode != 0:
             print('run_all.sh failed')
             os.chdir(matchable_root)
             exit(1)
@@ -124,9 +133,9 @@ def build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tes
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:j:ltda',
-                ['help', 'clang', 'build', 'install', 'jobs', 'lib_only', 'test', 'debug',
-                 'alphabetical_only'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:j:ltdsa',
+                ['help', 'clang', 'build_dir=', 'install_dir=', 'jobs=', 'lib_only', 'test', 'debug',
+                 'sanitize', 'alphabetical_only'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -141,6 +150,7 @@ def main():
     run_tests = False
     debug = False
     alphabetical_only = False
+    sanitize = False
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -160,13 +170,15 @@ def main():
             run_tests = True
         elif o in ('-d', '--debug'):
             debug = True
+        elif o in ('-s', '--sanitize'):
+            sanitize = True
         elif o in ('-a', '--alphabetical_only'):
             alphabetical_only = True
         else:
             assert False, "unhandled option"
 
     build_and_install(use_clang, build_dir, install_dir, jobs, lib_only, run_tests, debug,
-                      alphabetical_only)
+                      alphabetical_only, sanitize)
 
     exit(0)
 
