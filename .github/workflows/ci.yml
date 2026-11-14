@@ -15,14 +15,18 @@ concurrency:
 
 jobs:
   test:
-    name: ${{ matrix.compiler }} ${{ matrix.build }} ${{ matrix.mode }}
-    runs-on: ubuntu-24.04
+    name: ${{ matrix.os }} ${{ matrix.compiler }} ${{ matrix.build }} ${{ matrix.mode }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-24.04, macos-latest]
         compiler: [gcc, clang]
         build: [sanitize, release]
         mode: ['', '-a']
+        exclude:
+          - os: macos-latest
+            compiler: gcc
     env:
       MODE: ${{ matrix.mode }}
     steps:
@@ -42,6 +46,28 @@ jobs:
           export CXX=g++
           if [ "${{ matrix.compiler }}" = clang ]; then CXX=clang++; fi
           test_scripts/cxx14.sh $MODE
+
+  windows:
+    name: windows msvc ${{ matrix.build }} ${{ matrix.mode }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [Debug, Release]
+        mode: ['', '-a']
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: build and run tests
+        run: |
+          opts=()
+          if [ "${{ matrix.mode }}" = -a ]; then opts+=(-DOMIT_BY_INDEX=ON); fi
+          cmake -S . -B "$RUNNER_TEMP/build" "${opts[@]}"
+          cmake --build "$RUNNER_TEMP/build" --config ${{ matrix.build }} --parallel
+          cmake --install "$RUNNER_TEMP/build" --config ${{ matrix.build }} --prefix "$RUNNER_TEMP/install"
+          "$RUNNER_TEMP/install/share/matchable/test/bin/run_all.sh" again_quietly
 
   gcc48:
     name: gcc 4.8 C++14 ${{ matrix.mode }}
