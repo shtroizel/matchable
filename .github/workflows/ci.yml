@@ -1,0 +1,58 @@
+name: ci
+
+on:
+  push:
+    branches: [master, dev]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.compiler }} ${{ matrix.build }} ${{ matrix.mode }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+        build: [sanitize, release]
+        mode: ['', '-a']
+    env:
+      MODE: ${{ matrix.mode }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: build and run tests
+        run: |
+          opts=(-t $MODE -b "$RUNNER_TEMP/build" -i "$RUNNER_TEMP/install")
+          if [ "${{ matrix.compiler }}" = clang ]; then opts+=(-c); fi
+          if [ "${{ matrix.build }}" = sanitize ]
+          then
+              export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=all"
+              opts+=(-d)
+          fi
+          python3 scripts/build_and_install.py "${opts[@]}"
+      - name: C++14 tests
+        run: |
+          export CXX=g++
+          if [ "${{ matrix.compiler }}" = clang ]; then CXX=clang++; fi
+          test_scripts/cxx14.sh $MODE
+
+  gcc48:
+    name: gcc 4.8 C++14 ${{ matrix.mode }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: ['', '-a']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: C++14 tests with GCC 4.8
+        run: >
+          docker run --rm -v "$PWD:/src:ro" -e MODE=${{ matrix.mode }} ubuntu:14.04 bash -c
+          'apt-get update -qq && apt-get install -y -qq g++ > /dev/null && /src/test_scripts/cxx14.sh $MODE'

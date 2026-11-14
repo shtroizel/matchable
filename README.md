@@ -329,6 +329,11 @@ Run All Tests Quietly
 ```
 install/share/matchable/test/bin/run_all.sh quietly
 ```
+Build and run tests that need only C++14, using $CXX (default g++) with -std=gnu++1y (-a omits by index):
+```
+test_scripts/cxx14.sh
+```
+CI runs the full suite with gcc and clang, with and without sanitizers, plus the C++14 tests with GCC 4.8.
 
 # Supported Systems
 Artix Linux, amd64<br/>
