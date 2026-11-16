@@ -117,6 +117,13 @@ int main()
     std::cout << "output of foo(\"Saturday\") --> " << foo("Saturday") << std::endl;
     std::cout << "output of foo(\"Tuesday\") --> " << foo("Tuesday") << std::endl;
 
+    // from_string_as_ref() and from_by_string_index_as_ref() do the same lookups as from_string()
+    // and from_by_string_index() but return a reference to the stored variant instead of a copy,
+    // so they don't allocate
+    // the reference stays valid until variants are added or removed
+    DayOfWeek::Type const & monday = DayOfWeek::from_string_as_ref("Monday");
+    std::cout << "\nfrom_string_as_ref(\"Monday\") --> " << monday << std::endl;
+
     return 0;
 }
 

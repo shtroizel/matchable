@@ -59,6 +59,8 @@ namespace matchable
         MatchBox(std::initializer_list<std::pair<M, T>> init_list);
         T const & at(M const &) const;
         T & mut_at(M const &);
+        T const & at_slot(int slot) const;
+        T & mut_at_slot(int slot);
         void set(M const &, T const &);
         void unset(M const &);
         bool is_set(M const &) const;
@@ -120,6 +122,29 @@ namespace matchable
 
         size_t index = static_cast<size_t>(match.as_slot());
         return index < targets.size() ? targets[index] : default_t;
+    }
+
+
+    template<typename M, typename T>
+    T const & MatchBox<M, T>::at_slot(int slot) const
+    {
+        if (slot < 0)
+            return nil_target;
+
+        size_t index = static_cast<size_t>(slot);
+        return index < targets.size() ? targets[index] : default_t;
+    }
+
+
+    template<typename M, typename T>
+    T & MatchBox<M, T>::mut_at_slot(int slot)
+    {
+        if (slot < 0)
+            return nil_target;
+
+        size_t index = static_cast<size_t>(slot);
+        grow_to_fit(index);
+        return targets[index];
     }
 
 
@@ -649,7 +674,8 @@ namespace matchable
                 *found = str == it->as_string();                                                           \
             return it->as_by_string_index();                                                               \
         }                                                                                                  \
-        inline Type from_string(std::string const & str)                                                   \
+        /* *_as_ref return references, valid until the variant lists change */                             \
+        inline Type const & from_string_as_ref(std::string const & str)                                    \
         {                                                                                                  \
             auto it = std::lower_bound(                                                                    \
                 I##t::variants_by_string().begin(),                                                        \
@@ -661,14 +687,16 @@ namespace matchable
                 return *it;                                                                                \
             return nil;                                                                                    \
         }                                                                                                  \
-        inline Type from_by_string_index(int index)                                                        \
+        inline Type from_string(std::string const & str) { return from_string_as_ref(str); }               \
+        inline Type const & from_by_string_index_as_ref(int index)                                         \
         {                                                                                                  \
             if (index < 0 || index >= (int) I##t::all_variants_by_string()->size())                        \
                 return nil;                                                                                \
             if (I##t::all_variants_by_string() != &I##t::variants_by_string())                             \
-                return from_string(I##t::all_variants_by_string()->at(index).as_string());                 \
-            return I##t::all_variants_by_string()->at(index);                                              \
+                return from_string_as_ref((*I##t::all_variants_by_string())[index].as_string());           \
+            return (*I##t::all_variants_by_string())[index];                                               \
         }                                                                                                  \
+        inline Type from_by_string_index(int index) { return from_by_string_index_as_ref(index); }         \
         inline Type from_identifier_string(std::string const & str)                                        \
         {                                                                                                  \
             for (auto v : variants())                                                                      \
@@ -1043,15 +1071,15 @@ namespace matchable
 #define matchable_declaration_property_amendment(pt, p, t)                                                 \
     public:                                                                                                \
         /* vector property */                                                                              \
-        std::vector<pt> const & as_##p##_vect() const { return p##_vect_mb().at(Type(clone())); }          \
-        std::vector<pt> & as_mutable_##p##_vect() { return p##_vect_mb().mut_at(Type(clone())); }          \
+        std::vector<pt> const & as_##p##_vect() const { return p##_vect_mb().at_slot(as_slot()); }         \
+        std::vector<pt> & as_mutable_##p##_vect() { return p##_vect_mb().mut_at_slot(as_slot()); }         \
         void set_##p##_vect(std::vector<pt> const & v)                                                     \
             { auto c = Type(clone()); p##_vect_mb().set(c, v);                                             \
               matchable::call_observers(p##_vect_obs_mb(), c); }                                           \
                                                                                                            \
         /* single property */                                                                              \
-        pt const & as_##p() const { return p##_mb().at(Type(clone())); }                                   \
-        pt & as_mutable_##p() { return p##_mb().mut_at(Type(clone())); }                                   \
+        pt const & as_##p() const { return p##_mb().at_slot(as_slot()); }                                  \
+        pt & as_mutable_##p() { return p##_mb().mut_at_slot(as_slot()); }                                  \
         void set_##p(pt const & s)                                                                         \
             { auto c = Type(clone()); p##_mb().set(c, s); matchable::call_observers(p##_obs_mb(), c); }    \
                                                                                                            \
