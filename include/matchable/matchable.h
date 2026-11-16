@@ -77,7 +77,7 @@ namespace matchable
 
     template<typename M, typename T>
     MatchBox<M, T>::MatchBox(T const & fill)
-        : nil_target{}
+        : nil_target{fill}
         , nil_target_init_flag{false}
         , default_t{fill}
     {
