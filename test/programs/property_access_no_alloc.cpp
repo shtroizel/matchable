@@ -11,7 +11,15 @@
 
 static int allocations{0};
 
-void * operator new(std::size_t size)
+// GCC 12+ warns (mismatched-new-delete) if it inlines these and sees malloc or free meet
+// operator new or delete
+#if defined(_MSC_VER)
+#define NOT_INLINED __declspec(noinline)
+#else
+#define NOT_INLINED __attribute__((noinline))
+#endif
+
+NOT_INLINED void * operator new(std::size_t size)
 {
     ++allocations;
     void * p = std::malloc(size == 0 ? 1 : size);
@@ -20,8 +28,8 @@ void * operator new(std::size_t size)
     return p;
 }
 
-void operator delete(void * p) noexcept { std::free(p); }
-void operator delete(void * p, std::size_t) noexcept { std::free(p); }
+NOT_INLINED void operator delete(void * p) noexcept { std::free(p); }
+NOT_INLINED void operator delete(void * p, std::size_t) noexcept { std::free(p); }
 
 
 
