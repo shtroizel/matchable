@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstring>
 #include <functional>
 #include <map>
 #include <memory>
@@ -445,6 +446,7 @@ namespace matchable
                              [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
                          );
                 M::interface_type::by_string().erase(i, M::interface_type::by_string().end());
+                M::interface_type::rebuild_names();
             }
 
 #ifndef MATCHABLE_OMIT_BY_INDEX
@@ -464,6 +466,7 @@ namespace matchable
         {
             M::interface_type::by_string() = prev_variants_by_string;
             M::interface_type::all_by_string() = &M::interface_type::by_string();
+            M::interface_type::rebuild_names();
 #ifndef MATCHABLE_OMIT_BY_INDEX
             M::interface_type::by_index() = prev_variants_by_index;
             M::interface_type::all_by_index() = &M::interface_type::by_index();
@@ -477,9 +480,9 @@ namespace matchable
     };
 
 
-    inline bool str_lt_str(std::string const & l, std::string const & r)
+    inline bool chars_lt_chars(char const * l, size_t l_len, char const * r, size_t r_len)
     {
-        size_t const min_len = std::min(l.length(), r.length());
+        size_t const min_len = std::min(l_len, r_len);
         for (size_t i = 0; i < min_len; ++i)
         {
             bool l_alpha = (l[i] >= 'A' && l[i] <= 'Z') || (l[i] >= 'a' && l[i] <= 'z');
@@ -496,8 +499,73 @@ namespace matchable
                     return false;
             }
         }
-        return l.length() < r.length();
+        return l_len < r_len;
     }
+
+
+    inline bool str_lt_str(std::string const & l, std::string const & r)
+    {
+        return chars_lt_chars(l.data(), l.size(), r.data(), r.size());
+    }
+
+
+    // a type's variant names in by-string order, packed into one buffer so a lookup touches only this
+    // table, with each name's by-string index
+    class VariantNames
+    {
+    public:
+        void clear() { chars.clear(); begins.assign(1, 0); indexes.clear(); }
+        void push_back(std::string const & name, int index)
+        {
+            chars += name;
+            begins.push_back((unsigned) chars.size());
+            indexes.push_back(index);
+        }
+        // indexes are renumbered by the caller
+        void insert(int position, std::string const & name)
+        {
+            unsigned const at = begins[position];
+            chars.insert(at, name);
+            begins.insert(begins.begin() + position + 1, at);
+            for (size_t i = position + 1; i < begins.size(); ++i)
+                begins[i] += (unsigned) name.size();
+            indexes.insert(indexes.begin() + position, position);
+        }
+        void set_index(int position, int index) { indexes[position] = index; }
+        int size() const { return (int) indexes.size(); }
+        int index(int position) const { return indexes[position]; }
+        // position of the first name not less than s, or size()
+        int lower_bound(char const * s, size_t len) const
+        {
+            int first = 0;
+            int count = size();
+            while (count > 0)
+            {
+                int const step = count / 2;
+                int const middle = first + step;
+                size_t const middle_len = begins[middle + 1] - begins[middle];
+                if (chars_lt_chars(chars.data() + begins[middle], middle_len, s, len))
+                {
+                    first = middle + 1;
+                    count -= step + 1;
+                }
+                else
+                {
+                    count = step;
+                }
+            }
+            return first;
+        }
+        bool equals(int position, char const * s, size_t len) const
+        {
+            return begins[position + 1] - begins[position] == len &&
+                    std::memcmp(chars.data() + begins[position], s, len) == 0;
+        }
+    private:
+        std::string chars;
+        std::vector<unsigned> begins{0};
+        std::vector<int> indexes;
+    };
 
 } // namespace matchable
 
@@ -520,13 +588,21 @@ namespace matchable
             virtual std::string const & as_identifier_string() const = 0;                                  \
             static std::vector<Type> const & variants_by_string() { return by_string(); }                  \
             static std::vector<Type> const * all_variants_by_string() { return all_by_string(); }          \
+            static ::matchable::VariantNames const & variant_names() { return names(); }                   \
             static bool register_variant(Type const & variant, int * i);                                   \
         private:                                                                                           \
             virtual void set_by_string_index(int index) = 0;                                               \
             virtual std::shared_ptr<I##t> clone() const = 0;                                               \
-            static std::vector<Type> & by_string() { static std::vector<Type> v; return v; }               \
+            static std::vector<Type> & by_string() { names(); static std::vector<Type> v; return v; }      \
             static std::vector<Type> *& all_by_string()                                                    \
-                    { static std::vector<Type> * v = &by_string(); return v; }
+                    { static std::vector<Type> * v = &by_string(); return v; }                             \
+            static ::matchable::VariantNames & names() { static ::matchable::VariantNames n; return n; }   \
+            static void rebuild_names()                                                                    \
+            {                                                                                              \
+                names().clear();                                                                           \
+                for (auto const & v : by_string())                                                         \
+                    names().push_back(v.as_string(), v.as_by_string_index());                              \
+            }
 
 
 #ifdef MATCHABLE_OMIT_BY_INDEX
@@ -656,38 +732,39 @@ namespace matchable
         inline std::vector<Type> const & variants_by_string() { return I##t::variants_by_string(); }       \
         [[maybe_unused]] static std::string const name{#t};                                                \
         static Type nil{};                                                                                 \
-        inline int variants_by_string_index_of(std::string const & str, bool * found)                      \
+        inline int variants_by_string_index_of(char const * str, size_t len, bool * found)                 \
         {                                                                                                  \
-            auto it = std::lower_bound(                                                                    \
-                I##t::variants_by_string().begin(),                                                        \
-                I##t::variants_by_string().end(),                                                          \
-                str,                                                                                       \
-                [](t::Type const & v, std::string const & s){ return v.lt_by_string(s); }                  \
-            );                                                                                             \
-            if (it == I##t::variants_by_string().end())                                                    \
+            ::matchable::VariantNames const & names = I##t::variant_names();                               \
+            int const position = names.lower_bound(str, len);                                              \
+            if (position == names.size())                                                                  \
             {                                                                                              \
                 if (nullptr != found)                                                                      \
                     *found = false;                                                                        \
-                return I##t::variants_by_string().size();                                                  \
+                return names.size();                                                                       \
             }                                                                                              \
             if (nullptr != found)                                                                          \
-                *found = str == it->as_string();                                                           \
-            return it->as_by_string_index();                                                               \
+                *found = names.equals(position, str, len);                                                 \
+            return names.index(position);                                                                  \
         }                                                                                                  \
+        inline int variants_by_string_index_of(std::string const & str, bool * found)                      \
+            { return variants_by_string_index_of(str.data(), str.size(), found); }                         \
+        inline int variants_by_string_index_of(char const * str, bool * found)                             \
+            { return variants_by_string_index_of(str, nullptr == str ? 0 : std::strlen(str), found); }     \
         /* *_as_ref return references, valid until the variant lists change */                             \
-        inline Type const & from_string_as_ref(std::string const & str)                                    \
+        inline Type const & from_string_as_ref(char const * str, size_t len)                               \
         {                                                                                                  \
-            auto it = std::lower_bound(                                                                    \
-                I##t::variants_by_string().begin(),                                                        \
-                I##t::variants_by_string().end(),                                                          \
-                str,                                                                                       \
-                [](t::Type const & v, std::string const & s){ return v.lt_by_string(s); }                  \
-            );                                                                                             \
-            if (it != I##t::variants_by_string().end() && str == it->as_string())                          \
-                return *it;                                                                                \
+            ::matchable::VariantNames const & names = I##t::variant_names();                               \
+            int const position = names.lower_bound(str, len);                                              \
+            if (position != names.size() && names.equals(position, str, len))                              \
+                return I##t::variants_by_string()[position];                                               \
             return nil;                                                                                    \
         }                                                                                                  \
+        inline Type const & from_string_as_ref(std::string const & str)                                    \
+            { return from_string_as_ref(str.data(), str.size()); }                                         \
+        inline Type const & from_string_as_ref(char const * str)                                           \
+            { return from_string_as_ref(str, nullptr == str ? 0 : std::strlen(str)); }                     \
         inline Type from_string(std::string const & str) { return from_string_as_ref(str); }               \
+        inline Type from_string(char const * str) { return from_string_as_ref(str); }                      \
         inline Type const & from_by_string_index_as_ref(int index)                                         \
         {                                                                                                  \
             if (index < 0 || index >= (int) I##t::all_variants_by_string()->size())                        \
@@ -714,12 +791,15 @@ namespace matchable
                 if (nullptr != index)                                                                      \
                     *index = static_cast<int>(variants().size());                                          \
                 static auto pred = [](Type const & a, Type const & b) { return a.lt_by_string(b); };       \
-                by_string().insert(                                                                        \
-                    std::upper_bound(by_string().begin(), by_string().end(), variant, pred),               \
-                    variant                                                                                \
-                );                                                                                         \
+                auto const at = std::upper_bound(by_string().begin(), by_string().end(), variant, pred);   \
+                int const position = (int) (at - by_string().begin());                                     \
+                by_string().insert(by_string().begin() + position, variant);                               \
+                names().insert(position, variant.as_string());                                             \
                 for (int i = 0; i < (int) by_string().size(); ++i)                                         \
+                {                                                                                          \
                     by_string()[i].set_by_string_index(i);                                                 \
+                    names().set_index(i, i);                                                               \
+                }                                                                                          \
             }
 
 
