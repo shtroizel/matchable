@@ -11,7 +11,7 @@ import getopt
 from shutil import which
 
 sys.dont_write_bytecode = True
-from test_buildtimes import matchable_source, variant_names
+from test_buildtimes import append_csv, matchable_source, parse_sweep, start_csv, variant_names
 
 
 repo_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
@@ -98,12 +98,12 @@ int main()
     std::vector<std::pair<std::string, std::vector<Query>>> cases{
         {"one variant repeated", first(1)},
         {"one type", first_type},
-        {std::to_string(std::min<size_t>(20, all.size())) + " variants", first(20)},
-        {std::to_string(std::min<size_t>(200, all.size())) + " variants", first(200)},
-        {std::to_string(std::min<size_t>(2000, all.size())) + " variants", first(2000)},
-        {"all variants", all},
-        {"all variants, misses", misses},
     };
+    for (size_t n : {20, 200, 2000})
+        if (n < all.size())
+            cases.push_back({std::to_string(n) + " variants", first(n)});
+    cases.push_back({"all variants", all});
+    cases.push_back({"all variants, misses", misses});
     long checksum = 0;
     for (auto const & c : cases)
         std::printf("%s\t%.1f\n", c.first.c_str(), best_ns(sequence(c.second), checksum));
@@ -132,6 +132,12 @@ def usage():
     print('                              going first) and the times are compared')
     print('    -w  --work_dir        where the programs are generated and built')
     print('                            * defaults to <matchable root>/build_bench_lookup')
+    print('        --sweep           comma separated variants per type, e.g. 10,25,50,100,250,500,1000')
+    print('                            * one program per value, keeping types x variants (-t x -v) the')
+    print('                              same, so every point looks up the same number of variants')
+    print('                            * each value must divide -t x -v exactly')
+    print('                            * results go to a csv file for scripts/plot_sweep.py')
+    print('    -o  --output          csv file for --sweep (default <work_dir>/sweep.csv)')
     print('\ntimes are only comparable with times from the same machine and load, so compare within')
     print('one run (ratios), not with numbers from elsewhere')
 
@@ -204,9 +210,9 @@ def run(program, pin):
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hct:v:j:r:p:b:w:',
+        opts, args = getopt.getopt(sys.argv[1:], 'hct:v:j:r:p:b:w:o:',
                 ['help', 'clang', 'types=', 'variants=', 'jobs=', 'repeat=', 'pin=', 'baseline=',
-                 'work_dir='])
+                 'work_dir=', 'sweep=', 'output='])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -220,6 +226,8 @@ def main():
     pin = None
     baseline = None
     work_dir = repo_root + 'build_bench_lookup'
+    sweep = None
+    output = None
     for o, a in opts:
         if o in ('-h', '--help'):
             usage()
@@ -249,6 +257,10 @@ def main():
                 sys.exit(2)
         elif o in ('-w', '--work_dir'):
             work_dir = os.path.abspath(a)
+        elif o == '--sweep':
+            sweep = parse_sweep(a)
+        elif o in ('-o', '--output'):
+            output = os.path.abspath(a)
         else:
             assert False, "unhandled option"
 
@@ -256,6 +268,36 @@ def main():
     if baseline is not None:
         sides.append(('baseline', baseline))
 
+    if output is not None and sweep is None:
+        print('--output is only used with --sweep')
+        sys.exit(2)
+    if sweep is not None:
+        uneven = [v for v in sweep if (types * variants) % v != 0]
+        if uneven:
+            print('--sweep values must divide ' + str(types * variants) + ' (-t x -v) exactly: '
+                  + ', '.join(str(v) for v in uneven) + ' do not')
+            sys.exit(2)
+
+    if sweep is None:
+        cases, best = measure(sides, types, variants, work_dir, use_clang, jobs, repeat, pin)
+        print_summary(cases, best, repeat, pin)
+        return
+
+    # each point is written as soon as it is measured, so stopping early keeps the finished points
+    total = types * variants
+    path = output or work_dir + '/sweep.csv'
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    start_csv(path)
+    for v in sweep:
+        t = total // v
+        cases, best = measure(sides, t, v, work_dir, use_clang, jobs, repeat, pin)
+        print_summary(cases, best, repeat, pin)
+        append_csv(path, [['lookup', v, t, c, side, '{:.1f}'.format(best[side][c])]
+                          for side, _ in sides for c in cases])
+    print('\nwrote ' + path)
+
+
+def measure(sides, types, variants, work_dir, use_clang, jobs, repeat, pin):
     programs = {}
     for side, include_dir in sides:
         print('building: ' + side + ' (' + str(types) + ' types x ' + str(variants) + ' variants)',
@@ -274,7 +316,10 @@ def main():
                 if name not in cases:
                     cases.append(name)
                 best[side][name] = min(best[side].get(name, ns), ns)
+    return cases, best
 
+
+def print_summary(cases, best, repeat, pin):
     print('\n\n******* Lookup Performance Summary *******')
     print('ns per variants_by_string_index_of(), fastest of ' + str(repeat) + ' run(s)'
           + ('' if pin is None else ', cpu ' + str(pin)) + '\n')
@@ -282,7 +327,7 @@ def main():
     for c in cases:
         ns = best['current'][c]
         line = '  ' + c.rjust(width) + ': ' + '{:8.1f}'.format(ns)
-        if baseline is not None:
+        if 'baseline' in best:
             b_ns = best['baseline'][c]
             line += '   baseline ' + '{:8.1f}'.format(b_ns) + '   ratio ' + '{:5.2f}'.format(ns / b_ns)
         print(line)

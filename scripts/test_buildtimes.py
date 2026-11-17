@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import csv
 import os
 import shutil
 import subprocess
@@ -54,6 +55,17 @@ def usage():
     for name, tus, variants in scale_cases:
         print('                            * ' + name + ': ' + str(tus)
               + ' translation unit(s), one type of ' + str(variants) + ' variants each')
+    print('        --sweep           comma separated variants per type, e.g. 10,50,100,250,500,1000')
+    print('                            * one build per value of jobs (-j) translation units, each one type')
+    print('                              of that many variants; each compile of 1000 variants needs about')
+    print('                              2 GB of memory')
+    print('                            * each translation unit compile is timed on its own (main.cpp, link')
+    print('                              and cmake excluded) and the mean goes to a csv file for')
+    print('                              scripts/plot_sweep.py')
+    print('                            * on cpus with fast and slow cores, -j above the fast core count')
+    print('                              puts compiles on slow cores: compare runs at the same -j')
+    print('    -o  --output          csv file for --sweep')
+    print('                            * default <matchable root>/build_sweep_buildtimes.csv')
     print('    -b  --baseline        include directory holding another matchable/matchable.h')
     print('                            * every case is also built with it and the times compared')
     print('                            * builds alternate, taking turns going first')
@@ -142,12 +154,27 @@ def generate_scale(tus, variants, include_dir):
     write_file(src_dir + '/main.cpp', main_content)
 
 
-def timed_build(use_clang, debug, minimal, jobs):
+launcher_content = '''import os, resource, subprocess, sys
+code = subprocess.run(sys.argv[2:]).returncode
+usage = resource.getrusage(resource.RUSAGE_CHILDREN)
+source = next((a for a in sys.argv[2:] if a.endswith('.cpp')), '?')
+with open(sys.argv[1], 'a') as f:
+    f.write(os.path.basename(source) + ' ' + str(usage.ru_utime + usage.ru_stime) + '\\n')
+sys.exit(code)
+'''
+
+
+def timed_build(use_clang, debug, minimal, jobs, per_file=None):
+    # per_file: a dict filled with cpu seconds per compiled source file
     shutil.rmtree(build_dir, ignore_errors=True)
     os.makedirs(build_dir)
     os.chdir(build_dir)
 
     cmake_cmd = ['cmake']
+    if per_file is not None:
+        write_file(build_dir + '/launcher.py', launcher_content)
+        launcher = [sys.executable, build_dir + '/launcher.py', build_dir + '/compile_times.txt']
+        cmake_cmd.append('-DCMAKE_CXX_COMPILER_LAUNCHER=' + ';'.join(launcher))
 
     if use_clang:
         clang_c = which('clang')
@@ -181,6 +208,11 @@ def timed_build(use_clang, debug, minimal, jobs):
                                  stdout=subprocess.DEVNULL).returncode
     end = time.time()
     cpu = cpu_seconds() - cpu_start
+    if per_file is not None and return_code == 0:
+        with open(build_dir + '/compile_times.txt') as f:
+            for line in f:
+                name, seconds = line.split()
+                per_file[name] = float(seconds)
 
     os.chdir(repo_root)
     shutil.rmtree(build_dir)
@@ -198,6 +230,27 @@ def cpu_seconds():
     return usage.ru_utime + usage.ru_stime
 
 
+def start_csv(path):
+    with open(path, 'w', newline='') as f:
+        csv.writer(f).writerow(['kind', 'variants', 'types', 'case', 'side', 'value'])
+
+
+def append_csv(path, rows):
+    with open(path, 'a', newline='') as f:
+        csv.writer(f).writerows(rows)
+
+
+def parse_sweep(text):
+    try:
+        values = [int(v) for v in text.split(',')]
+    except ValueError:
+        values = []
+    if not values or min(values) < 1:
+        print('--sweep needs a comma separated list of positive whole numbers, got ' + text)
+        sys.exit(2)
+    return values
+
+
 def clean_up():
     shutil.rmtree(src_dir, ignore_errors=True)
     shutil.rmtree(build_dir, ignore_errors=True)
@@ -209,8 +262,9 @@ def clean_up():
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcdmj:r:sb:',
-                ['help', 'clang', 'debug', 'minimal', 'jobs=', 'repeat=', 'scale', 'baseline='])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcdmj:r:sb:o:',
+                ['help', 'clang', 'debug', 'minimal', 'jobs=', 'repeat=', 'scale', 'baseline=', 'sweep=',
+                 'output='])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -223,6 +277,8 @@ def main():
     repeat = 3
     scale = False
     baseline = None
+    sweep = None
+    output = None
     for o, a in opts:
         if o in ('-h', '--help'):
             usage()
@@ -248,15 +304,30 @@ def main():
                 if not os.path.isfile(baseline + '/matchable/' + header):
                     print('no matchable/' + header + ' in ' + baseline)
                     sys.exit(2)
+        elif o == '--sweep':
+            sweep = parse_sweep(a)
+        elif o in ('-o', '--output'):
+            output = os.path.abspath(a)
         else:
             assert False, "unhandled option"
+
+    if output is not None and sweep is None:
+        print('--output is only used with --sweep')
+        sys.exit(2)
+    if sweep is not None and scale:
+        print('--sweep and --scale are separate modes, choose one')
+        sys.exit(2)
 
     if os.name == 'nt':
         print('compiler cpu time is measured with the resource module, which needs a unix-like system')
         sys.exit(2)
 
     current = os.path.abspath(repo_root + 'include')
-    if scale:
+    if sweep is not None:
+        cases = [(str(variants) + ' variants (' + str(jobs) + ' x ' + str(variants) + ')',
+                  lambda d, variants=variants: generate_scale(jobs, variants, d))
+                 for variants in sweep]
+    elif scale:
         cases = [(name + ' (' + str(tus) + ' x ' + str(variants) + ')',
                   lambda d, tus=tus, variants=variants: generate_scale(tus, variants, d))
                  for name, tus, variants in scale_cases]
@@ -268,17 +339,32 @@ def main():
     if baseline is not None:
         sides.append(('baseline', baseline))
 
-    # times[case][side] = [(cpu, wall), ...], one per repeat
+    # each sweep point is written as soon as it is measured, so stopping early keeps the finished points
+    path = output or repo_root + 'build_sweep_buildtimes.csv'
+    if sweep is not None:
+        start_csv(path)
+
+    # times[case][side] = [(cpu, wall), ...], one per repeat; per_tu[case][side] = [mean cpu, ...]
     times = []
+    per_tu = []
     try:
-        for name, generate in cases:
+        for i, (name, generate) in enumerate(cases):
             times.append({side: [] for side, _ in sides})
+            per_tu.append({side: [] for side, _ in sides})
             for r in range(repeat):
                 for side, include_dir in (sides if r % 2 == 0 else sides[::-1]):
                     print('building: ' + name + ', ' + side + ' ' + str(r + 1) + '/' + str(repeat),
                           flush=True)
                     generate(include_dir)
-                    times[-1][side].append(timed_build(use_clang, debug, minimal, jobs))
+                    per_file = {} if sweep is not None else None
+                    times[-1][side].append(timed_build(use_clang, debug, minimal, jobs, per_file))
+                    if per_file is not None:
+                        tus = [cpu for f, cpu in per_file.items() if f != 'main.cpp']
+                        per_tu[-1][side].append(sum(tus) / len(tus))
+            if sweep is not None:
+                append_csv(path, [['build', sweep[i], jobs, 'cpu seconds per translation unit', side,
+                                   '{:.3f}'.format(min(per_tu[-1][side]))]
+                                  for side, _ in sides])
     finally:
         clean_up()
 
@@ -298,7 +384,9 @@ def main():
             baseline_cpu = min(cpu for cpu, _ in case_times['baseline'])
             line += '   cpu ratio ' + '{:5.2f}'.format(current_cpu / baseline_cpu)
         print(line)
-    if not scale:
+    if sweep is not None:
+        print('\nwrote ' + path)
+    elif not scale:
         full, fwd = [min(cpu for cpu, _ in case_times['current']) for case_times in times]
         print('\n  full / forward cpu: ' + '{:.2f}'.format(full / fwd))
 
