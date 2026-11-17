@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import time
 import multiprocessing
+import random
 import sys
 import getopt
 
@@ -12,8 +13,28 @@ from shutil import which
 
 
 repo_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
-src_dir = repo_root + 'test_buildtimes/src'
-prep_dir = repo_root + 'test_buildtimes/prepare'
+work_dir = repo_root + 'test_buildtimes'
+src_dir = work_dir + '/src'
+build_dir = work_dir + '/build'
+prep_dir = work_dir + '/prepare'
+
+# (name, translation units, variants per type): one type per translation unit
+scale_cases = [
+    ('small types', 300, 10),
+    ('leaf-sized types', 60, 150),
+    ('one big type', 1, 1000),
+]
+
+cxx_keywords = {
+    'alignas', 'alignof', 'and', 'asm', 'auto', 'bitand', 'bitor', 'bool', 'break', 'case', 'catch', 'char',
+    'class', 'compl', 'concept', 'const', 'consteval', 'constexpr', 'constinit', 'continue', 'decltype',
+    'default', 'delete', 'do', 'double', 'else', 'enum', 'explicit', 'export', 'extern', 'false', 'float',
+    'for', 'friend', 'goto', 'if', 'inline', 'int', 'long', 'mutable', 'namespace', 'new', 'noexcept',
+    'not', 'nullptr', 'operator', 'or', 'private', 'protected', 'public', 'register', 'requires', 'return',
+    'short', 'signed', 'sizeof', 'static', 'struct', 'switch', 'template', 'this', 'throw', 'true', 'try',
+    'typedef', 'typeid', 'typename', 'union', 'unsigned', 'using', 'virtual', 'void', 'volatile', 'while',
+    'xor',
+}
 
 
 def usage():
@@ -23,75 +44,109 @@ def usage():
     print('    -d  --debug           build with debug symbols')
     print('    -m  --minimal         build with minimal features')
     print('                            * use alphabetical only (omit by index)')
+    print('    -j  --jobs            max jobs')
+    print('                            * default is cpu count ['
+          + str(multiprocessing.cpu_count()) + ']')
+    print('    -r  --repeat          builds per case, the fastest is reported (default 3)')
+    print('                            * with -b, current and baseline builds alternate')
+    print('    -s  --scale           time how builds grow with types and variants instead of comparing')
+    print('                          full definitions with forward declarations:')
+    for name, tus, variants in scale_cases:
+        print('                            * ' + name + ': ' + str(tus)
+              + ' translation unit(s), one type of ' + str(variants) + ' variants each')
+    print('    -b  --baseline        include directory holding another matchable/matchable.h')
+    print('                            * every case is also built with it and the times compared')
+    print('                            * builds alternate, taking turns going first')
+    print('                            * for example the include directory of a checkout of another commit')
+    print('\ncompiler CPU time (user + system) is reported first and ratios use it: it depends less on')
+    print('scheduling and -j than wall time does. Times are only comparable with times from the same')
+    print('machine and load, so compare within one run (ratios), not with numbers from elsewhere')
 
 
-def run_test(mode, use_clang, debug, minimal):
+def variant_names(count, rng):
+    names = set()
+    while len(names) < count:
+        name = ''.join(rng.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(rng.randint(3, 12)))
+        if name not in cxx_keywords:
+            names.add(name)
+    return sorted(names)
 
-    # remove and recreate source directory
+
+def matchable_source(type_name, names):
+    lines = ['#include "matchable/matchable.h"', '']
+    for start in range(0, len(names), 108):
+        macro = 'MATCHABLE' if start == 0 else 'GROW_MATCHABLE'
+        lines.append(macro + '(')
+        lines.append('    ' + type_name)
+        for name in names[start:start + 108]:
+            lines.append('    , ' + name)
+        lines.append(')')
+    lines.append('')
+    lines.append('int lookup_' + type_name + '(std::string const & s)')
+    lines.append('{')
+    lines.append('    bool found = false;')
+    lines.append('    return ' + type_name + '::variants_by_string_index_of(s, &found);')
+    lines.append('}')
+    return '\n'.join(lines) + '\n'
+
+
+def write_file(path, content):
+    with open(path, 'w') as f:
+        f.write(content)
+
+
+def prepare_sources(include_dir):
     shutil.rmtree(src_dir, ignore_errors=True)
-    os.makedirs(src_dir)
+    os.makedirs(src_dir + '/matchable')
+    shutil.copy(include_dir + '/matchable/matchable.h', src_dir + '/matchable')
+    shutil.copy(include_dir + '/matchable/matchable_fwd.h', src_dir + '/matchable')
+    shutil.copy(prep_dir + '/CMakeLists.txt', work_dir)
 
-    # copy matchable to source directory
-    matchable_dest_dir = src_dir + '/matchable'
-    os.makedirs(matchable_dest_dir)
-    shutil.copy(repo_root + 'include/matchable/matchable.h', matchable_dest_dir)
-    shutil.copy(repo_root + 'include/matchable/matchable_fwd.h', matchable_dest_dir)
 
-    # remove and recreate CMakeLists.txt
-    try:
-        os.remove(prep_dir + '/../CMakeLists.txt')
-    except OSError:
-        pass
-    shutil.copy(prep_dir + '/CMakeLists.txt', prep_dir + '/..')
-
-    # copy matchables.h
+def generate_fwd_full(mode, include_dir):
+    prepare_sources(include_dir)
     shutil.copy(prep_dir + '/matchables.h', src_dir)
-
-    # copy IncludedAllOverThePlace
     shutil.copy(prep_dir + '/' + mode + '/IncludedAllOverThePlace.h', src_dir)
     shutil.copy(prep_dir + '/IncludedAllOverThePlace.cpp', src_dir)
 
-    # create main.cpp and LikesIncludedAllOverThePlace_i.h/cpp for i in [0..107]
     main_content_start = '#include "matchables.h"\n'
     main_content_main = ''
-
     for i in range(0, 108):
-        likes_h_content  = '#pragma once\n'
-        likes_h_content += '#include "IncludedAllOverThePlace.h"\n'
-        likes_h_content += 'class LikesIncludedAllOverThePlace_' + str(i)
-        likes_h_content += ' : public IncludedAllOverThePlace\n'
-        likes_h_content += '{ public: void foo(int); };\n\n'
-
-        likes_h_file = open(src_dir + '/LikesIncludedAllOverThePlace_' + str(i) + '.h', 'w')
-        likes_h_file.write(likes_h_content)
-        likes_h_file.close()
-
-        likes_cpp_content  = '#include "LikesIncludedAllOverThePlace_' + str(i) + '.h"\n'
-        likes_cpp_content += 'void LikesIncludedAllOverThePlace_' + str(i) + '::foo(int) {}\n\n'
-
-        likes_cpp_file = open(src_dir + '/LikesIncludedAllOverThePlace_' + str(i) + '.cpp', 'w')
-        likes_cpp_file.write(likes_cpp_content)
-        likes_cpp_file.close()
-
-        main_content_start += '#include "LikesIncludedAllOverThePlace_' + str(i) + '.h"\n'
-        main_content_main += '    LikesIncludedAllOverThePlace_' + str(i) + ' l_' + str(i) + ';\n'
+        name = 'LikesIncludedAllOverThePlace_' + str(i)
+        write_file(src_dir + '/' + name + '.h',
+                   '#pragma once\n#include "IncludedAllOverThePlace.h"\nclass ' + name
+                   + ' : public IncludedAllOverThePlace\n{ public: void foo(int); };\n\n')
+        write_file(src_dir + '/' + name + '.cpp',
+                   '#include "' + name + '.h"\nvoid ' + name + '::foo(int) {}\n\n')
+        main_content_start += '#include "' + name + '.h"\n'
+        main_content_main += '    ' + name + ' l_' + str(i) + ';\n'
         main_content_main += '    (void) l_' + str(i) + ';\n'
-
-    main_content = main_content_start
-    main_content += 'int main()\n{\n    ' + main_content_main
-    main_content += '}\n\n'
-
-    main_file = open(src_dir + '/main.cpp', 'w')
-    main_file.write(main_content)
-    main_file.close()
+    write_file(src_dir + '/main.cpp',
+               main_content_start + 'int main()\n{\n    ' + main_content_main + '}\n\n')
 
 
-    # remove and recreate build directory
-    shutil.rmtree(src_dir + '/../build', ignore_errors=True)
-    os.makedirs(src_dir + '/../build')
-    os.chdir(src_dir + '/../build')
+def generate_scale(tus, variants, include_dir):
+    prepare_sources(include_dir)
+    rng = random.Random(20261117)
+    main_content = '#include <string>\n\n'
+    main_calls = ''
+    for i in range(tus):
+        type_name = 'T' + str(i)
+        names = variant_names(variants, rng)
+        write_file(src_dir + '/' + type_name + '.cpp', matchable_source(type_name, names))
+        main_content += 'int lookup_' + type_name + '(std::string const &);\n'
+        main_calls += '    sum += lookup_' + type_name + '(s);\n'
+    main_content += '\nint main(int argc, char ** argv)\n{\n'
+    main_content += '    std::string const s = argc > 1 ? argv[1] : "";\n    int sum = 0;\n'
+    main_content += main_calls + '    return sum == -1 ? 1 : 0;\n}\n'
+    write_file(src_dir + '/main.cpp', main_content)
 
-    # run cmake
+
+def timed_build(use_clang, debug, minimal, jobs):
+    shutil.rmtree(build_dir, ignore_errors=True)
+    os.makedirs(build_dir)
+    os.chdir(build_dir)
+
     cmake_cmd = ['cmake']
 
     if use_clang:
@@ -115,28 +170,47 @@ def run_test(mode, use_clang, debug, minimal):
 
     cmake_cmd.append('..')
 
-    if subprocess.run(cmake_cmd).returncode != 0:
+    if subprocess.run(cmake_cmd, stdout=subprocess.DEVNULL).returncode != 0:
         print('cmake failed')
-        exit(-1)
+        exit(1)
 
-    # run make and track how much time it needs
+    # time only the build, not cmake
+    cpu_start = cpu_seconds()
     start = time.time()
-    return_code = subprocess.run(['make', '-j' + str(multiprocessing.cpu_count())]).returncode
+    return_code = subprocess.run(['cmake', '--build', '.', '--parallel', str(jobs)],
+                                 stdout=subprocess.DEVNULL).returncode
     end = time.time()
+    cpu = cpu_seconds() - cpu_start
 
-    os.remove(prep_dir + '/../CMakeLists.txt')
-    shutil.rmtree(src_dir + '/../build')
-    shutil.rmtree(src_dir)
+    os.chdir(repo_root)
+    shutil.rmtree(build_dir)
 
-    if (return_code != 0):
-        raise Exception
+    if return_code != 0:
+        print('build failed')
+        exit(1)
 
-    return end - start
+    return cpu, end - start
+
+
+def cpu_seconds():
+    import resource
+    usage = resource.getrusage(resource.RUSAGE_CHILDREN)
+    return usage.ru_utime + usage.ru_stime
+
+
+def clean_up():
+    shutil.rmtree(src_dir, ignore_errors=True)
+    shutil.rmtree(build_dir, ignore_errors=True)
+    try:
+        os.remove(work_dir + '/CMakeLists.txt')
+    except OSError:
+        pass
 
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcdm', ['help', 'clang', 'debug', 'minimal'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcdmj:r:sb:',
+                ['help', 'clang', 'debug', 'minimal', 'jobs=', 'repeat=', 'scale', 'baseline='])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -145,6 +219,10 @@ def main():
     use_clang = False
     debug = False
     minimal = False
+    jobs = multiprocessing.cpu_count()
+    repeat = 3
+    scale = False
+    baseline = None
     for o, a in opts:
         if o in ('-h', '--help'):
             usage()
@@ -155,18 +233,74 @@ def main():
             debug = True
         elif o in ('-m', '--minimal'):
             minimal = True
+        elif o in ('-j', '--jobs'):
+            jobs = int(a)
+        elif o in ('-r', '--repeat'):
+            repeat = int(a)
+            if repeat < 1:
+                print('--repeat needs at least 1')
+                sys.exit(2)
+        elif o in ('-s', '--scale'):
+            scale = True
+        elif o in ('-b', '--baseline'):
+            baseline = os.path.abspath(a)
+            for header in ('matchable.h', 'matchable_fwd.h'):
+                if not os.path.isfile(baseline + '/matchable/' + header):
+                    print('no matchable/' + header + ' in ' + baseline)
+                    sys.exit(2)
         else:
             assert False, "unhandled option"
 
-    try:
-        fwd_time = run_test("fwd", use_clang, debug, minimal)
-        full_time = run_test("full", use_clang, debug, minimal)
+    if os.name == 'nt':
+        print('compiler cpu time is measured with the resource module, which needs a unix-like system')
+        sys.exit(2)
 
-        print('\n\n******* Build Time Performance Summary *******\n')
-        print('  using full definititions: ' + str(full_time))
-        print('using forward declarations: ' + str(fwd_time))
-    except Exception:
-        pass
+    current = os.path.abspath(repo_root + 'include')
+    if scale:
+        cases = [(name + ' (' + str(tus) + ' x ' + str(variants) + ')',
+                  lambda d, tus=tus, variants=variants: generate_scale(tus, variants, d))
+                 for name, tus, variants in scale_cases]
+    else:
+        cases = [('using full definitions', lambda d: generate_fwd_full('full', d)),
+                 ('using forward declarations', lambda d: generate_fwd_full('fwd', d))]
+
+    sides = [('current', current)]
+    if baseline is not None:
+        sides.append(('baseline', baseline))
+
+    # times[case][side] = [(cpu, wall), ...], one per repeat
+    times = []
+    try:
+        for name, generate in cases:
+            times.append({side: [] for side, _ in sides})
+            for r in range(repeat):
+                for side, include_dir in (sides if r % 2 == 0 else sides[::-1]):
+                    print('building: ' + name + ', ' + side + ' ' + str(r + 1) + '/' + str(repeat),
+                          flush=True)
+                    generate(include_dir)
+                    times[-1][side].append(timed_build(use_clang, debug, minimal, jobs))
+    finally:
+        clean_up()
+
+    print('\n\n******* Build Time Performance Summary *******')
+    print('seconds, fastest of ' + str(repeat) + ' build(s) each, -j ' + str(jobs))
+    print('slowest cpu in parentheses: far above the fastest means the machine was busy or throttled\n')
+    width = max(len(name) for name, _ in cases)
+    for (name, _), case_times in zip(cases, times):
+        line = '  ' + name.rjust(width) + ':'
+        for side, _ in sides:
+            cpus = [cpu for cpu, _ in case_times[side]]
+            wall = min(wall for _, wall in case_times[side])
+            line += '   ' + side + ' cpu ' + '{:8.2f}'.format(min(cpus)) + ' (' + '{:.2f}'.format(max(cpus))
+            line += ')  wall ' + '{:7.2f}'.format(wall)
+        if baseline is not None:
+            current_cpu = min(cpu for cpu, _ in case_times['current'])
+            baseline_cpu = min(cpu for cpu, _ in case_times['baseline'])
+            line += '   cpu ratio ' + '{:5.2f}'.format(current_cpu / baseline_cpu)
+        print(line)
+    if not scale:
+        full, fwd = [min(cpu for cpu, _ in case_times['current']) for case_times in times]
+        print('\n  full / forward cpu: ' + '{:.2f}'.format(full / fwd))
 
 
 if __name__ == "__main__":
