@@ -279,7 +279,7 @@ bool is_weekday(DayOfWeek::Type day)
 Example: test/programs/relationships.cpp<br/>
 
 ## Forward Declaring Matchables
-To benchmark compile time performace with and without forward declarations run:
+To benchmark compile time performance with and without forward declarations run:
 ```
 scripts/test_buildtimes.py
 ```
@@ -341,6 +341,36 @@ Build and run tests that need only C++14, using $CXX (default g++) with -std=gnu
 test_scripts/cxx14.sh
 ```
 CI runs the full suite with gcc and clang, with and without sanitizers, plus the C++14 tests with GCC 4.8.
+
+# Measuring Performance
+Build and lookup times depend on the machine and its load, so they compare best within one run on one
+machine: each script can build a second copy with another matchable.h and print ratios. Each script lists
+its options with -h.
+
+#### scripts/test_buildtimes.py
+Compiler cpu time for builds using full definitions vs forward declarations (default), for growing types
+(-s), or for a sweep of variants per type (--sweep), with each compile timed on its own<br/>
+-b \<include dir\> also builds every case with another matchable.h and prints the ratio
+```
+scripts/test_buildtimes.py -b ../other-matchable/include
+scripts/test_buildtimes.py --sweep=10,50,100,250,500,1000 -j 6
+```
+
+#### scripts/bench_lookup.py
+ns per variants_by_string_index_of(), from one variant looked up over and over to random variants of 1000
+types, plus misses<br/>
+-p pins the timed program to one cpu, -b compares with another matchable.h
+```
+scripts/bench_lookup.py -p 2 -b ../other-matchable/include
+scripts/bench_lookup.py --sweep=10,25,50,100,250,500,1000 -p 2
+```
+
+#### scripts/plot_sweep.py
+Plots --sweep results against variants per type and fits a curve to each case<br/>
+Needs numpy and matplotlib (for example the python3-numpy and python3-matplotlib packages)
+```
+scripts/plot_sweep.py build_sweep_buildtimes.csv build_bench_lookup/sweep.csv
+```
 
 # Supported Systems
 Artix Linux, amd64<br/>

@@ -71,8 +71,8 @@ def usage():
     print('                            * builds alternate, taking turns going first')
     print('                            * for example the include directory of a checkout of another commit')
     print('\ncompiler CPU time (user + system) is reported first and ratios use it: it depends less on')
-    print('scheduling and -j than wall time does. Times are only comparable with times from the same')
-    print('machine and load, so compare within one run (ratios), not with numbers from elsewhere')
+    print('scheduling and -j than wall time does. Times depend on the machine and its load, so they')
+    print('compare best within one run on one machine (ratios, with -b)')
 
 
 def variant_names(count, rng):

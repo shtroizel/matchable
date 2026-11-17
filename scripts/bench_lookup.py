@@ -138,8 +138,8 @@ def usage():
     print('                            * each value must divide -t x -v exactly')
     print('                            * results go to a csv file for scripts/plot_sweep.py')
     print('    -o  --output          csv file for --sweep (default <work_dir>/sweep.csv)')
-    print('\ntimes are only comparable with times from the same machine and load, so compare within')
-    print('one run (ratios), not with numbers from elsewhere')
+    print('\ntimes depend on the machine and its load, so they compare best within one run on one machine')
+    print('(ratios, with -b)')
 
 
 def generate(project_dir, types, variants):
