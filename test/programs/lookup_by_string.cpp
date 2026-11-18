@@ -11,18 +11,20 @@
 
 int word_count();
 int word_index(std::string const & s, bool * found);
+int zebra_by_string_index();
 
 // constructed before Word registers its variants, so it is destroyed after them: lookups made while
-// static objects are destroyed must still find Word's names
+// static objects are destroyed must still find Word's names, and an index read before registration is -1
 struct LookupAtExit
 {
-    LookupAtExit() { word_count(); }
+    LookupAtExit() : zebra_before_registration{zebra_by_string_index()} { word_count(); }
     ~LookupAtExit()
     {
         bool found = false;
-        if (word_index("zebra", &found) != 18 || !found)
+        if (word_index("zebra", &found) != 18 || !found || zebra_by_string_index() != 18)
             std::_Exit(1);
     }
+    int const zebra_before_registration;
 } lookup_at_exit;
 
 
@@ -49,6 +51,7 @@ MATCHABLE(Empty)
 
 int word_count() { return (int) Word::variants_by_string().size(); }
 int word_index(std::string const & s, bool * found) { return Word::variants_by_string_index_of(s, found); }
+int zebra_by_string_index() { return Word::zebra::grab().as_by_string_index(); }
 
 
 // the by-string order, written out here instead of taken from the library: non-letters before letters,
@@ -162,6 +165,9 @@ int main()
     for (auto const & w : Word::variants_by_string())
         order.push_back(w.as_string());
     TEST_EQ(ok, order == expected_order, true);
+    TEST_EQ(ok, lookup_at_exit.zebra_before_registration, -1);
+    for (int i = 0; i < (int) Word::variants_by_string().size(); ++i)
+        TEST_EQ(ok, Word::variants_by_string()[i].as_by_string_index(), i);
 
     // as_index() is the registration order, in every build: each index from 0 to size - 1 once
     std::vector<int> indexes;

@@ -527,6 +527,10 @@ namespace matchable
             static std::vector<Type> const & variants_by_string() { return by_string(); }                  \
             static ::matchable::VariantNames const & variant_names() { return names(); }                   \
             static bool register_variant(Type const & variant);                                            \
+        protected:                                                                                         \
+            /* each variant's by-string index, at its as_index() */                                        \
+            static std::vector<int> & by_string_indexes()                                                  \
+                { static auto v = new std::vector<int>; return *v; }                                       \
         private:                                                                                           \
             virtual void set_by_string_index(int index) = 0;                                               \
             virtual std::shared_ptr<I##t> clone() const = 0;                                               \
@@ -709,8 +713,10 @@ namespace matchable
                 int const position = (int) (at - by_string().begin());                                     \
                 by_string().insert(by_string().begin() + position, variant);                               \
                 names().insert(position, variant.as_string());                                             \
-                for (int i = 0; i < (int) by_string().size(); ++i)                                         \
-                    by_string()[i].set_by_string_index(i);                                                 \
+                for (int & i : by_string_indexes())                                                        \
+                    if (i >= position)                                                                     \
+                        ++i;                                                                               \
+                by_string()[position].set_by_string_index(position);                                       \
             }
 
 
@@ -755,7 +761,13 @@ namespace matchable
         {                                                                                                  \
         public:                                                                                            \
             v() = default;                                                                                 \
-            int as_by_string_index() const override { return *m_by_string_index(); }                       \
+            int as_by_string_index() const override                                                        \
+            {                                                                                              \
+                int const i = *m_index();                                                                  \
+                if (i < 0 || i >= (int) by_string_indexes().size())                                        \
+                    return -1;                                                                             \
+                return by_string_indexes()[i];                                                             \
+            }                                                                                              \
             std::string const & as_string() const override                                                 \
             {                                                                                              \
                 static std::string const s =                                                               \
@@ -770,9 +782,16 @@ namespace matchable
             }                                                                                              \
             std::string const & as_identifier_string() const override                                      \
                 { static std::string const s{#v}; return s; }                                              \
-            void set_by_string_index(int index) override { *m_by_string_index() = index; }                 \
+            void set_by_string_index(int by_string_index) override                                         \
+            {                                                                                              \
+                int const i = *m_index();                                                                  \
+                if (i < 0)                                                                                 \
+                    return;                                                                                \
+                if (i >= (int) by_string_indexes().size())                                                 \
+                    by_string_indexes().resize(i + 1, -1);                                                 \
+                by_string_indexes()[i] = by_string_index;                                                  \
+            }                                                                                              \
             static Type grab() { return Type(create()); }                                                  \
-            static int * m_by_string_index() { static int i{-1}; return &i; }                              \
             int as_index() const override { return *m_index(); }                                           \
             static int * m_index() { static int i{-1}; return &i; }                                        \
             static bool & registered() { static bool r{false}; return r; }                                 \
