@@ -461,11 +461,10 @@ namespace matchable
 
 
     // a type's variant names in by-string order, packed into one buffer so a lookup touches only this
-    // table, with each name's by-string index
+    // table; a name's position is its by-string index
     class VariantNames
     {
     public:
-        // indexes are renumbered by the caller
         void insert(int position, std::string const & name)
         {
             unsigned const at = begins[position];
@@ -473,11 +472,8 @@ namespace matchable
             begins.insert(begins.begin() + position + 1, at);
             for (size_t i = position + 1; i < begins.size(); ++i)
                 begins[i] += (unsigned) name.size();
-            indexes.insert(indexes.begin() + position, position);
         }
-        void set_index(int position, int index) { indexes[position] = index; }
-        int size() const { return (int) indexes.size(); }
-        int index(int position) const { return indexes[position]; }
+        int size() const { return (int) begins.size() - 1; }
         // position of the first name not less than s, or size()
         int lower_bound(char const * s, size_t len) const
         {
@@ -508,7 +504,6 @@ namespace matchable
     private:
         std::string chars;
         std::vector<unsigned> begins{0};
-        std::vector<int> indexes;
     };
 
 } // namespace matchable
@@ -667,15 +662,9 @@ namespace matchable
         {                                                                                                  \
             ::matchable::VariantNames const & names = I##t::variant_names();                               \
             int const position = names.lower_bound(str, len);                                              \
-            if (position == names.size())                                                                  \
-            {                                                                                              \
-                if (nullptr != found)                                                                      \
-                    *found = false;                                                                        \
-                return names.size();                                                                       \
-            }                                                                                              \
             if (nullptr != found)                                                                          \
-                *found = names.equals(position, str, len);                                                 \
-            return names.index(position);                                                                  \
+                *found = position != names.size() && names.equals(position, str, len);                     \
+            return position;                                                                               \
         }                                                                                                  \
         inline int variants_by_string_index_of(std::string const & str, bool * found)                      \
             { return variants_by_string_index_of(str.data(), str.size(), found); }                         \
@@ -725,10 +714,7 @@ namespace matchable
                 by_string().insert(by_string().begin() + position, variant);                               \
                 names().insert(position, variant.as_string());                                             \
                 for (int i = 0; i < (int) by_string().size(); ++i)                                         \
-                {                                                                                          \
                     by_string()[i].set_by_string_index(i);                                                 \
-                    names().set_index(i, i);                                                               \
-                }                                                                                          \
             }
 
 
