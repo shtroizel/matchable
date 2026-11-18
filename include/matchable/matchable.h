@@ -60,8 +60,8 @@ namespace matchable
         MatchBox(std::initializer_list<std::pair<M, T>> init_list);
         T const & at(M const &) const;
         T & mut_at(M const &);
-        T const & at_slot(int slot) const;
-        T & mut_at_slot(int slot);
+        T const & at_index(int index) const;
+        T & mut_at_index(int index);
         void set(M const &, T const &);
         void unset(M const &);
         bool is_set(M const &) const;
@@ -121,31 +121,31 @@ namespace matchable
         if (match.is_nil())
             return nil_target;
 
-        size_t index = static_cast<size_t>(match.as_slot());
+        size_t index = static_cast<size_t>(match.as_index());
         return index < targets.size() ? targets[index] : default_t;
     }
 
 
     template<typename M, typename T>
-    T const & MatchBox<M, T>::at_slot(int slot) const
+    T const & MatchBox<M, T>::at_index(int index) const
     {
-        if (slot < 0)
+        if (index < 0)
             return nil_target;
 
-        size_t index = static_cast<size_t>(slot);
-        return index < targets.size() ? targets[index] : default_t;
+        size_t i = static_cast<size_t>(index);
+        return i < targets.size() ? targets[i] : default_t;
     }
 
 
     template<typename M, typename T>
-    T & MatchBox<M, T>::mut_at_slot(int slot)
+    T & MatchBox<M, T>::mut_at_index(int index)
     {
-        if (slot < 0)
+        if (index < 0)
             return nil_target;
 
-        size_t index = static_cast<size_t>(slot);
-        grow_to_fit(index);
-        return targets[index];
+        size_t i = static_cast<size_t>(index);
+        grow_to_fit(i);
+        return targets[i];
     }
 
 
@@ -155,7 +155,7 @@ namespace matchable
         if (match.is_nil())
             return nil_target;
 
-        size_t index = static_cast<size_t>(match.as_slot());
+        size_t index = static_cast<size_t>(match.as_index());
         grow_to_fit(index);
         return targets[index];
     }
@@ -171,7 +171,7 @@ namespace matchable
         }
         else
         {
-            size_t index = static_cast<size_t>(match.as_slot());
+            size_t index = static_cast<size_t>(match.as_index());
             grow_to_fit(index);
             targets[index] = target;
             init_flags[index] = true;
@@ -189,7 +189,7 @@ namespace matchable
         }
         else
         {
-            size_t index = static_cast<size_t>(match.as_slot());
+            size_t index = static_cast<size_t>(match.as_index());
             if (index < targets.size())
             {
                 targets[index] = default_t;
@@ -205,7 +205,7 @@ namespace matchable
         if (match.is_nil())
             return nil_target_init_flag;
 
-        size_t index = static_cast<size_t>(match.as_slot());
+        size_t index = static_cast<size_t>(match.as_index());
         return index < init_flags.size() && init_flags[index];
     }
 
@@ -297,7 +297,7 @@ namespace matchable
         }
         else
         {
-            size_t index = static_cast<size_t>(match.as_slot());
+            size_t index = static_cast<size_t>(match.as_index());
             grow_to_fit(index);
             init_flags[index] = true;
         }
@@ -313,7 +313,7 @@ namespace matchable
         }
         else
         {
-            size_t index = static_cast<size_t>(match.as_slot());
+            size_t index = static_cast<size_t>(match.as_index());
             if (index < init_flags.size())
                 init_flags[index] = false;
         }
@@ -329,7 +329,7 @@ namespace matchable
         }
         else
         {
-            size_t index = static_cast<size_t>(match.as_slot());
+            size_t index = static_cast<size_t>(match.as_index());
             grow_to_fit(index);
             init_flags[index] = !init_flags[index];
         }
@@ -342,7 +342,7 @@ namespace matchable
         if (match.is_nil())
             return nil_init_flag;
 
-        return flag_at(static_cast<size_t>(match.as_slot()));
+        return flag_at(static_cast<size_t>(match.as_index()));
     }
 
 
@@ -520,13 +520,13 @@ namespace matchable
             I##t() = default;                                                                              \
             virtual ~I##t() = default;                                                                     \
             virtual int as_by_string_index() const = 0;                                                    \
-            virtual int as_slot() const = 0;                                                               \
-            static int next_slot() { static int n{0}; return n++; }                                        \
+            virtual int as_index() const = 0;                                                              \
+            static int next_index() { static int n{0}; return n++; }                                       \
             virtual std::string const & as_string() const = 0;                                             \
             virtual std::string const & as_identifier_string() const = 0;                                  \
             static std::vector<Type> const & variants_by_string() { return by_string(); }                  \
             static ::matchable::VariantNames const & variant_names() { return names(); }                   \
-            static bool register_variant(Type const & variant, int * i);                                   \
+            static bool register_variant(Type const & variant);                                            \
         private:                                                                                           \
             virtual void set_by_string_index(int index) = 0;                                               \
             virtual std::shared_ptr<I##t> clone() const = 0;                                               \
@@ -543,7 +543,6 @@ namespace matchable
 #else
 #define matchable_declare_end(t)                                                                           \
         public:                                                                                            \
-            virtual int as_index() const = 0;                                                              \
             static std::vector<Type> const & variants() { return variants_by_index(); }                    \
             static std::vector<Type> const & variants_by_index() { return by_index(); }                    \
         private:                                                                                           \
@@ -588,7 +587,7 @@ namespace matchable
                 return nullptr == t ? nil_str : t->as_identifier_string();                                 \
             }                                                                                              \
             int as_by_string_index() const { return nullptr == t ? -1 : t->as_by_string_index(); }         \
-            int as_slot() const { return nullptr == t ? -1 : t->as_slot(); }                               \
+            int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
             bool is_nil() const { return nullptr == t; }                                                   \
             matchable::FlowControl match(MatchParamWithFlowControl const & mb) const                       \
             {                                                                                              \
@@ -642,7 +641,6 @@ namespace matchable
 #else
 #define matchable_create_type_end(t)                                                                       \
         public:                                                                                            \
-            int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
             bool lt_by_index(MatchableType const & m) const { return as_index() < m.as_index(); }          \
             bool operator<(MatchableType const & m) const { return as_index() < m.as_index(); }            \
         };                                                                                                 \
@@ -699,15 +697,13 @@ namespace matchable
                     return v;                                                                              \
             return Type{};                                                                                 \
         }                                                                                                  \
-        [[maybe_unused]] static bool const register_##t = I##t::register_variant(nil, nullptr);            \
+        [[maybe_unused]] static bool const register_##t = I##t::register_variant(nil);                     \
     }
 
 
 #define matchable_define_register_variant_common                                                           \
             if (!variant.is_nil())                                                                         \
             {                                                                                              \
-                if (nullptr != index)                                                                      \
-                    *index = static_cast<int>(variants().size());                                          \
                 static auto pred = [](Type const & a, Type const & b) { return a.lt_by_string(b); };       \
                 auto const at = std::upper_bound(by_string().begin(), by_string().end(), variant, pred);   \
                 int const position = (int) (at - by_string().begin());                                     \
@@ -723,7 +719,7 @@ namespace matchable
     matchable_define_common(t)                                                                             \
     namespace t                                                                                            \
     {                                                                                                      \
-        inline bool I##t::register_variant(Type const & variant, int * index)                              \
+        inline bool I##t::register_variant(Type const & variant)                                           \
         {                                                                                                  \
             matchable_define_register_variant_common                                                       \
             return true;                                                                                   \
@@ -734,7 +730,7 @@ namespace matchable
     matchable_define_common(t)                                                                             \
     namespace t                                                                                            \
     {                                                                                                      \
-        inline bool I##t::register_variant(Type const & variant, int * index)                              \
+        inline bool I##t::register_variant(Type const & variant)                                           \
         {                                                                                                  \
             matchable_define_register_variant_common                                                       \
             if (!variant.is_nil())                                                                         \
@@ -777,8 +773,8 @@ namespace matchable
             void set_by_string_index(int index) override { *m_by_string_index() = index; }                 \
             static Type grab() { return Type(create()); }                                                  \
             static int * m_by_string_index() { static int i{-1}; return &i; }                              \
-            int as_slot() const override { return *m_slot(); }                                             \
-            static int * m_slot() { static int i{-1}; return &i; }                                         \
+            int as_index() const override { return *m_index(); }                                           \
+            static int * m_index() { static int i{-1}; return &i; }                                        \
             static bool & registered() { static bool r{false}; return r; }                                 \
         private:                                                                                           \
             std::shared_ptr<I##t> clone() const  override { return create(); }                             \
@@ -790,19 +786,16 @@ namespace matchable
         };                                                                                                 \
         [[maybe_unused]] static bool const register_me_##t##v =                                            \
             v::registered() ||                                                                             \
-            (v::registered() = true, *v::m_slot() = I##t::next_slot(),                                     \
-             I##t::register_variant(v::grab(), nullptr));                                                  \
+            (v::registered() = true, *v::m_index() = I##t::next_index(),                                   \
+             I##t::register_variant(v::grab()));                                                           \
     }
 #else
 #define matchable_create_variant_end(t, v)                                                                 \
-        public:                                                                                            \
-            int as_index() const override { return *m_index(); }                                           \
-            static int * m_index() { static int i{-1}; return &i; }                                        \
         };                                                                                                 \
         [[maybe_unused]] static bool const register_me_##t##v =                                            \
             v::registered() ||                                                                             \
-            (v::registered() = true, *v::m_slot() = I##t::next_slot(),                                     \
-             I##t::register_variant(v::grab(), v::m_index()));                                             \
+            (v::registered() = true, *v::m_index() = I##t::next_index(),                                   \
+             I##t::register_variant(v::grab()));                                                           \
     }
 #endif
 
@@ -1064,15 +1057,15 @@ namespace matchable
 #define matchable_declaration_property_amendment(pt, p, t)                                                 \
     public:                                                                                                \
         /* vector property */                                                                              \
-        std::vector<pt> const & as_##p##_vect() const { return p##_vect_mb().at_slot(as_slot()); }         \
-        std::vector<pt> & as_mutable_##p##_vect() { return p##_vect_mb().mut_at_slot(as_slot()); }         \
+        std::vector<pt> const & as_##p##_vect() const { return p##_vect_mb().at_index(as_index()); }       \
+        std::vector<pt> & as_mutable_##p##_vect() { return p##_vect_mb().mut_at_index(as_index()); }       \
         void set_##p##_vect(std::vector<pt> const & v)                                                     \
             { auto c = Type(clone()); p##_vect_mb().set(c, v);                                             \
               matchable::call_observers(p##_vect_obs_mb(), c); }                                           \
                                                                                                            \
         /* single property */                                                                              \
-        pt const & as_##p() const { return p##_mb().at_slot(as_slot()); }                                  \
-        pt & as_mutable_##p() { return p##_mb().mut_at_slot(as_slot()); }                                  \
+        pt const & as_##p() const { return p##_mb().at_index(as_index()); }                                \
+        pt & as_mutable_##p() { return p##_mb().mut_at_index(as_index()); }                                \
         void set_##p(pt const & s)                                                                         \
             { auto c = Type(clone()); p##_mb().set(c, s); matchable::call_observers(p##_obs_mb(), c); }    \
                                                                                                            \

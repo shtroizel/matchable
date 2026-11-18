@@ -163,6 +163,15 @@ int main()
         order.push_back(w.as_string());
     TEST_EQ(ok, order == expected_order, true);
 
+    // as_index() is the registration order, in every build: each index from 0 to size - 1 once
+    std::vector<int> indexes;
+    for (auto const & w : Word::variants())
+        indexes.push_back(w.as_index());
+    std::sort(indexes.begin(), indexes.end());
+    for (int i = 0; i < (int) indexes.size(); ++i)
+        TEST_EQ(ok, indexes[i], i);
+    TEST_EQ(ok, Word::nil.as_index(), -1);
+
     for (auto const & w : Word::variants_by_string())
     {
         bool found = false;

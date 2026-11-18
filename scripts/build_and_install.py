@@ -36,7 +36,6 @@ def usage():
     print('    -a  --alphabetical_only      variants \'by string\' only (omit \'by index\')')
     print('                                   * adds definition MATCHABLE_OMIT_BY_INDEX which will:')
     print('                                     - omit variants_by_index()')
-    print('                                     - omit as_index()')
     print('                                     - omit from_index()')
     print('                                     - omit lt_by_index()\n')
 
