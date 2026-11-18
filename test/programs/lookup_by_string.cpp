@@ -173,18 +173,6 @@ int main()
     check_word(ok, p, "all variants");
 
     {
-        UNMATCHABLE(Word, apple, esc_17, zebra, a_very_long_variant_name_well_past_fifteen_characterz);
-        TEST_EQ(ok, (int) Word::variants_by_string().size(), 15);
-        bool found = true;
-        Word::variants_by_string_index_of("apple", &found);
-        TEST_EQ(ok, found, false);
-        TEST_EQ(ok, Word::from_string("zebra"), Word::nil);
-        check_word(ok, p, "inside UNMATCHABLE");
-    }
-    TEST_EQ(ok, (int) Word::variants_by_string().size(), 19);
-    check_word(ok, p, "after UNMATCHABLE");
-
-    {
         char const * null_name = nullptr;
         bool found = true;
         TEST_EQ(ok, Word::variants_by_string_index_of(null_name, &found), 0);

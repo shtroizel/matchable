@@ -431,55 +431,6 @@ namespace matchable
     }
 
 
-    template<typename M>
-    class Unmatchable
-    {
-    public:
-        Unmatchable(std::initializer_list<M> um)
-        {
-            {
-                prev_variants_by_string = M::interface_type::variants_by_string();
-                M::interface_type::all_by_string() = &prev_variants_by_string;
-                auto i = std::remove_if(
-                             M::interface_type::by_string().begin(),
-                             M::interface_type::by_string().end(),
-                             [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
-                         );
-                M::interface_type::by_string().erase(i, M::interface_type::by_string().end());
-                M::interface_type::rebuild_names();
-            }
-
-#ifndef MATCHABLE_OMIT_BY_INDEX
-            {
-                prev_variants_by_index = M::interface_type::variants_by_index();
-                M::interface_type::all_by_index() = &prev_variants_by_index;
-                auto i = std::remove_if(
-                             M::interface_type::by_index().begin(),
-                             M::interface_type::by_index().end(),
-                             [&](M m){ return std::find(um.begin(), um.end(), m) != um.end(); }
-                         );
-                M::interface_type::by_index().erase(i, M::interface_type::by_index().end());
-            }
-#endif
-        }
-        ~Unmatchable()
-        {
-            M::interface_type::by_string() = prev_variants_by_string;
-            M::interface_type::all_by_string() = &M::interface_type::by_string();
-            M::interface_type::rebuild_names();
-#ifndef MATCHABLE_OMIT_BY_INDEX
-            M::interface_type::by_index() = prev_variants_by_index;
-            M::interface_type::all_by_index() = &M::interface_type::by_index();
-#endif
-        }
-    private:
-        std::vector<M> prev_variants_by_string;
-#ifndef MATCHABLE_OMIT_BY_INDEX
-        std::vector<M> prev_variants_by_index;
-#endif
-    };
-
-
     inline bool chars_lt_chars(char const * l, size_t l_len, char const * r, size_t r_len)
     {
         size_t const min_len = std::min(l_len, r_len);
@@ -514,13 +465,6 @@ namespace matchable
     class VariantNames
     {
     public:
-        void clear() { chars.clear(); begins.assign(1, 0); indexes.clear(); }
-        void push_back(std::string const & name, int index)
-        {
-            chars += name;
-            begins.push_back((unsigned) chars.size());
-            indexes.push_back(index);
-        }
         // indexes are renumbered by the caller
         void insert(int position, std::string const & name)
         {
@@ -577,7 +521,6 @@ namespace matchable
         class I##t                                                                                         \
         {                                                                                                  \
             friend class MatchableType<I##t>;                                                              \
-            friend class ::matchable::Unmatchable<MatchableType<I##t>>;                                    \
         public:                                                                                            \
             I##t() = default;                                                                              \
             virtual ~I##t() = default;                                                                     \
@@ -587,22 +530,13 @@ namespace matchable
             virtual std::string const & as_string() const = 0;                                             \
             virtual std::string const & as_identifier_string() const = 0;                                  \
             static std::vector<Type> const & variants_by_string() { return by_string(); }                  \
-            static std::vector<Type> const * all_variants_by_string() { return all_by_string(); }          \
             static ::matchable::VariantNames const & variant_names() { return names(); }                   \
             static bool register_variant(Type const & variant, int * i);                                   \
         private:                                                                                           \
             virtual void set_by_string_index(int index) = 0;                                               \
             virtual std::shared_ptr<I##t> clone() const = 0;                                               \
             static std::vector<Type> & by_string() { names(); static std::vector<Type> v; return v; }      \
-            static std::vector<Type> *& all_by_string()                                                    \
-                    { static std::vector<Type> * v = &by_string(); return v; }                             \
-            static ::matchable::VariantNames & names() { static ::matchable::VariantNames n; return n; }   \
-            static void rebuild_names()                                                                    \
-            {                                                                                              \
-                names().clear();                                                                           \
-                for (auto const & v : by_string())                                                         \
-                    names().push_back(v.as_string(), v.as_by_string_index());                              \
-            }
+            static ::matchable::VariantNames & names() { static ::matchable::VariantNames n; return n; }
 
 
 #ifdef MATCHABLE_OMIT_BY_INDEX
@@ -617,11 +551,8 @@ namespace matchable
             virtual int as_index() const = 0;                                                              \
             static std::vector<Type> const & variants() { return variants_by_index(); }                    \
             static std::vector<Type> const & variants_by_index() { return by_index(); }                    \
-            static std::vector<Type> const * all_variants_by_index() { return all_by_index(); }            \
         private:                                                                                           \
             static std::vector<Type> & by_index() { static std::vector<Type> v; return v; }                \
-            static std::vector<Type> *& all_by_index()                                                     \
-                    { static std::vector<Type> * v = &by_index(); return v; }                              \
         };                                                                                                 \
     }
 #endif
@@ -767,11 +698,9 @@ namespace matchable
         inline Type from_string(char const * str) { return from_string_as_ref(str); }                      \
         inline Type const & from_by_string_index_as_ref(int index)                                         \
         {                                                                                                  \
-            if (index < 0 || index >= (int) I##t::all_variants_by_string()->size())                        \
+            if (index < 0 || index >= (int) I##t::variants_by_string().size())                             \
                 return nil;                                                                                \
-            if (I##t::all_variants_by_string() != &I##t::variants_by_string())                             \
-                return from_string_as_ref((*I##t::all_variants_by_string())[index].as_string());           \
-            return (*I##t::all_variants_by_string())[index];                                               \
+            return I##t::variants_by_string()[index];                                                      \
         }                                                                                                  \
         inline Type from_by_string_index(int index) { return from_by_string_index_as_ref(index); }         \
         inline Type from_identifier_string(std::string const & str)                                        \
@@ -829,11 +758,9 @@ namespace matchable
         inline std::vector<Type> const & variants_by_index() { return I##t::variants_by_index(); }         \
         inline Type from_index(int index)                                                                  \
         {                                                                                                  \
-            if (index < 0 || index >= (int) I##t::all_variants_by_index()->size())                         \
+            if (index < 0 || index >= (int) I##t::variants_by_index().size())                              \
                 return nil;                                                                                \
-            if (I##t::all_variants_by_index() != &I##t::variants_by_index())                               \
-                return from_string(I##t::all_variants_by_index()->at(index).as_string());                  \
-            return I##t::all_variants_by_index()->at(index);                                               \
+            return I##t::variants_by_index()[index];                                                       \
         }                                                                                                  \
     }
 #endif
@@ -1906,37 +1833,6 @@ namespace matchable
     [[maybe_unused]] static bool const SET_PROPERTY_VECT_init_##t##_nil_##p =                              \
         [](decltype(t::nil.as_##p##_vect()) sv)                                                            \
             { t::nil.set_##p##_##vect(sv); return true; }({__VA_ARGS__});
-
-
-// Remove variants for the current scope (when the scope exits the removed variants are restored).
-#define UNMATCHABLE(t, ...)                                                                                \
-    matchable::Unmatchable<t::Type> unm_##t{{mcv(matchable_concat_variant, t, ##__VA_ARGS__)}}
-
-
-#define NAMESPACEx1_UNMATCHABLE(n0, t, ...)                                                                \
-    matchable::Unmatchable<n0::t::Type> unm_##n0##_##t                                                     \
-        {{mcv(matchable_concat_variant, n0::t, ##__VA_ARGS__)}}
-
-
-#define NAMESPACEx2_UNMATCHABLE(n0, n1, t, ...)                                                            \
-    matchable::Unmatchable<n0::n1::t::Type> unm_##n0##_##n1##_##t                                          \
-        {{mcv(matchable_concat_variant, n0::n1::t, ##__VA_ARGS__)}}
-
-
-#define NAMESPACEx3_UNMATCHABLE(n0, n1, n2, t, ...)                                                        \
-    matchable::Unmatchable<n0::n1::n2::t::Type> unm_##n0##_##n1##_##n2##_##t                               \
-        {{mcv(matchable_concat_variant, n0::n1::n2::t, ##__VA_ARGS__)}}
-
-
-#define NAMESPACEx4_UNMATCHABLE(n0, n1, n2, n3, t, ...)                                                    \
-    matchable::Unmatchable<n0::n1::n2::n3::t::Type> unm_##n0##_##n1##_##n2##_##n3##_##t                    \
-        {{mcv(matchable_concat_variant, n0::n1::n2::n3::t, ##__VA_ARGS__)}}
-
-
-#define NAMESPACEx5_UNMATCHABLE(n0, n1, n2, n3, n4, t, ...)                                                \
-    matchable::Unmatchable<n0::n1::n2::n3::n4::t::Type>                                                    \
-        unm_##n0##_##n1##_##n2##_##n3##_##n4##_##t                                                         \
-            {{mcv(matchable_concat_variant, n0::n1::n2::n3::n4::t, ##__VA_ARGS__)}}
 
 
 // Test if a given matchable instance is contained within a given list of variants

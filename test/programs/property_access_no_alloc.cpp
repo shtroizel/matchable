@@ -72,17 +72,6 @@ int main()
         TEST_EQ(ok, sum, 1 + 2 + 2 + 3 + 3);
     }
 
-    {
-        UNMATCHABLE(Fruit, banana);
-
-        TEST_EQ(ok, Fruit::from_by_string_index_as_ref(0), Fruit::apple::grab());
-        TEST_EQ(ok, Fruit::from_by_string_index_as_ref(1), Fruit::nil);
-        TEST_EQ(ok, Fruit::from_by_string_index_as_ref(2), Fruit::cherry::grab());
-        TEST_EQ(ok, Fruit::from_string_as_ref("banana"), Fruit::nil);
-        for (int i = -1; i < 4; ++i)
-            TEST_EQ(ok, Fruit::from_by_string_index_as_ref(i), Fruit::from_by_string_index(i));
-    }
-
     for (int i = -1; i < 4; ++i)
         TEST_EQ(ok, Fruit::from_by_string_index_as_ref(i), Fruit::from_by_string_index(i));
 

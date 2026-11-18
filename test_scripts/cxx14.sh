@@ -8,7 +8,7 @@ cd "$(dirname "${0}")/.."
 cxx=${CXX:-g++}
 flags=(-std=gnu++1y -Wall -Wextra -Werror -Wno-attributes -Wno-unused-variable -Iinclude -Itest/include)
 needs_cxx17=" escapable sorting matchable_maker "
-needs_by_index=" cards matchable_usage relationships max_variants unmatchable "
+needs_by_index=" cards matchable_usage relationships max_variants "
 if ! "${cxx}" -dM -E -x c++ /dev/null | grep -q __clang__
 then
     flags+=(-Wno-dangling-reference)

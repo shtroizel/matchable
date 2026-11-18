@@ -255,18 +255,6 @@ Example: test/programs/relationships.cpp<br/>
 
 ## Run-time macros
 
-#### UNMATCHABLE(type, variant...)
-Removes variants for the current scope. When the scope exits the removed variants are restored.<br/>
-For matchables defined within namespaces the following macros are available:<br/>
-* NAMESPACEx1_UNMATCHABLE()
-* NAMESPACEx2_UNMATCHABLE()
-* NAMESPACEx3_UNMATCHABLE()
-* NAMESPACEx4_UNMATCHABLE()
-* NAMESPACEx5_UNMATCHABLE()
-
-Further namespace nesting beyond 5 is supported by using the Unmatchable template directly (see example)<br/>
-Example: test/programs/unmatchable.cpp<br/>
-
 #### MATCHABLE_INSTANCE_IN(type, instance, variant...) -> bool
 returns true if instance is one of the given variants or false otherwise<br/>
 Example:
