@@ -45,6 +45,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+#define MATCHABLE_VERSION_MAJOR 14
+#define MATCHABLE_VERSION_MINOR 0
+#define MATCHABLE_VERSION_PATCH 0
+
+
+
 namespace matchable
 {
     // Associative array for matchables

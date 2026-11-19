@@ -84,6 +84,12 @@ if(NOT LIB_ONLY)
     add_matchable_test(fwd_header)
     add_matchable_test(lookup_by_string)
     add_matchable_test(matchable_maker matchablemaker_static)
+    add_matchable_test(version)
+    target_compile_definitions(version PRIVATE
+        CMAKE_VERSION_MAJOR=${matchable_VERSION_MAJOR}
+        CMAKE_VERSION_MINOR=${matchable_VERSION_MINOR}
+        CMAKE_VERSION_PATCH=${matchable_VERSION_PATCH}
+    )
     if(NOT OMIT_BY_INDEX)
         add_matchable_test(cards)
         add_matchable_test(matchable_usage)
