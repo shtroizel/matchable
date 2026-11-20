@@ -67,6 +67,30 @@ if(NOT LIB_ONLY)
     add_matchable_multi_tu_test(multi_tu_main_middle a.cpp plain.cpp main.cpp b.cpp)
     add_matchable_multi_tu_test(multi_tu_main_last plain.cpp a.cpp b.cpp main.cpp)
 
+    # units loaded and unloaded at run time, built with MATCHABLE_UNLOADABLE; the program exports its
+    # symbols so the units share its registry, and gcc needs -fno-gnu-unique for dlclose to unload a unit
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_executable(grow_unload test/programs/grow_unload/main.cpp)
+        target_include_directories(grow_unload PRIVATE include test/include)
+        # optimized, the program inlines property storage instead of exporting it, so a unit runs its own
+        # copy and is the first to build storage the program goes on using
+        target_compile_options(grow_unload PRIVATE -O2)
+        set_target_properties(grow_unload PROPERTIES ENABLE_EXPORTS ON)
+        target_link_libraries(grow_unload PRIVATE ${CMAKE_DL_LIBS})
+        install(TARGETS grow_unload RUNTIME DESTINATION share/matchable/test/programs)
+        foreach(version 1 2)
+            add_library(grow_unload_unit_${version} MODULE test/programs/grow_unload/unit.cpp)
+            target_include_directories(grow_unload_unit_${version} PRIVATE include)
+            target_compile_definitions(grow_unload_unit_${version} PRIVATE
+                UNIT_VERSION=${version} MATCHABLE_UNLOADABLE)
+            if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+                target_compile_options(grow_unload_unit_${version} PRIVATE -fno-gnu-unique)
+            endif()
+            add_dependencies(grow_unload grow_unload_unit_${version})
+            install(TARGETS grow_unload_unit_${version} LIBRARY DESTINATION share/matchable/test/modules)
+        endforeach()
+    endif()
+
     add_matchable_test(escapable)
     add_matchable_test(test_ok)
     add_matchable_test(self_property)

@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <functional>
 #include <map>
 #include <memory>
+#include <new>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -507,9 +508,49 @@ namespace matchable
             return begins[position + 1] - begins[position] == len &&
                     std::memcmp(chars.data() + begins[position], s, len) == 0;
         }
+        // removes the names at positions, which are sorted ascending, in one pass
+        void erase(std::vector<int> const & positions)
+        {
+            if (positions.empty())
+                return;
+            std::string kept;
+            std::vector<unsigned> kept_begins{0};
+            kept.reserve(chars.size());
+            kept_begins.reserve(begins.size() - positions.size());
+            size_t next = 0;
+            for (int i = 0; i < size(); ++i)
+            {
+                if (next < positions.size() && positions[next] == i)
+                {
+                    ++next;
+                    continue;
+                }
+                kept.append(chars, begins[i], begins[i + 1] - begins[i]);
+                kept_begins.push_back((unsigned) kept.size());
+            }
+            chars.swap(kept);
+            begins.swap(kept_begins);
+        }
     private:
         std::string chars;
         std::vector<unsigned> begins{0};
+    };
+
+
+    // a T that is never destroyed, held in place so access costs nothing extra. Storage that growth units
+    // share must outlive whichever code built it first: a unit that is unloaded runs the destructors of
+    // the statics it built
+    template<typename T>
+    class Immortal
+    {
+    public:
+        Immortal() { new (&v) T(); }
+        Immortal(Immortal const &) = delete;
+        Immortal & operator=(Immortal const &) = delete;
+        ~Immortal() {}
+        T & get() { return v; }
+    private:
+        union { T v; };
     };
 
 } // namespace matchable
@@ -533,6 +574,9 @@ namespace matchable
             static std::vector<Type> const & variants_by_string() { return by_string(); }                  \
             static ::matchable::VariantNames const & variant_names() { return names(); }                   \
             static bool register_variant(Type const & variant);                                            \
+            /* removes variants by as_index() in one pass; growth units call it when they are unloaded */  \
+            static void unregister_variants(std::vector<int> const & indexes);                             \
+            static bool variants_removed() { return has_removed(); }                                       \
         protected:                                                                                         \
             /* each variant's by-string index, at its as_index() */                                        \
             static std::vector<int> & by_string_indexes()                                                  \
@@ -540,8 +584,12 @@ namespace matchable
         private:                                                                                           \
             virtual void set_by_string_index(int index) = 0;                                               \
             virtual std::shared_ptr<I##t> clone() const = 0;                                               \
-            static std::vector<Type> & by_string() { names(); static std::vector<Type> v; return v; }      \
-            static ::matchable::VariantNames & names() { static ::matchable::VariantNames n; return n; }
+            static std::vector<Type> & by_string()                                                         \
+                { names(); static ::matchable::Immortal<std::vector<Type>> v; return v.get(); }            \
+            /* true once any variant was unregistered, so as_index() values may have gaps */               \
+            static bool & has_removed() { static bool r{false}; return r; }                                \
+            static ::matchable::VariantNames & names()                                                     \
+                { static ::matchable::Immortal<::matchable::VariantNames> n; return n.get(); }
 
 
 #ifdef MATCHABLE_OMIT_BY_INDEX
@@ -556,7 +604,8 @@ namespace matchable
             static std::vector<Type> const & variants() { return variants_by_index(); }                    \
             static std::vector<Type> const & variants_by_index() { return by_index(); }                    \
         private:                                                                                           \
-            static std::vector<Type> & by_index() { static std::vector<Type> v; return v; }                \
+            static std::vector<Type> & by_index()                                                          \
+                { static ::matchable::Immortal<std::vector<Type>> v; return v.get(); }                     \
         };                                                                                                 \
     }
 #endif
@@ -588,13 +637,13 @@ namespace matchable
             MatchableType & operator=(MatchableType &&) = default;                                         \
             std::string const & as_string() const                                                          \
             {                                                                                              \
-                static std::string const nil_str{"nil"};                                                   \
-                return nullptr == t ? nil_str : t->as_string();                                            \
+                static std::string const * nil_str = new std::string{"nil"};                               \
+                return nullptr == t ? *nil_str : t->as_string();                                           \
             }                                                                                              \
             std::string as_identifier_string() const                                                       \
             {                                                                                              \
-                static std::string const nil_str{"nil"};                                                   \
-                return nullptr == t ? nil_str : t->as_identifier_string();                                 \
+                static std::string const * nil_str = new std::string{"nil"};                               \
+                return nullptr == t ? *nil_str : t->as_identifier_string();                                \
             }                                                                                              \
             int as_by_string_index() const { return nullptr == t ? -1 : t->as_by_string_index(); }         \
             int as_index() const { return nullptr == t ? -1 : t->as_index(); }                             \
@@ -658,6 +707,24 @@ namespace matchable
 #endif
 
 
+// with MATCHABLE_UNLOADABLE, each translation unit records the variants it grows and unregisters them when
+// its statics are destroyed: when the code is unloaded, or at exit
+#ifdef MATCHABLE_UNLOADABLE
+#define matchable_define_grown_here(t)                                                                     \
+        namespace                                                                                          \
+        {                                                                                                  \
+            struct GrownHere                                                                               \
+            {                                                                                              \
+                std::vector<int> indexes;                                                                  \
+                ~GrownHere() { I##t::unregister_variants(indexes); }                                       \
+            };                                                                                             \
+            [[maybe_unused]] inline GrownHere & grown_here() { static GrownHere g; return g; }             \
+        }
+#else
+#define matchable_define_grown_here(t)
+#endif
+
+
 #define matchable_define_common(t)                                                                         \
     namespace t                                                                                            \
     {                                                                                                      \
@@ -666,6 +733,7 @@ namespace matchable
         inline std::vector<Type> const & variants_by_string() { return I##t::variants_by_string(); }       \
         [[maybe_unused]] static std::string const name{#t};                                                \
         static Type nil{};                                                                                 \
+        matchable_define_grown_here(t)                                                                     \
         inline int variants_by_string_index_of(char const * str, size_t len, bool * found)                 \
         {                                                                                                  \
             ::matchable::VariantNames const & names = I##t::variant_names();                               \
@@ -717,6 +785,9 @@ namespace matchable
                 static auto pred = [](Type const & a, Type const & b) { return a.lt_by_string(b); };       \
                 auto const at = std::upper_bound(by_string().begin(), by_string().end(), variant, pred);   \
                 int const position = (int) (at - by_string().begin());                                     \
+                std::string const & str = variant.as_string();                                             \
+                if (position > 0 && names().equals(position - 1, str.data(), str.size()))                  \
+                    return false;                                                                          \
                 by_string().insert(by_string().begin() + position, variant);                               \
                 names().insert(position, variant.as_string());                                             \
                 for (int & i : by_string_indexes())                                                        \
@@ -736,6 +807,41 @@ namespace matchable
             matchable_define_register_variant_common                                                       \
             return true;                                                                                   \
         }                                                                                                  \
+        inline void I##t::unregister_variants(std::vector<int> const & indexes)                            \
+        {                                                                                                  \
+            std::vector<int> positions;                                                                    \
+            for (int i : indexes)                                                                          \
+            {                                                                                              \
+                if (i < 0 || i >= (int) by_string_indexes().size() || by_string_indexes()[i] < 0)          \
+                    continue;                                                                              \
+                positions.push_back(by_string_indexes()[i]);                                               \
+                by_string_indexes()[i] = -1;                                                               \
+            }                                                                                              \
+            if (positions.empty())                                                                         \
+                return;                                                                                    \
+            has_removed() = true;                                                                          \
+            std::sort(positions.begin(), positions.end());                                                 \
+            std::vector<Type> & vs = by_string();                                                          \
+            size_t next = 0;                                                                               \
+            size_t kept = 0;                                                                               \
+            for (size_t p = 0; p < vs.size(); ++p)                                                         \
+            {                                                                                              \
+                if (next < positions.size() && positions[next] == (int) p)                                 \
+                {                                                                                          \
+                    ++next;                                                                                \
+                    continue;                                                                              \
+                }                                                                                          \
+                if (kept != p)                                                                             \
+                    vs[kept] = std::move(vs[p]);                                                           \
+                ++kept;                                                                                    \
+            }                                                                                              \
+            vs.erase(vs.begin() + kept, vs.end());                                                         \
+            names().erase(positions);                                                                      \
+            for (int & b : by_string_indexes())                                                            \
+                if (b >= 0)                                                                                \
+                    b -= (int) (std::lower_bound(positions.begin(), positions.end(), b) -                  \
+                            positions.begin());                                                            \
+        }                                                                                                  \
     }
 #else
 #define matchable_define(t)                                                                                \
@@ -749,12 +855,61 @@ namespace matchable
                 by_index().push_back(variant);                                                             \
             return true;                                                                                   \
         }                                                                                                  \
+        inline void I##t::unregister_variants(std::vector<int> const & indexes)                            \
+        {                                                                                                  \
+            std::vector<int> positions;                                                                    \
+            for (int i : indexes)                                                                          \
+            {                                                                                              \
+                if (i < 0 || i >= (int) by_string_indexes().size() || by_string_indexes()[i] < 0)          \
+                    continue;                                                                              \
+                positions.push_back(by_string_indexes()[i]);                                               \
+                by_string_indexes()[i] = -1;                                                               \
+            }                                                                                              \
+            if (positions.empty())                                                                         \
+                return;                                                                                    \
+            has_removed() = true;                                                                          \
+            std::sort(positions.begin(), positions.end());                                                 \
+            std::vector<Type> & vs = by_string();                                                          \
+            size_t next = 0;                                                                               \
+            size_t kept = 0;                                                                               \
+            for (size_t p = 0; p < vs.size(); ++p)                                                         \
+            {                                                                                              \
+                if (next < positions.size() && positions[next] == (int) p)                                 \
+                {                                                                                          \
+                    ++next;                                                                                \
+                    continue;                                                                              \
+                }                                                                                          \
+                if (kept != p)                                                                             \
+                    vs[kept] = std::move(vs[p]);                                                           \
+                ++kept;                                                                                    \
+            }                                                                                              \
+            vs.erase(vs.begin() + kept, vs.end());                                                         \
+            names().erase(positions);                                                                      \
+            for (int & b : by_string_indexes())                                                            \
+                if (b >= 0)                                                                                \
+                    b -= (int) (std::lower_bound(positions.begin(), positions.end(), b) -                  \
+                            positions.begin());                                                            \
+            std::vector<int> removed(indexes);                                                             \
+            std::sort(removed.begin(), removed.end());                                                     \
+            auto & bi = by_index();                                                                        \
+            bi.erase(std::remove_if(bi.begin(), bi.end(), [&](Type const & v)                              \
+                { return std::binary_search(removed.begin(), removed.end(), v.as_index()); }), bi.end());  \
+        }                                                                                                  \
         inline std::vector<Type> const & variants_by_index() { return I##t::variants_by_index(); }         \
         inline Type from_index(int index)                                                                  \
         {                                                                                                  \
-            if (index < 0 || index >= (int) I##t::variants_by_index().size())                              \
+            auto const & vs = I##t::variants_by_index();                                                   \
+            if (!I##t::variants_removed())                                                                 \
+            {                                                                                              \
+                if (index < 0 || index >= (int) vs.size())                                                 \
+                    return nil;                                                                            \
+                return vs[index];                                                                          \
+            }                                                                                              \
+            auto const at = std::lower_bound(vs.begin(), vs.end(), index,                                  \
+                [](Type const & v, int i) { return v.as_index() < i; });                                   \
+            if (at == vs.end() || at->as_index() != index)                                                 \
                 return nil;                                                                                \
-            return I##t::variants_by_index()[index];                                                       \
+            return *at;                                                                                    \
         }                                                                                                  \
     }
 #endif
@@ -823,6 +978,20 @@ namespace matchable
              I##t::register_variant(v::grab()));                                                           \
     }
 #endif
+
+
+#define matchable_grow_variant_end(t, v)                                                                   \
+        };                                                                                                 \
+        [[maybe_unused]] static bool const grow_me_##t##v =                                                \
+            v::registered() ||                                                                             \
+            (grown_here(), v::registered() = true, *v::m_index() = I##t::next_index(),                     \
+             I##t::register_variant(v::grab()) && (grown_here().indexes.push_back(*v::m_index()), true));  \
+    }
+
+
+#define matchable_grow_variant(t, v)                                                                       \
+    matchable_create_variant_begin(t, v)                                                                   \
+    matchable_grow_variant_end(t, v)
 
 
 #define matchable_create_variant(t, v)                                                                     \
@@ -1127,25 +1296,37 @@ namespace matchable
     private:                                                                                               \
         /* vector property for non-nil variants */                                                         \
         static matchable::MatchBox<t::Type, std::vector<pt>> & p##_vect_mb()                               \
-            { static matchable::MatchBox<t::Type, std::vector<pt>> mb; return mb; }                        \
+            {                                                                                              \
+                static matchable::Immortal<matchable::MatchBox<t::Type, std::vector<pt>>> mb;              \
+                return mb.get();                                                                           \
+            }                                                                                              \
         /* vector property for nil variant */                                                              \
-        static std::vector<pt> & nil_##p##_vect() { static std::vector<pt> v; return v; }                  \
+        static std::vector<pt> & nil_##p##_vect()                                                          \
+            { static matchable::Immortal<std::vector<pt>> v; return v.get(); }                             \
         /* observers of vector property for non-nil variants */                                            \
         static matchable::MatchBox<t::Type, matchable::Observers> & p##_vect_obs_mb()                      \
-            { static matchable::MatchBox<t::Type, matchable::Observers> mb; return mb; }                   \
+            {                                                                                              \
+                static matchable::Immortal<matchable::MatchBox<t::Type, matchable::Observers>> mb;         \
+                return mb.get();                                                                           \
+            }                                                                                              \
         /* observers of vector property for nil variant */                                                 \
-        static matchable::Observers & nil_##p##_vect_obs() { static matchable::Observers m; return m; }    \
+        static matchable::Observers & nil_##p##_vect_obs()                                                 \
+            { static matchable::Immortal<matchable::Observers> m; return m.get(); }                        \
                                                                                                            \
         /* single property */                                                                              \
         static matchable::MatchBox<t::Type, pt> & p##_mb()                                                 \
-            { static matchable::MatchBox<t::Type, pt> mb; return mb; }                                     \
+            { static matchable::Immortal<matchable::MatchBox<t::Type, pt>> mb; return mb.get(); }          \
         /* single property for nil */                                                                      \
-        static pt & nil_##p() { static pt s; return s; }                                                   \
+        static pt & nil_##p() { static matchable::Immortal<pt> s; return s.get(); }                        \
         /* observers of single property for non-nil variants */                                            \
         static matchable::MatchBox<t::Type, matchable::Observers> & p##_obs_mb()                           \
-            { static matchable::MatchBox<t::Type, matchable::Observers> mb; return mb; }                   \
+            {                                                                                              \
+                static matchable::Immortal<matchable::MatchBox<t::Type, matchable::Observers>> mb;         \
+                return mb.get();                                                                           \
+            }                                                                                              \
         /* observers of single property for nil variant */                                                 \
-        static matchable::Observers & nil_##p##_obs() { static matchable::Observers v; return v; }
+        static matchable::Observers & nil_##p##_obs()                                                      \
+            { static matchable::Immortal<matchable::Observers> v; return v.get(); }
 
 
 #define PROPERTYx1_MATCHABLE(pt0, p0, t, ...)                                                              \
@@ -1847,7 +2028,11 @@ namespace matchable
 
 
 // Add variants to existing matchable
+#ifdef MATCHABLE_UNLOADABLE
+#define GROW_MATCHABLE(t, ...) mcv(matchable_grow_variant, t, ##__VA_ARGS__)
+#else
 #define GROW_MATCHABLE(t, ...) mcv(matchable_create_variant, t, ##__VA_ARGS__)
+#endif
 
 
 // FLOW CONTROL MACROS
@@ -1865,7 +2050,7 @@ namespace matchable
 
         inline std::vector<std::pair<std::string, std::string>> const & code_symbol_pairs()
         {
-            static std::vector<std::pair<std::string, std::string>> const csp =
+            static auto const * csp = new std::vector<std::pair<std::string, std::string>>(
                 [](){
                     std::vector<std::pair<std::string, std::string>> csp_init;
                     csp_init.push_back(std::make_pair("_spc_", " "));
@@ -1901,8 +2086,8 @@ namespace matchable
                     csp_init.push_back(std::make_pair("_cbr_", "}"));
                     csp_init.push_back(std::make_pair("_tld_", "~"));
                     return csp_init;
-                }();
-            return csp;
+                }());
+            return *csp;
         }
 
         inline std::string unescape(std::string const & esc)
@@ -1954,7 +2139,7 @@ namespace matchable
                 return str;
 
             static int const offset{32};
-            static std::array<std::string, 128 - offset> const escapables =
+            static auto const * escapables = new std::array<std::string, 128 - offset>(
                 [&](){
                     std::array<std::string, 128 - offset> e;
 
@@ -1994,11 +2179,11 @@ namespace matchable
                     e[(int) '}' - offset] = "_cbr_";
                     e[(int) '~' - offset] = "_tld_";
                     return e;
-                }();
+                }());
 
             int const & ch = str[0];
             if (ch >= offset && ch < 127)
-                return escapables[ch - offset];
+                return (*escapables)[ch - offset];
 
             return str;
         }

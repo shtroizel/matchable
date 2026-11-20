@@ -229,6 +229,23 @@ translation units include it, and the program sees all of them.<br/>
 
 Example: test/programs/multi_tu/
 
+#### Unloading grown variants
+Code loaded at run time (with dlopen, or by a JIT) may grow a type and be unloaded later. Compile that code
+with MATCHABLE_UNLOADABLE defined: each of its translation units records the variants it grows and
+unregisters them when its static objects are destroyed, which happens when the code is unloaded or the
+program exits.<br/>
+* the program that loads the code exports its symbols (for example `-rdynamic`, or CMake's ENABLE_EXPORTS)
+  so the loaded code shares its registry. With GCC, compile the loaded code with `-fno-gnu-unique` so
+  dlclose unloads it
+* a name that is already registered is not registered again, and lookups keep finding the first. To
+  replace loaded code with another version, unload the old version first
+* drop copies of a variant before unloading the code that grew it
+* as_index() values are not reused, and from_index() still finds every remaining variant
+* build code that stays loaded for the whole run without MATCHABLE_UNLOADABLE, so lookups made while static
+  objects are destroyed still find its variants
+
+Example: test/programs/grow_unload/
+
 ## Macros for setting properties at link-time
 
 #### MATCHABLE_VARIANT_PROPERTY_VALUE(type, variant, property_name, property_value)
