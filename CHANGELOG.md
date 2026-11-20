@@ -8,6 +8,25 @@ Each release is tagged vX.Y.Z.
 
 ## [Unreleased]
 
+## [15.1.0] - 2026-11-20
+
+### Added
+- MATCHABLE_UNLOADABLE: code compiled with it unregisters the variants its GROW_MATCHABLE lines added when
+  it is unloaded (dlclose, or removal from a JIT), so a program can load, unload and swap code that grows
+  its types. Without it, GROW_MATCHABLE works as before
+- unregister_variants() on each type, which removes variants by as_index() in one pass
+
+### Changed
+- Registering a name that is already registered is refused, so lookups keep finding the first
+- Once variants are removed, from_index() finds the rest by binary search, since as_index() values are
+  not reused
+- Registry tables, property storage, observers, nil values and the escapable tables are never destroyed.
+  Rebuild everything compiled against an earlier version
+
+### Fixed
+- Storage that loaded code built first is no longer destroyed when that code is unloaded, so the program
+  no longer reads freed memory afterward
+
 ## [15.0.0] - 2026-11-18
 
 ### Removed
