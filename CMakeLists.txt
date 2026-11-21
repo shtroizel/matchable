@@ -91,6 +91,20 @@ if(NOT LIB_ONLY)
         endforeach()
     endif()
 
+    # a program referring to variants that a library built with hidden visibility owns and exports
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_library(variant_ref_owner SHARED test/programs/variant_ref_lib/library.cpp)
+        target_include_directories(variant_ref_owner PRIVATE include)
+        set_target_properties(variant_ref_owner PROPERTIES CXX_VISIBILITY_PRESET hidden
+            VISIBILITY_INLINES_HIDDEN ON)
+        add_executable(variant_ref_lib test/programs/variant_ref_lib/main.cpp)
+        target_include_directories(variant_ref_lib PRIVATE include test/include)
+        target_link_libraries(variant_ref_lib PRIVATE variant_ref_owner)
+        install(TARGETS variant_ref_owner LIBRARY DESTINATION share/matchable/test/lib)
+        install(TARGETS variant_ref_lib RUNTIME DESTINATION share/matchable/test/programs)
+        set_target_properties(variant_ref_lib PROPERTIES INSTALL_RPATH "$ORIGIN/../lib")
+    endif()
+
     add_matchable_test(escapable)
     add_matchable_test(test_ok)
     add_matchable_test(self_property)
@@ -109,6 +123,7 @@ if(NOT LIB_ONLY)
     add_matchable_test(lookup_by_string)
     add_matchable_test(matchable_maker matchablemaker_static)
     add_matchable_test(version)
+    add_matchable_test(variant_ref)
     target_compile_definitions(version PRIVATE
         CMAKE_VERSION_MAJOR=${matchable_VERSION_MAJOR}
         CMAKE_VERSION_MINOR=${matchable_VERSION_MINOR}

@@ -246,6 +246,24 @@ program exits.<br/>
 
 Example: test/programs/grow_unload/
 
+## Referring to variants of any matchable
+Every variant derives from matchable::Variant, which gives as_string(), as_type_name(), as_by_string_index()
+and as_index() without knowing the variant's type. A matchable::VariantRef refers to one, or is nil, and
+works as a property type, so variants of one matchable can refer to variants of others.<br/>
+* `matchable::variant_ref<type::variant>()` is a variant's reference. It's a constant, so tables of
+  references need no code to fill them, and it needs only a declaration of the variant
+  (`namespace type { class variant; }`), not its matchable
+* `->` and `*` reach the variant, get() gives a `matchable::Variant const *` (nullptr when nil), and
+  **type**::from_variant(ref) gives the typed variant back, or nil when the reference is nil or to another
+  type
+* code split into libraries with hidden visibility defines each variant's instance in the library that
+  owns it (`template struct __attribute__((visibility("default"))) matchable::Instance<type::variant>;`)
+  and declares it everywhere else (`extern template struct matchable::Instance<type::variant>;`). The
+  linker resolves references to the owner's instance, which answers from the owner's registry. The owner
+  defines it before its own first use, or GCC ignores the visibility
+
+Examples: test/programs/variant_ref.cpp, test/programs/variant_ref_lib/
+
 ## Macros for setting properties at link-time
 
 #### MATCHABLE_VARIANT_PROPERTY_VALUE(type, variant, property_name, property_value)

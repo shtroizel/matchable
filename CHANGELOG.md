@@ -8,6 +8,20 @@ Each release is tagged vX.Y.Z.
 
 ## [Unreleased]
 
+### Added
+- matchable::Variant, a base of every type's variants with as_string(), as_type_name(),
+  as_by_string_index() and as_index()
+- matchable::VariantRef, a reference to a variant of any type, or nil, usable as a property type
+- matchable::Instance<type::variant>, one object per variant and its address. Code split into libraries
+  can define instances in one and declare them in the rest
+- matchable::variant_ref<type::variant>(), a variant's VariantRef: a constant that needs only a
+  declaration of the variant
+- **type**::from_variant(), which turns a VariantRef back into a typed variant, or nil
+
+### Changed
+- Variant destructors are trivial and protected instead of virtual, and variant classes are final, so a
+  referenced Instance needs no destruction at exit. Variants are still destroyed through shared_ptr
+
 ## [15.1.0] - 2026-11-20
 
 ### Added

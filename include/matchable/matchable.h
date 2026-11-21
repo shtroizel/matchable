@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstddef>
 #include <cstring>
 #include <functional>
 #include <map>
@@ -537,6 +538,56 @@ namespace matchable
     };
 
 
+    // the base of every matchable's variants, so a variant of any matchable can be referred to
+    class Variant
+    {
+    public:
+        virtual std::string const & as_string() const = 0;
+        virtual std::string const & as_type_name() const = 0;
+        virtual int as_by_string_index() const = 0;
+        virtual int as_index() const = 0;
+    protected:
+        // trivial, so a variant's Instance needs no destruction at exit; shared_ptr destroys variants
+        ~Variant() = default;
+    };
+
+    // a variant of any matchable, or nil; usable as a property type. It holds where the variant's address
+    // is kept, which code can take from a forward declaration of the variant alone
+    class VariantRef
+    {
+    public:
+        constexpr VariantRef() = default;
+        constexpr VariantRef(std::nullptr_t) {}
+        constexpr explicit VariantRef(Variant const * const * at) : at{at} {}
+        Variant const * get() const { return nullptr == at ? nullptr : *at; }
+        Variant const * operator->() const { return *at; }
+        Variant const & operator*() const { return **at; }
+        bool is_nil() const { return nullptr == at; }
+        bool operator==(VariantRef const & other) const { return get() == other.get(); }
+        bool operator!=(VariantRef const & other) const { return get() != other.get(); }
+    private:
+        Variant const * const * at{nullptr};
+    };
+
+    // one object per variant, and its address as a Variant. Libraries can define them where the variant is
+    // owned, before any use there, and declare them extern elsewhere, so the linker resolves references by
+    // name
+    template<typename V>
+    struct Instance
+    {
+        static V const object;
+        static Variant const * const address;
+    };
+    template<typename V>
+    V const Instance<V>::object{};
+    template<typename V>
+    Variant const * const Instance<V>::address{&object};
+
+    // a variant's reference: a constant, so tables of references need no code to fill
+    template<typename V>
+    constexpr VariantRef variant_ref() { return VariantRef{&Instance<V>::address}; }
+
+
     // a T that is never destroyed, held in place so access costs nothing extra. Storage that growth units
     // share must outlive whichever code built it first: a unit that is unloaded runs the destructors of
     // the statics it built
@@ -560,16 +611,13 @@ namespace matchable
     namespace t                                                                                            \
     {                                                                                                      \
         using Type = MatchableType<class I##t>;                                                            \
-        class I##t                                                                                         \
+        class I##t : public ::matchable::Variant                                                           \
         {                                                                                                  \
             friend class MatchableType<I##t>;                                                              \
+            friend Type from_variant(::matchable::VariantRef r);                                           \
         public:                                                                                            \
             I##t() = default;                                                                              \
-            virtual ~I##t() = default;                                                                     \
-            virtual int as_by_string_index() const = 0;                                                    \
-            virtual int as_index() const = 0;                                                              \
             static int next_index() { static int n{0}; return n++; }                                       \
-            virtual std::string const & as_string() const = 0;                                             \
             virtual std::string const & as_identifier_string() const = 0;                                  \
             static std::vector<Type> const & variants_by_string() { return by_string(); }                  \
             static ::matchable::VariantNames const & variant_names() { return names(); }                   \
@@ -578,6 +626,7 @@ namespace matchable
             static void unregister_variants(std::vector<int> const & indexes);                             \
             static bool variants_removed() { return has_removed(); }                                       \
         protected:                                                                                         \
+            ~I##t() = default;                                                                             \
             /* each variant's by-string index, at its as_index() */                                        \
             static std::vector<int> & by_string_indexes()                                                  \
                 { static auto v = new std::vector<int>; return *v; }                                       \
@@ -733,6 +782,12 @@ namespace matchable
         inline std::vector<Type> const & variants_by_string() { return I##t::variants_by_string(); }       \
         [[maybe_unused]] static std::string const name{#t};                                                \
         static Type nil{};                                                                                 \
+        /* the variant a reference is to, or nil when it is nil or a variant of another matchable */       \
+        inline Type from_variant(::matchable::VariantRef r)                                                \
+        {                                                                                                  \
+            I##t const * v = dynamic_cast<I##t const *>(r.get());                                          \
+            return nullptr == v ? Type{} : Type(v->clone());                                               \
+        }                                                                                                  \
         matchable_define_grown_here(t)                                                                     \
         inline int variants_by_string_index_of(char const * str, size_t len, bool * found)                 \
         {                                                                                                  \
@@ -918,7 +973,7 @@ namespace matchable
 #define matchable_create_variant_begin(t, v)                                                               \
     namespace t                                                                                            \
     {                                                                                                      \
-        class v : public I##t                                                                              \
+        class v final : public I##t                                                                        \
         {                                                                                                  \
         public:                                                                                            \
             v() = default;                                                                                 \
@@ -943,6 +998,8 @@ namespace matchable
             }                                                                                              \
             std::string const & as_identifier_string() const override                                      \
                 { static std::string const s{#v}; return s; }                                              \
+            std::string const & as_type_name() const override                                              \
+                { static std::string const s{#t}; return s; }                                              \
             void set_by_string_index(int by_string_index) override                                         \
             {                                                                                              \
                 int const i = *m_index();                                                                  \
