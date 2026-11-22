@@ -439,32 +439,12 @@ namespace matchable
     }
 
 
+    // unsigned bytes, then shorter first: std::string's order, the same on every platform
     inline bool chars_lt_chars(char const * l, size_t l_len, char const * r, size_t r_len)
     {
         size_t const min_len = std::min(l_len, r_len);
-        for (size_t i = 0; i < min_len; ++i)
-        {
-            bool l_alpha = (l[i] >= 'A' && l[i] <= 'Z') || (l[i] >= 'a' && l[i] <= 'z');
-            bool r_alpha = (r[i] >= 'A' && r[i] <= 'Z') || (r[i] >= 'a' && r[i] <= 'z');
-            if (l_alpha ^ r_alpha)
-            {
-                return r_alpha;
-            }
-            else
-            {
-                if (l[i] < r[i])
-                    return true;
-                else if (r[i] < l[i])
-                    return false;
-            }
-        }
-        return l_len < r_len;
-    }
-
-
-    inline bool str_lt_str(std::string const & l, std::string const & r)
-    {
-        return chars_lt_chars(l.data(), l.size(), r.data(), r.size());
+        int const c = min_len == 0 ? 0 : std::memcmp(l, r, min_len);
+        return c < 0 || (c == 0 && l_len < r_len);
     }
 
 
@@ -727,9 +707,9 @@ namespace matchable
             bool operator==(MatchableType const & m) const { return as_string() == m.as_string(); }        \
             bool operator!=(MatchableType const & m) const { return as_string() != m.as_string(); }        \
             bool lt_by_string(MatchableType const & m) const                                               \
-                    { return matchable::str_lt_str(as_string(), m.as_string()); }                          \
+                    { return as_string() < m.as_string(); }                                                \
             bool lt_by_string(std::string const & str) const                                               \
-                    { return matchable::str_lt_str(as_string(), str); }                                    \
+                    { return as_string() < str; }                                                          \
             friend std::ostream & operator<<(std::ostream & o, MatchableType const & m)                    \
             {                                                                                              \
                 return o << m.as_string();                                                                 \

@@ -54,19 +54,13 @@ int word_index(std::string const & s, bool * found) { return Word::variants_by_s
 int zebra_by_string_index() { return Word::zebra::grab().as_by_string_index(); }
 
 
-// the by-string order, written out here instead of taken from the library: non-letters before letters,
-// then by char value, then shorter first
+// the by-string order, written out here instead of taken from the library: unsigned bytes, then shorter
+// first
 bool expected_lt(std::string const & l, std::string const & r)
 {
     for (size_t i = 0; i < l.size() && i < r.size(); ++i)
-    {
-        bool const l_letter = (l[i] >= 'a' && l[i] <= 'z') || (l[i] >= 'A' && l[i] <= 'Z');
-        bool const r_letter = (r[i] >= 'a' && r[i] <= 'z') || (r[i] >= 'A' && r[i] <= 'Z');
-        if (l_letter != r_letter)
-            return r_letter;
         if (l[i] != r[i])
-            return l[i] < r[i];
-    }
+            return (unsigned char) l[i] < (unsigned char) r[i];
     return l.size() < r.size();
 }
 
@@ -159,7 +153,7 @@ int main()
     std::vector<std::string> const expected_order{
         "100", "17", "2", "Apple", "Zebra", "a_very_long_variant_name_well_past_fifteen_characters",
         "a_very_long_variant_name_well_past_fifteen_characterz", "aardvark", "apple", "apple pie",
-        "apple-tree", "apple~pie", "apples", "b", "ba", "bab", "banana", "mango", "zebra"
+        "apple-tree", "apples", "apple~pie", "b", "ba", "bab", "banana", "mango", "zebra"
     };
     std::vector<std::string> order;
     for (auto const & w : Word::variants_by_string())

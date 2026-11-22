@@ -19,8 +19,16 @@ Each release is tagged vX.Y.Z.
 - **type**::from_variant(), which turns a VariantRef back into a typed variant, or nil
 
 ### Changed
+- By-string order (variants_by_string(), as_by_string_index(), lt_by_string() and, with
+  MATCHABLE_OMIT_BY_INDEX, variants() and operator<) compares names as unsigned bytes, std::string's
+  order, instead of putting symbols and digits before letters and comparing char values. It is now the
+  same on every platform; before, names with bytes above 127 sorted differently where char is unsigned.
+  Without MATCHABLE_OMIT_BY_INDEX, variants() and operator< keep declaration order
 - Variant destructors are trivial and protected instead of virtual, and variant classes are final, so a
   referenced Instance needs no destruction at exit. Variants are still destroyed through shared_ptr
+
+### Removed
+- matchable::str_lt_str(). Compare names with std::string's operator< instead
 
 ## [15.1.0] - 2026-11-20
 
