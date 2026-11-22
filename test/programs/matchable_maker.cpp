@@ -128,6 +128,57 @@ int main()
     }
 
     {
+        // a sort key goes once, before the line declaring its type, and extra includes follow the
+        // standard ones; both survive a load, so saving what was loaded writes the same file
+        matchable::MatchableMaker mm;
+        mm.includes.push_back("matchable_maker_key.h");
+        mm.includes.push_back("other/key.h");
+        auto word = mm.grab("Word");
+        word->sortkey = "fold_case";
+        for (int i = 0; i < 20; ++i)
+            word->add_variant("w" + std::to_string(i));
+        auto shape = mm.grab("Shape");
+        shape->sortkey = "keys::shape_key";
+        shape->add_property("int", "sides");
+        shape->add_variant("square");
+        mm.grab("Plain")->add_variant("p");
+        std::filesystem::path const path = dir / "sortkey.h";
+        matchable::save__content::Flags const content{matchable::save__content::matchables::grab()};
+        TEST_EQ(ok, mm.save_as(path.string(), content, wrap), matchable::save__status::success::grab());
+        std::string const saved = slurp(path);
+        TEST_EQ(ok, contains(saved, "#include <matchable/matchable_fwd.h>\n"
+                                    "#include <matchable_maker_key.h>\n"
+                                    "#include <other/key.h>\n"), true);
+        TEST_EQ(ok, contains(saved, "\nMATCHABLE_SORTKEY(Word, fold_case)\nMATCHABLE(Word, w0, "), true);
+        TEST_EQ(ok, contains(saved, "\nMATCHABLE_SORTKEY(Shape, keys::shape_key)\n"
+                                    "PROPERTYx1_MATCHABLE(int, sides, Shape, square)\n"), true);
+        TEST_EQ(ok, contains(saved, "\nGROW_MATCHABLE(Word, w16, "), true);
+        TEST_EQ(ok, saved.find("MATCHABLE_SORTKEY(Word") == saved.rfind("MATCHABLE_SORTKEY(Word"), true);
+        TEST_EQ(ok, saved.find("MATCHABLE_FWD(Word)") < saved.find("MATCHABLE_SORTKEY(Word"), true);
+        TEST_EQ(ok, contains(saved, "MATCHABLE_SORTKEY(Plain"), false);
+
+        matchable::MatchableMaker loaded;
+        TEST_EQ(ok, loaded.load(path.string()), matchable::load__status::success::grab());
+        TEST_EQ(ok, loaded.includes == mm.includes, true);
+        TEST_EQ(ok, loaded.grab("Word")->sortkey, std::string{"fold_case"});
+        TEST_EQ(ok, loaded.grab("Shape")->sortkey, std::string{"keys::shape_key"});
+        TEST_EQ(ok, loaded.grab("Plain")->sortkey, std::string{});
+        std::filesystem::path const again = dir / "sortkey_again.h";
+        TEST_EQ(ok, loaded.save_as(again.string(), content, wrap),
+                matchable::save__status::success::grab());
+        TEST_EQ(ok, slurp(again), saved);
+
+        // always mode only grows types declared elsewhere, which carry their own sort key
+        std::filesystem::path const grown = dir / "sortkey_grown.h";
+        TEST_EQ(ok, mm.save_as(grown.string(), content, always), matchable::save__status::success::grab());
+        std::string const grown_text = slurp(grown);
+        TEST_EQ(ok, contains(grown_text, "#include <matchable_maker_key.h>\n"), true);
+        TEST_EQ(ok, contains(grown_text, "\nGROW_MATCHABLE(Word, w0, "), true);
+        TEST_EQ(ok, contains(grown_text, "MATCHABLE_SORTKEY"), false);
+        TEST_EQ(ok, contains(grown_text, "MATCHABLE_FWD"), false);
+    }
+
+    {
         std::vector<std::string> numbers;
         for (int i = 0; i < 20; ++i)
             numbers.push_back(std::to_string(i));

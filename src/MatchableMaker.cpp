@@ -258,9 +258,15 @@ namespace matchable
 
         save__status::Type ret{save__status::success::grab()};
 
-        if (fputs("#pragma once\n\n\n#include <matchable/matchable.h>\n"
-                  "#include <matchable/matchable_fwd.h>\n\n\n\n", f) == EOF)
-            goto save_io_error;
+        {
+            std::string preamble{"#pragma once\n\n\n#include <matchable/matchable.h>\n"
+                                 "#include <matchable/matchable_fwd.h>\n"};
+            for (auto const & header : includes)
+                preamble += "#include <" + header + ">\n";
+            preamble += "\n\n\n";
+            if (fputs(preamble.c_str(), f) == EOF)
+                goto save_io_error;
+        }
 
         // if we need matchable 'generated_matchable' with variants for each matchable in the maker
         if (content.is_set(save__content::generated_matchable::grab()))
@@ -419,6 +425,7 @@ save_cleanup:
     MATCHABLE(
         MatchableKeyword,
         esc_MATCHABLE_FWD,
+        esc_MATCHABLE_SORTKEY,
         esc_MATCHABLE,
         esc_PROPERTYx1_MATCHABLE,
         esc_PROPERTYx2_MATCHABLE,
@@ -456,6 +463,21 @@ save_cleanup:
             if (first == std::string::npos)
                 return "";
             return s.substr(first, s.find_last_not_of(whitespace) - first + 1);
+        }
+
+
+        // records the header of an #include line (spaces already removed) that save_as() did not write
+        // itself, once
+        void read_include(std::string const & line, std::vector<std::string> & includes)
+        {
+            static std::string const directive{"#include<"};
+            if (line.compare(0, directive.size(), directive) != 0 || line.back() != '>')
+                return;
+            std::string const header = line.substr(directive.size(), line.size() - directive.size() - 1);
+            if (header == "matchable/matchable.h" || header == "matchable/matchable_fwd.h")
+                return;
+            if (std::find(includes.begin(), includes.end(), header) == includes.end())
+                includes.push_back(header);
         }
     }
 
@@ -506,6 +528,8 @@ save_cleanup:
 
                 if (ch == '(')
                     keyword = MatchableKeyword::from_string(str);
+                else
+                    read_include(str, includes);
             }
 
             // read keyword's arguments (populate "args"), splitting where the preprocessor would
@@ -572,6 +596,18 @@ save_cleanup:
                             return;
                         }
                         grab(args[0]);
+                    }},
+
+                {MatchableKeyword::esc_MATCHABLE_SORTKEY::grab(),
+                    [&](){
+                        if (args.size() != 2)
+                        {
+                            std::cout << "Error loading MATCHABLE_SORTKEY(), expected 2 args (got "
+                                      << args.size() << ")" << std::endl;
+                            ret = load__status::syntax_error::grab();
+                            return;
+                        }
+                        grab(args[0])->sortkey = args[1];
                     }},
 
                 {MatchableKeyword::esc_MATCHABLE::grab(),
@@ -1209,6 +1245,8 @@ load_end:
             {save__grow_mode::wrap::grab(),
                 [&](){
                     handled = true;
+                    if (!m.sortkey.empty())
+                        ret += "MATCHABLE_SORTKEY(" + m.name + ", " + m.sortkey + ")\n";
                     if (m.property_types_and_names.size() > 0)
                     {
                         ret += "PROPERTYx";

@@ -131,6 +131,21 @@ if(NOT LIB_ONLY)
         endforeach()
     endif()
     add_matchable_test(matchable_maker matchablemaker_static)
+    # MatchableMaker saves a header during the build, which matchable_maker_generated compiles and checks
+    add_executable(matchable_maker_generate test/programs/matchable_maker_generated/generate.cpp)
+    target_include_directories(matchable_maker_generate PRIVATE include)
+    target_link_libraries(matchable_maker_generate PRIVATE matchablemaker_static)
+    set(generated_dir ${PROJECT_BINARY_DIR}/generated_headers)
+    add_custom_command(
+        OUTPUT ${generated_dir}/matchable_maker_generated.h
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${generated_dir}
+        COMMAND matchable_maker_generate ${generated_dir}/matchable_maker_generated.h
+        DEPENDS matchable_maker_generate
+    )
+    add_executable(matchable_maker_generated test/programs/matchable_maker_generated/main.cpp
+        ${generated_dir}/matchable_maker_generated.h)
+    target_include_directories(matchable_maker_generated PRIVATE include test/include ${generated_dir})
+    install(TARGETS matchable_maker_generated RUNTIME DESTINATION share/matchable/test/programs)
     add_matchable_test(version)
     add_matchable_test(variant_ref)
     add_matchable_test(sortkey)

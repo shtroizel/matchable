@@ -21,6 +21,10 @@ Each release is tagged vX.Y.Z.
   for example `caf_xc3__xa9_` for "café"
 - MATCHABLE_SORTKEY(type, key), written before a type is declared, orders its variants by key(name) and
   then by name. Lookups and lt_by_string() follow that order
+- MatchableMaker: Matchable::sortkey names a key function, and save_as() in wrap mode writes
+  MATCHABLE_SORTKEY once before the line that declares the type (always mode declares nothing).
+  MatchableMaker::includes lists headers a saved file includes after the standard two, such as one
+  declaring the key function. load() reads both back
 
 ### Changed
 - By-string order (variants_by_string(), as_by_string_index(), lt_by_string() and, with

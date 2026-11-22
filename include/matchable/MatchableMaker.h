@@ -2,6 +2,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include <matchable/matchable.h>
 
 
@@ -55,6 +56,8 @@ namespace matchable
         std::string name;
         std::vector<MatchableVariant> variants;
         std::vector<std::pair<std::string, std::string>> property_types_and_names;
+        // the key function MATCHABLE_SORTKEY names when this is saved, or empty for plain byte order
+        std::string sortkey;
     private:
         set_property_status::Type verify_property_and_variant__and__get_variant_iter(
             std::string const & property,
@@ -69,6 +72,8 @@ namespace matchable
         MatchableMaker();
         ~MatchableMaker();
         Matchable * grab(std::string const & m);
+        // wrap: declares each matchable, growing it past the first 16 variants; always: only grows
+        // matchables declared elsewhere, so it writes no MATCHABLE_FWD or MATCHABLE_SORTKEY
         save__status::Type save_as(
             std::string const & filename,
             save__content::Flags const & content,
@@ -76,6 +81,9 @@ namespace matchable
         );
         load__status::Type load(std::string const & filename);
         std::map<std::string, Matchable *> matchables;
+        // headers a saved file includes after matchable.h and matchable_fwd.h, such as one declaring a
+        // sort key function
+        std::vector<std::string> includes;
     private:
         std::string print_matchable_fwd(Matchable const & m);
         std::string print_matchable(Matchable const & m, save__grow_mode::Type mode);
