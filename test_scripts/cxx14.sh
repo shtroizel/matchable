@@ -37,12 +37,23 @@ run()
     fi
 }
 
+# version compares matchable.h with the project version in CMakeLists.txt, which CMake passes it
+version=$(sed -n 's/^project(matchable VERSION \([0-9.]*\))$/\1/p' CMakeLists.txt)
+IFS=. read -r major minor patch <<< "${version}"
+version_flags=(-DCMAKE_VERSION_MAJOR="${major}" -DCMAKE_VERSION_MINOR="${minor}"
+               -DCMAKE_VERSION_PATCH="${patch}")
+
 for src in test/programs/*.cpp
 do
     name=$(basename "${src}" .cpp)
     [[ "${needs_cxx17}" == *" ${name} "* ]] && continue
     [[ "${1:-}" == "-a" && "${needs_by_index}" == *" ${name} "* ]] && continue
-    run "${name}" "${src}"
+    if [[ "${name}" == "version" ]]
+    then
+        run "${name}" "${src}" "${version_flags[@]}"
+    else
+        run "${name}" "${src}"
+    fi
 done
 run multi_tu test/programs/multi_tu/{main,a,b,plain}.cpp
 
