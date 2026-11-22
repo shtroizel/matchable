@@ -17,6 +17,8 @@ Each release is tagged vX.Y.Z.
 - matchable::variant_ref<type::variant>(), a variant's VariantRef: a constant that needs only a
   declaration of the variant
 - **type**::from_variant(), which turns a VariantRef back into a typed variant, or nil
+- Escape codes `_x80_` through `_xff_` for bytes 128 to 255, so a variant name can hold any UTF-8 text,
+  for example `caf_xc3__xa9_` for "café"
 
 ### Changed
 - By-string order (variants_by_string(), as_by_string_index(), lt_by_string() and, with

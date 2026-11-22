@@ -1,4 +1,8 @@
+#include <cstdio>
 #include <iostream>
+#include <random>
+#include <string>
+#include <vector>
 
 #include "matchable/matchable.h"
 #include "test_ok.h"
@@ -110,6 +114,26 @@ MATCHABLE(
     esc_grab,
     esc_std
 )
+MATCHABLE(utf8, caf_xc3__xa9_, _xc3__x9c_ber, esc__xc3__xa9_t_xc3__xa9_)
+
+
+
+// escape_all() and unescape_all() round trip symbols and bytes 128 and up next to each other and to text
+// that spells no code
+void check_round_trips(test_ok & ok)
+{
+    std::vector<std::string> const pieces{
+        "a", "Z", "0", "q", " ", "&", "(", ")", "~", "-", "\xc3", "\xa9", "\xff", "\x80"
+    };
+    std::mt19937 rng{20261122};
+    for (int i = 0; i < 20000; ++i)
+    {
+        std::string s;
+        for (int n = (int) (rng() % 6) + 1; n > 0; --n)
+            s += pieces[rng() % pieces.size()];
+        TEST_EQ(ok, matchable::escapable::unescape_all(matchable::escapable::escape_all(s)), s);
+    }
+}
 
 
 
@@ -145,6 +169,29 @@ int main()
 
     esc = "s";
     TEST_EQ(ok, esc, matchable::escapable::escape(esc));
+
+    for (int byte = 128; byte < 256; ++byte)
+    {
+        char code[8];
+        std::snprintf(code, sizeof(code), "_x%02x_", byte);
+        std::string const raw(1, (char) byte);
+        TEST_EQ(ok, matchable::escapable::escape(raw), std::string(code));
+        TEST_EQ(ok, matchable::escapable::unescape(code), raw);
+        TEST_EQ(ok, matchable::escapable::unescape_all(code), raw);
+    }
+    check_round_trips(ok);
+
+    // codes next to each other each keep both of their own underscores
+    TEST_EQ(ok, matchable::escapable::unescape_all("_parl__und__parl_"), std::string("(&("));
+    TEST_EQ(ok, matchable::escapable::unescape_all("_parl_und_parl_"), std::string("_parl&parl_"));
+
+    TEST_EQ(ok, utf8::caf_xc3__xa9_::grab().as_string(), std::string("caf\xc3\xa9"));
+    TEST_EQ(ok, utf8::_xc3__x9c_ber::grab().as_string(), std::string("\xc3\x9c" "ber"));
+    TEST_EQ(ok, utf8::esc__xc3__xa9_t_xc3__xa9_::grab().as_string(), std::string("\xc3\xa9t\xc3\xa9"));
+    TEST_EQ(ok, utf8::from_string("caf\xc3\xa9"), utf8::caf_xc3__xa9_::grab());
+    TEST_EQ(ok, utf8::variants_by_string()[0], utf8::caf_xc3__xa9_::grab());
+    TEST_EQ(ok, utf8::variants_by_string()[1], utf8::_xc3__x9c_ber::grab());
+    TEST_EQ(ok, matchable::escapable::escape_all("caf\xc3\xa9"), std::string("caf_xc3__xa9_"));
 
     return ok();
 }

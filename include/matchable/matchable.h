@@ -2122,6 +2122,11 @@ namespace matchable
                     csp_init.push_back(std::make_pair("_pip_", "|"));
                     csp_init.push_back(std::make_pair("_cbr_", "}"));
                     csp_init.push_back(std::make_pair("_tld_", "~"));
+                    static char const hex[] = "0123456789abcdef";
+                    for (int byte = 128; byte < 256; ++byte)
+                        csp_init.push_back(std::make_pair(
+                            std::string("_x") + hex[byte / 16] + hex[byte % 16] + "_",
+                            std::string(1, (char) byte)));
                     return csp_init;
                 }());
             return *csp;
@@ -2176,9 +2181,9 @@ namespace matchable
                 return str;
 
             static int const offset{32};
-            static auto const * escapables = new std::array<std::string, 128 - offset>(
+            static auto const * escapables = new std::array<std::string, 256 - offset>(
                 [&](){
-                    std::array<std::string, 128 - offset> e;
+                    std::array<std::string, 256 - offset> e;
 
                     for (int i = 0; i < (int) e.size(); ++i)
                         e[i] = std::string(1, (char) (i + offset));
@@ -2215,11 +2220,14 @@ namespace matchable
                     e[(int) '|' - offset] = "_pip_";
                     e[(int) '}' - offset] = "_cbr_";
                     e[(int) '~' - offset] = "_tld_";
+                    for (auto const & cs : code_symbol_pairs())
+                        if ((unsigned char) cs.second[0] >= 128)
+                            e[(unsigned char) cs.second[0] - offset] = cs.first;
                     return e;
                 }());
 
-            int const & ch = str[0];
-            if (ch >= offset && ch < 127)
+            int const ch = (unsigned char) str[0];
+            if (ch >= offset && ch != 127)
                 return (*escapables)[ch - offset];
 
             return str;
