@@ -133,6 +133,7 @@ if(NOT LIB_ONLY)
     add_matchable_test(matchable_maker matchablemaker_static)
     add_matchable_test(version)
     add_matchable_test(variant_ref)
+    add_matchable_test(sortkey)
     target_compile_definitions(version PRIVATE
         CMAKE_VERSION_MAJOR=${matchable_VERSION_MAJOR}
         CMAKE_VERSION_MINOR=${matchable_VERSION_MINOR}

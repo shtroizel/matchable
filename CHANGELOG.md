@@ -19,6 +19,8 @@ Each release is tagged vX.Y.Z.
 - **type**::from_variant(), which turns a VariantRef back into a typed variant, or nil
 - Escape codes `_x80_` through `_xff_` for bytes 128 to 255, so a variant name can hold any UTF-8 text,
   for example `caf_xc3__xa9_` for "café"
+- MATCHABLE_SORTKEY(type, key), written before a type is declared, orders its variants by key(name) and
+  then by name. Lookups and lt_by_string() follow that order
 
 ### Changed
 - By-string order (variants_by_string(), as_by_string_index(), lt_by_string() and, with

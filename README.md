@@ -209,6 +209,19 @@ PROPERTYx21_MATCHABLE()<br/>
 
 Example: test/programs/relationships.cpp
 
+## Choosing the by-string order
+By default, by-string order (variants_by_string(), as_by_string_index(), lt_by_string()) compares names as
+unsigned bytes, the order of std::string.<br/>
+
+#### MATCHABLE_SORTKEY(type, key)
+Orders **type** by key(name), then by name, both as unsigned bytes. **key** is a function that takes and
+returns a std::string, for example one that folds case so "Apple" and "apple" sort next to each other.
+Write it before **type** is declared, in the same header, so every translation unit sees the same order;
+written after, it stops the build. A type with a sort key stores each key once, and a lookup computes the
+key of the string it looks up once.<br/>
+
+Example: test/programs/sortkey.cpp
+
 ## Going beyond 108 variants
 Although a matchable is initially defined with up to 108 variants, it may grow to achieve variant counts higher than 108.
 #### GROW_MATCHABLE(type, variant...)

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string>
+#include <vector>
 
 #include "tab.h"
 #include "test_ok.h"
@@ -7,6 +9,7 @@
 
 GROW_MATCHABLE(Tab, alpha)
 GROW_MATCHABLE(Tab, zulu)
+GROW_MATCHABLE(Keyed, zulu)
 
 
 
@@ -34,6 +37,16 @@ int main()
     TEST_EQ(ok, Tab::from_index(a), Tab::alpha::grab());
     TEST_EQ(ok, Tab::from_index(z), Tab::zulu::grab());
 #endif
+
+    std::vector<std::string> keyed;
+    for (auto const & k : Keyed::variants_by_string())
+        keyed.push_back(k.as_string());
+    TEST_EQ(ok, keyed == (std::vector<std::string>{"ALPHA", "alpha", "Bravo", "bravo", "Zulu", "zulu"}), true);
+    for (int i = 0; i < (int) Keyed::variants_by_string().size(); ++i)
+    {
+        TEST_EQ(ok, Keyed::variants_by_string()[i].as_by_string_index(), i);
+        TEST_EQ(ok, Keyed::from_string(keyed[i]), Keyed::variants_by_string()[i]);
+    }
 
     TEST_EQ(ok, Tab::zulu::grab().as_id(), 26);
     TEST_EQ(ok, Tab::alpha::grab().as_id(), 0);

@@ -449,21 +449,99 @@ namespace matchable
 
 
     // a type's variant names in by-string order, packed into one buffer so a lookup touches only this
-    // table; a name's position is its by-string index
+    // table; a name's position is its by-string index. A type with a sort key keeps each name's key in a
+    // second buffer and orders by key, then name
     class VariantNames
     {
     public:
-        void insert(int position, std::string const & name)
+        void insert(int position, std::string const & name) { names.insert(position, name); }
+        void insert(int position, std::string const & name, std::string const & key)
         {
-            unsigned const at = begins[position];
-            chars.insert(at, name);
-            begins.insert(begins.begin() + position + 1, at);
-            for (size_t i = position + 1; i < begins.size(); ++i)
-                begins[i] += (unsigned) name.size();
+            names.insert(position, name);
+            keys.insert(position, key);
         }
-        int size() const { return (int) begins.size() - 1; }
+        int size() const { return names.size(); }
         // position of the first name not less than s, or size()
         int lower_bound(char const * s, size_t len) const
+        {
+            return search([&](int middle) { return names.lt(middle, s, len); });
+        }
+        // position of the first (key, name) not less than (key, s), or size()
+        int lower_bound(std::string const & key, char const * s, size_t len) const
+        {
+            return search(
+                [&](int middle)
+                {
+                    if (keys.lt(middle, key.data(), key.size()))
+                        return true;
+                    return keys.equals(middle, key.data(), key.size()) && names.lt(middle, s, len);
+                });
+        }
+        bool equals(int position, char const * s, size_t len) const
+            { return names.equals(position, s, len); }
+        // removes the names at positions, which are sorted ascending, in one pass
+        void erase(std::vector<int> const & positions)
+        {
+            names.erase(positions);
+            if (keys.size() > 0)
+                keys.erase(positions);
+        }
+    private:
+        class Packed
+        {
+        public:
+            void insert(int position, std::string const & s)
+            {
+                if (begins.empty())
+                    begins.push_back(0);
+                unsigned const at = begins[position];
+                chars.insert(at, s);
+                begins.insert(begins.begin() + position + 1, at);
+                for (size_t i = position + 1; i < begins.size(); ++i)
+                    begins[i] += (unsigned) s.size();
+            }
+            int size() const { return begins.empty() ? 0 : (int) begins.size() - 1; }
+            bool lt(int position, char const * s, size_t len) const
+            {
+                size_t const length = begins[position + 1] - begins[position];
+                return chars_lt_chars(chars.data() + begins[position], length, s, len);
+            }
+            bool equals(int position, char const * s, size_t len) const
+            {
+                return begins[position + 1] - begins[position] == len &&
+                        std::memcmp(chars.data() + begins[position], s, len) == 0;
+            }
+            void erase(std::vector<int> const & positions)
+            {
+                if (positions.empty())
+                    return;
+                std::string kept;
+                std::vector<unsigned> kept_begins{0};
+                kept.reserve(chars.size());
+                kept_begins.reserve(begins.size() - positions.size());
+                size_t next = 0;
+                for (int i = 0; i < size(); ++i)
+                {
+                    if (next < positions.size() && positions[next] == i)
+                    {
+                        ++next;
+                        continue;
+                    }
+                    kept.append(chars, begins[i], begins[i + 1] - begins[i]);
+                    kept_begins.push_back((unsigned) kept.size());
+                }
+                chars.swap(kept);
+                begins.swap(kept_begins);
+            }
+        private:
+            std::string chars;
+            // empty until the first insert, so a type without a sort key allocates nothing for keys
+            std::vector<unsigned> begins;
+        };
+
+        // the first position where less(position) is false
+        template<typename Less>
+        int search(Less const & less) const
         {
             int first = 0;
             int count = size();
@@ -471,8 +549,7 @@ namespace matchable
             {
                 int const step = count / 2;
                 int const middle = first + step;
-                size_t const middle_len = begins[middle + 1] - begins[middle];
-                if (chars_lt_chars(chars.data() + begins[middle], middle_len, s, len))
+                if (less(middle))
                 {
                     first = middle + 1;
                     count -= step + 1;
@@ -484,37 +561,9 @@ namespace matchable
             }
             return first;
         }
-        bool equals(int position, char const * s, size_t len) const
-        {
-            return begins[position + 1] - begins[position] == len &&
-                    std::memcmp(chars.data() + begins[position], s, len) == 0;
-        }
-        // removes the names at positions, which are sorted ascending, in one pass
-        void erase(std::vector<int> const & positions)
-        {
-            if (positions.empty())
-                return;
-            std::string kept;
-            std::vector<unsigned> kept_begins{0};
-            kept.reserve(chars.size());
-            kept_begins.reserve(begins.size() - positions.size());
-            size_t next = 0;
-            for (int i = 0; i < size(); ++i)
-            {
-                if (next < positions.size() && positions[next] == i)
-                {
-                    ++next;
-                    continue;
-                }
-                kept.append(chars, begins[i], begins[i + 1] - begins[i]);
-                kept_begins.push_back((unsigned) kept.size());
-            }
-            chars.swap(kept);
-            begins.swap(kept_begins);
-        }
-    private:
-        std::string chars;
-        std::vector<unsigned> begins{0};
+
+        Packed names;
+        Packed keys;
     };
 
 
@@ -530,6 +579,16 @@ namespace matchable
         // trivial, so a variant's Instance needs no destruction at exit; shared_ptr destroys variants
         ~Variant() = default;
     };
+
+    // a type's sort key, found by argument-dependent lookup: MATCHABLE_SORTKEY declares both in the type's
+    // namespace for its variants, and these serve every other type
+    inline bool matchable_has_sortkey(Variant const *) { return false; }
+    inline std::string matchable_sortkey(Variant const *, std::string const & name) { return name; }
+
+    template<typename T, typename = void>
+    struct is_complete : std::false_type {};
+    template<typename T>
+    struct is_complete<T, decltype(void(sizeof(T)))> : std::true_type {};
 
     // a variant of any matchable, or nil; usable as a property type. It holds where the variant's address
     // is kept, which code can take from a forward declaration of the variant alone
@@ -605,6 +664,29 @@ namespace matchable
             /* removes variants by as_index() in one pass; growth units call it when they are unloaded */  \
             static void unregister_variants(std::vector<int> const & indexes);                             \
             static bool variants_removed() { return has_removed(); }                                       \
+            /* by-string order: the MATCHABLE_SORTKEY key, if the type has one, then the name */           \
+            static bool has_sortkey()                                                                      \
+                { return matchable_has_sortkey(static_cast<I##t const *>(nullptr)); }                      \
+            static std::string sortkey(std::string const & name)                                           \
+                { return matchable_sortkey(static_cast<I##t const *>(nullptr), name); }                    \
+            static bool lt_by_string(std::string const & l, std::string const & r)                         \
+            {                                                                                              \
+                if (has_sortkey())                                                                         \
+                {                                                                                          \
+                    std::string const kl = sortkey(l);                                                     \
+                    std::string const kr = sortkey(r);                                                     \
+                    if (kl != kr)                                                                          \
+                        return kl < kr;                                                                    \
+                }                                                                                          \
+                return l < r;                                                                              \
+            }                                                                                              \
+            /* position of the first name not less than str, or the count of names */                      \
+            static int position_of(char const * str, size_t len)                                           \
+            {                                                                                              \
+                if (!has_sortkey())                                                                        \
+                    return names().lower_bound(str, len);                                                  \
+                return names().lower_bound(sortkey(std::string(str, len)), str, len);                      \
+            }                                                                                              \
         protected:                                                                                         \
             ~I##t() = default;                                                                             \
             /* each variant's by-string index, at its as_index() */                                        \
@@ -707,9 +789,9 @@ namespace matchable
             bool operator==(MatchableType const & m) const { return as_string() == m.as_string(); }        \
             bool operator!=(MatchableType const & m) const { return as_string() != m.as_string(); }        \
             bool lt_by_string(MatchableType const & m) const                                               \
-                    { return as_string() < m.as_string(); }                                                \
+                    { return T::lt_by_string(as_string(), m.as_string()); }                                \
             bool lt_by_string(std::string const & str) const                                               \
-                    { return as_string() < str; }                                                          \
+                    { return T::lt_by_string(as_string(), str); }                                          \
             friend std::ostream & operator<<(std::ostream & o, MatchableType const & m)                    \
             {                                                                                              \
                 return o << m.as_string();                                                                 \
@@ -772,7 +854,7 @@ namespace matchable
         inline int variants_by_string_index_of(char const * str, size_t len, bool * found)                 \
         {                                                                                                  \
             ::matchable::VariantNames const & names = I##t::variant_names();                               \
-            int const position = names.lower_bound(str, len);                                              \
+            int const position = I##t::position_of(str, len);                                              \
             if (nullptr != found)                                                                          \
                 *found = position != names.size() && names.equals(position, str, len);                     \
             return position;                                                                               \
@@ -785,7 +867,7 @@ namespace matchable
         inline Type const & from_string_as_ref(char const * str, size_t len)                               \
         {                                                                                                  \
             ::matchable::VariantNames const & names = I##t::variant_names();                               \
-            int const position = names.lower_bound(str, len);                                              \
+            int const position = I##t::position_of(str, len);                                              \
             if (position != names.size() && names.equals(position, str, len))                              \
                 return I##t::variants_by_string()[position];                                               \
             return nil;                                                                                    \
@@ -817,14 +899,15 @@ namespace matchable
 #define matchable_define_register_variant_common                                                           \
             if (!variant.is_nil())                                                                         \
             {                                                                                              \
-                static auto pred = [](Type const & a, Type const & b) { return a.lt_by_string(b); };       \
-                auto const at = std::upper_bound(by_string().begin(), by_string().end(), variant, pred);   \
-                int const position = (int) (at - by_string().begin());                                     \
                 std::string const & str = variant.as_string();                                             \
-                if (position > 0 && names().equals(position - 1, str.data(), str.size()))                  \
+                int const position = position_of(str.data(), str.size());                                  \
+                if (position < names().size() && names().equals(position, str.data(), str.size()))         \
                     return false;                                                                          \
                 by_string().insert(by_string().begin() + position, variant);                               \
-                names().insert(position, variant.as_string());                                             \
+                if (has_sortkey())                                                                         \
+                    names().insert(position, str, sortkey(str));                                           \
+                else                                                                                       \
+                    names().insert(position, str);                                                         \
                 for (int & i : by_string_indexes())                                                        \
                     if (i >= position)                                                                     \
                         ++i;                                                                               \
@@ -1196,6 +1279,20 @@ namespace matchable
     matchable_declare_end(t)                                                                               \
     matchable_define(t)                                                                                    \
     mcv(matchable_create_variant, t, ##__VA_ARGS__)
+
+
+// orders t's variants by key(name), then name, both as unsigned bytes; key takes and returns a std::string.
+// Write it before t is declared, in the same header, so every translation unit sees it
+#define MATCHABLE_SORTKEY(t, key)                                                                          \
+    namespace t                                                                                            \
+    {                                                                                                      \
+        class I##t;                                                                                        \
+        static_assert(!::matchable::is_complete<I##t>::value,                                              \
+                      "MATCHABLE_SORTKEY(" #t ", " #key ") must come before " #t " is declared");          \
+        inline bool matchable_has_sortkey(I##t const *) { return true; }                                   \
+        inline std::string matchable_sortkey(I##t const *, std::string const & name)                       \
+            { return key(name); }                                                                          \
+    }
 
 
 // pt: property type
