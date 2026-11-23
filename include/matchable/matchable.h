@@ -478,6 +478,14 @@ namespace matchable
                 return true;
             return keys.equals(position, key.data(), key.size()) && names.lt(position, s, len);
         }
+        // position of the first name that less(name, length) is false for, or size(). less must be true
+        // for the names up to some position and false from there on, so a caller that knows the order of
+        // the type can search the names where they are, without building a key
+        template<typename Less>
+        int lower_bound_by(Less const & less) const
+        {
+            return search([&](int middle) { return less(names.data(middle), names.length(middle)); });
+        }
         bool equals(int position, char const * s, size_t len) const
             { return names.equals(position, s, len); }
         // removes the names at positions, which are sorted ascending, in one pass
@@ -502,6 +510,8 @@ namespace matchable
                     begins[i] += (unsigned) s.size();
             }
             int size() const { return begins.empty() ? 0 : (int) begins.size() - 1; }
+            char const * data(int position) const { return chars.data() + begins[position]; }
+            size_t length(int position) const { return begins[position + 1] - begins[position]; }
             bool lt(int position, char const * s, size_t len) const
             {
                 size_t const length = begins[position + 1] - begins[position];

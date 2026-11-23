@@ -21,6 +21,8 @@ Each release is tagged vX.Y.Z.
   for example `caf_xc3__xa9_` for "café"
 - MATCHABLE_SORTKEY(type, key), written before a type is declared, orders its variants by key(name) and
   then by name. Lookups and lt_by_string() follow that order
+- VariantNames::lower_bound_by(less), which searches a type's names where they are with the caller's
+  comparison, so a caller that knows the type's order looks a string up without building a key
 - MatchableMaker: Matchable::sortkey names a key function, and save_as() in wrap mode writes
   MATCHABLE_SORTKEY once before the line that declares the type (always mode declares nothing).
   MatchableMaker::includes lists headers a saved file includes after the standard two, such as one

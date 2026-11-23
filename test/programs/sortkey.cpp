@@ -114,6 +114,32 @@ int main()
         TEST_EQ(ok, Plain::Type{}.lt_by_string(Plain::apple::grab()), false);
     }
 
+    // a caller that knows the order searches the names in place, computing no key
+    {
+        auto const fold_char = [](char c) { return c >= 'A' && c <= 'Z' ? (char) (c - 'A' + 'a') : c; };
+        matchable::VariantNames const & names = Word::IWord::variant_names();
+        std::vector<std::string> searched{expected};
+        for (std::string const s : {"", "0", "APPLe", "Apple pie", "ba", "BANANAS", "c", "zz", "~"})
+            searched.push_back(s);
+        int const before = fold_calls;
+        std::vector<int> positions;
+        for (std::string const & s : searched)
+            positions.push_back(names.lower_bound_by(
+                [&](char const * name, size_t length)
+                {
+                    size_t const shorter = std::min(length, s.size());
+                    for (size_t i = 0; i < shorter; ++i)
+                        if (fold_char(name[i]) != fold_char(s[i]))
+                            return (unsigned char) fold_char(name[i]) < (unsigned char) fold_char(s[i]);
+                    if (length != s.size())
+                        return length < s.size();
+                    return std::string(name, length) < s;
+                }));
+        TEST_EQ(ok, fold_calls - before, 0);
+        for (size_t i = 0; i < searched.size(); ++i)
+            TEST_EQ(ok, positions[i], Word::variants_by_string_index_of(searched[i], nullptr));
+    }
+
     // a type without a sort key keeps plain byte order
     std::vector<std::string> plain;
     for (auto const & p : Plain::variants_by_string())
