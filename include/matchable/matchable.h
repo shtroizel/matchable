@@ -585,10 +585,13 @@ namespace matchable
     inline bool matchable_has_sortkey(Variant const *) { return false; }
     inline std::string matchable_sortkey(Variant const *, std::string const & name) { return name; }
 
-    template<typename T, typename = void>
-    struct is_complete : std::false_type {};
-    template<typename T>
-    struct is_complete<T, decltype(void(sizeof(T)))> : std::true_type {};
+    namespace detail
+    {
+        template<typename T, typename = void>
+        struct is_complete : std::false_type {};
+        template<typename T>
+        struct is_complete<T, decltype(void(sizeof(T)))> : std::true_type {};
+    }
 
     // a variant of any matchable, or nil; usable as a property type. It holds where the variant's address
     // is kept, which code can take from a forward declaration of the variant alone
@@ -1287,7 +1290,7 @@ namespace matchable
     namespace t                                                                                            \
     {                                                                                                      \
         class I##t;                                                                                        \
-        static_assert(!::matchable::is_complete<I##t>::value,                                              \
+        static_assert(!::matchable::detail::is_complete<I##t>::value,                                      \
                       "MATCHABLE_SORTKEY(" #t ", " #key ") must come before " #t " is declared");          \
         inline bool matchable_has_sortkey(I##t const *) { return true; }                                   \
         inline std::string matchable_sortkey(I##t const *, std::string const & name)                       \
