@@ -218,7 +218,8 @@ Orders **type** by key(name), then by name, both as unsigned bytes. **key** is a
 returns a std::string, for example one that folds case so "Apple" and "apple" sort next to each other.
 Write it before **type** is declared, in the same header, so every translation unit sees the same order;
 written after, it stops the build. A type with a sort key stores each key once, and a lookup computes the
-key of the string it looks up once.<br/>
+key of the string it looks up once. lt_by_string() computes no key between two variants and one key
+between a variant and a string.<br/>
 
 Example: test/programs/sortkey.cpp
 

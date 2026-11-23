@@ -469,13 +469,14 @@ namespace matchable
         // position of the first (key, name) not less than (key, s), or size()
         int lower_bound(std::string const & key, char const * s, size_t len) const
         {
-            return search(
-                [&](int middle)
-                {
-                    if (keys.lt(middle, key.data(), key.size()))
-                        return true;
-                    return keys.equals(middle, key.data(), key.size()) && names.lt(middle, s, len);
-                });
+            return search([&](int middle) { return lt(middle, key, s, len); });
+        }
+        // whether the (key, name) at position is less than (key, s)
+        bool lt(int position, std::string const & key, char const * s, size_t len) const
+        {
+            if (keys.lt(position, key.data(), key.size()))
+                return true;
+            return keys.equals(position, key.data(), key.size()) && names.lt(position, s, len);
         }
         bool equals(int position, char const * s, size_t len) const
             { return names.equals(position, s, len); }
@@ -791,10 +792,23 @@ namespace matchable
                 { return T::variants_by_string(); }                                                        \
             bool operator==(MatchableType const & m) const { return as_string() == m.as_string(); }        \
             bool operator!=(MatchableType const & m) const { return as_string() != m.as_string(); }        \
+            /* two variants compare by their stored order; nil compares as the name "nil" */               \
             bool lt_by_string(MatchableType const & m) const                                               \
-                    { return T::lt_by_string(as_string(), m.as_string()); }                                \
+            {                                                                                              \
+                int const l = as_by_string_index();                                                        \
+                int const r = m.as_by_string_index();                                                      \
+                if (l >= 0 && r >= 0)                                                                      \
+                    return l < r;                                                                          \
+                return T::lt_by_string(as_string(), m.as_string());                                        \
+            }                                                                                              \
+            /* with a sort key, the variant's stored key is compared with the one key computed for str */  \
             bool lt_by_string(std::string const & str) const                                               \
-                    { return T::lt_by_string(as_string(), str); }                                          \
+            {                                                                                              \
+                int const l = as_by_string_index();                                                        \
+                if (l < 0 || !T::has_sortkey())                                                            \
+                    return T::lt_by_string(as_string(), str);                                              \
+                return T::variant_names().lt(l, T::sortkey(str), str.data(), str.size());                  \
+            }                                                                                              \
             friend std::ostream & operator<<(std::ostream & o, MatchableType const & m)                    \
             {                                                                                              \
                 return o << m.as_string();                                                                 \

@@ -7,8 +7,12 @@
 
 
 
+int fold_calls{0};
+
+
 std::string fold(std::string const & name)
 {
+    ++fold_calls;
     std::string folded{name};
     for (char & c : folded)
         if (c >= 'A' && c <= 'Z')
@@ -77,6 +81,37 @@ int main()
         TEST_EQ(ok, Word::from_string(s), Word::nil);
         auto const at = std::lower_bound(expected.begin(), expected.end(), s, expected_lt);
         TEST_EQ(ok, index, (int) (at - expected.begin()));
+    }
+
+    // two variants compare by their stored order, and a variant against a string computes one key
+    {
+        Word::Type const apple = Word::apple::grab();
+        Word::Type const banana = Word::Banana::grab();
+        int before = fold_calls;
+        TEST_EQ(ok, apple.lt_by_string(banana), true);
+        TEST_EQ(ok, banana.lt_by_string(apple), false);
+        TEST_EQ(ok, apple.lt_by_string(apple), false);
+        TEST_EQ(ok, fold_calls - before, 0);
+        before = fold_calls;
+        TEST_EQ(ok, apple.lt_by_string(std::string{"Apple pie"}), true);
+        TEST_EQ(ok, apple.lt_by_string(std::string{"APPLE"}), false);
+        TEST_EQ(ok, apple.lt_by_string(std::string{"apple"}), false);
+        TEST_EQ(ok, apple.lt_by_string(std::string{"applf"}), true);
+        TEST_EQ(ok, banana.lt_by_string(std::string{"banana"}), true);
+        TEST_EQ(ok, banana.lt_by_string(std::string{"b"}), false);
+        TEST_EQ(ok, fold_calls - before, 6);
+
+        // nil compares as the name "nil"
+        Word::Type const nil;
+        TEST_EQ(ok, nil.lt_by_string(apple), false);
+        TEST_EQ(ok, apple.lt_by_string(nil), true);
+        TEST_EQ(ok, nil.lt_by_string(std::string{"zebra"}), true);
+
+        TEST_EQ(ok, Plain::apple::grab().lt_by_string(Plain::Banana::grab()), false);
+        TEST_EQ(ok, Plain::Banana::grab().lt_by_string(Plain::apple::grab()), true);
+        TEST_EQ(ok, Plain::apple::grab().lt_by_string(std::string{"b"}), true);
+        TEST_EQ(ok, Plain::apple::grab().lt_by_string(std::string{"Zebra"}), false);
+        TEST_EQ(ok, Plain::Type{}.lt_by_string(Plain::apple::grab()), false);
     }
 
     // a type without a sort key keeps plain byte order
