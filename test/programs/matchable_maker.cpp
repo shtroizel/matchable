@@ -223,6 +223,49 @@ int main()
         TEST_EQ(ok, values == words, true);
     }
 
+    {
+        // variants that other files declare are declared extern before the matchables, 16 to a line, so
+        // property values can refer to them; they survive a load
+        matchable::MatchableMaker mm;
+        for (int i = 0; i < 18; ++i)
+            mm.extern_variants["Planet"].insert("p" + std::to_string(10 + i));
+        mm.extern_variants["Moon"].insert("luna");
+        auto alien = mm.grab("Alien");
+        alien->add_property("::matchable::VariantRef", "home");
+        alien->add_property("::matchable::VariantRef", "visited");
+        alien->add_variant("zog");
+        alien->set_property("zog", "home", "::matchable::variant_ref<Planet::p10>()");
+        std::vector<std::string> const visited{
+            "::matchable::variant_ref<Moon::luna>()", "::matchable::variant_ref<Planet::p27>()"
+        };
+        alien->set_propertyvect("zog", "visited", visited);
+        std::filesystem::path const path = dir / "extern_variants.h";
+        matchable::save__content::Flags const content{matchable::save__content::matchables::grab()};
+        TEST_EQ(ok, mm.save_as(path.string(), content, wrap), matchable::save__status::success::grab());
+        std::string const saved = slurp(path);
+        TEST_EQ(ok, contains(saved, "\nMATCHABLE_EXTERN_VARIANTS(Moon, luna)\n"
+                                    "MATCHABLE_EXTERN_VARIANTS(Planet, p10, p11, "), true);
+        TEST_EQ(ok, contains(saved, ", p25)\nMATCHABLE_EXTERN_VARIANTS(Planet, p26, p27)\n"), true);
+        TEST_EQ(ok, saved.find("(Planet, p26") < saved.find("MATCHABLE_FWD(Alien)"), true);
+
+        matchable::MatchableMaker loaded;
+        TEST_EQ(ok, loaded.load(path.string()), matchable::load__status::success::grab());
+        TEST_EQ(ok, loaded.extern_variants == mm.extern_variants, true);
+        TEST_EQ(ok, (int) loaded.matchables.size(), 1);
+        std::vector<std::string> values;
+        loaded.grab("Alien")->get_propertyvect("zog", "visited", values);
+        TEST_EQ(ok, values == visited, true);
+        std::filesystem::path const again = dir / "extern_variants_again.h";
+        TEST_EQ(ok, loaded.save_as(again.string(), content, wrap),
+                matchable::save__status::success::grab());
+        TEST_EQ(ok, slurp(again), saved);
+
+        // a file that only grows refers to them the same way
+        std::filesystem::path const grown = dir / "extern_variants_grown.h";
+        TEST_EQ(ok, mm.save_as(grown.string(), content, always), matchable::save__status::success::grab());
+        TEST_EQ(ok, contains(slurp(grown), "\nMATCHABLE_EXTERN_VARIANTS(Moon, luna)\n"), true);
+    }
+
     if (std::filesystem::exists("/dev/full") && std::filesystem::exists("/proc/self/fd"))
     {
         auto const open_files = []() {

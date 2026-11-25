@@ -17,6 +17,14 @@ Each release is tagged vX.Y.Z.
 - matchable::variant_ref<type::variant>(), a variant's VariantRef: a constant that needs only a
   declaration of the variant
 - **type**::from_variant(), which turns a VariantRef back into a typed variant, or nil
+- MATCHABLE_INSTANCE_VISIBILITY, defined as `default`, `protected` or `hidden` when compiling the code
+  that owns variants: each variant's Instance is defined where the variant is declared or grown, with
+  that visibility under GCC and Clang
+- MATCHABLE_EXTERN_VARIANTS(type, variant...), which declares variants that other code owns, so
+  matchable::variant_ref refers to them without the type's declaration
+- MatchableMaker::extern_variants lists such variants by type. save_as() declares them with
+  MATCHABLE_EXTERN_VARIANTS before the matchables, 16 to a line, so property values can refer to
+  variants of matchables in other files, and load() reads them back
 - Escape codes `_x80_` through `_xff_` for bytes 128 to 255, so a variant name can hold any UTF-8 text,
   for example `caf_xc3__xa9_` for "café"
 - MATCHABLE_SORTKEY(type, key), written before a type is declared, orders its variants by key(name) and

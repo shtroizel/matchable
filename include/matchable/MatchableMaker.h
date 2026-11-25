@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 #include <matchable/matchable.h>
@@ -84,6 +85,9 @@ namespace matchable
         // headers a saved file includes after matchable.h and matchable_fwd.h, such as one declaring a
         // sort key function
         std::vector<std::string> includes;
+        // variants that other files declare, by matchable name, for property values to refer to: a saved
+        // file declares them with MATCHABLE_EXTERN_VARIANTS before its matchables
+        std::map<std::string, std::set<std::string>> extern_variants;
     private:
         std::string print_matchable_fwd(Matchable const & m);
         std::string print_matchable(Matchable const & m, save__grow_mode::Type mode);

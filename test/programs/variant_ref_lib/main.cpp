@@ -7,13 +7,12 @@
 
 
 
-namespace Fruit { class pear; class apple; }
-extern template struct ::matchable::Instance<Fruit::pear>;
-extern template struct ::matchable::Instance<Fruit::apple>;
+MATCHABLE_EXTERN_VARIANTS(Fruit, pear, apple, banana)
 
 static ::matchable::VariantRef const refs[] = {
     ::matchable::variant_ref<Fruit::apple>(),
     ::matchable::variant_ref<Fruit::pear>(),
+    ::matchable::variant_ref<Fruit::banana>(),
 };
 
 
@@ -27,6 +26,8 @@ int main()
     TEST_EQ(ok, refs[0]->as_by_string_index(), 0);
     TEST_EQ(ok, refs[1]->as_string(), std::string("pear"));
     TEST_EQ(ok, refs[1]->as_by_string_index(), 2);
+    TEST_EQ(ok, refs[2]->as_string(), std::string("banana"));
+    TEST_EQ(ok, refs[2]->as_by_string_index(), 1);
 
     return ok();
 }

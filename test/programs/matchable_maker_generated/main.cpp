@@ -1,8 +1,10 @@
-// compiles the header generate.cpp saved during the build and checks the order its sort key gives
+// compiles the header generate.cpp saved during the build and checks the order its sort key gives,
+// and that its references reach the planets, whose instances another source file defines
 #include <string>
 #include <vector>
 
 #include "matchable_maker_generated.h"
+#include "planet.h"
 #include "test_ok.h"
 
 
@@ -32,6 +34,15 @@ int main()
 
     std::vector<std::string> const plain{"Apple", "Banana", "apple", "banana"};
     TEST_EQ(ok, names_by_string<Plain::Type>() == plain, true);
+
+    TEST_EQ(ok, Planet::from_variant(Alien::zog::grab().as_home()), Planet::mars::grab());
+    std::vector<::matchable::VariantRef> const & visited = Alien::zog::grab().as_visited_vect();
+    TEST_EQ(ok, (int) visited.size(), 2);
+    if (visited.size() == 2)
+    {
+        TEST_EQ(ok, visited[0]->as_string(), std::string("venus"));
+        TEST_EQ(ok, visited[1] == Alien::zog::grab().as_home(), true);
+    }
 
     return ok();
 }

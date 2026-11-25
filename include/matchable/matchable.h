@@ -622,9 +622,9 @@ namespace matchable
         Variant const * const * at{nullptr};
     };
 
-    // one object per variant, and its address as a Variant. Libraries can define them where the variant is
-    // owned, before any use there, and declare them extern elsewhere, so the linker resolves references by
-    // name
+    // one object per variant, and its address as a Variant. A library defines the instances of its variants
+    // by building with MATCHABLE_INSTANCE_VISIBILITY, and code elsewhere declares them with
+    // MATCHABLE_EXTERN_VARIANTS, so the linker resolves references by name
     template<typename V>
     struct Instance
     {
@@ -1136,14 +1136,31 @@ namespace matchable
     }
 
 
+// with MATCHABLE_INSTANCE_VISIBILITY defined as default, protected or hidden, each variant's Instance is
+// defined where the variant is declared or grown, at global scope, with that visibility under GCC and Clang
+#if defined(MATCHABLE_INSTANCE_VISIBILITY) && defined(__GNUC__)
+#define matchable_stringify_(x) #x
+#define matchable_stringify(x) matchable_stringify_(x)
+#define matchable_define_instance(t, v)                                                                    \
+    template struct __attribute__((visibility(matchable_stringify(MATCHABLE_INSTANCE_VISIBILITY))))        \
+        ::matchable::Instance<t::v>;
+#elif defined(MATCHABLE_INSTANCE_VISIBILITY)
+#define matchable_define_instance(t, v) template struct ::matchable::Instance<t::v>;
+#else
+#define matchable_define_instance(t, v)
+#endif
+
+
 #define matchable_grow_variant(t, v)                                                                       \
     matchable_create_variant_begin(t, v)                                                                   \
-    matchable_grow_variant_end(t, v)
+    matchable_grow_variant_end(t, v)                                                                       \
+    matchable_define_instance(t, v)
 
 
 #define matchable_create_variant(t, v)                                                                     \
     matchable_create_variant_begin(t, v)                                                                   \
-    matchable_create_variant_end(t, v)
+    matchable_create_variant_end(t, v)                                                                     \
+    matchable_define_instance(t, v)
 
 
 #define matchable_concat_variant(t, v) t::v::grab(),
@@ -2194,6 +2211,16 @@ namespace matchable
 #else
 #define GROW_MATCHABLE(t, ...) mcv(matchable_create_variant, t, ##__VA_ARGS__)
 #endif
+
+
+// declares variants of t that other code declares, such as a library built with
+// MATCHABLE_INSTANCE_VISIBILITY, so matchable::variant_ref<t::v>() works without t's declaration. Write
+// it at global scope
+#define matchable_declare_extern_variant(t, v)                                                             \
+    namespace t { class v; }                                                                               \
+    extern template struct ::matchable::Instance<t::v>;
+
+#define MATCHABLE_EXTERN_VARIANTS(t, ...) mcv(matchable_declare_extern_variant, t, ##__VA_ARGS__)
 
 
 // FLOW CONTROL MACROS

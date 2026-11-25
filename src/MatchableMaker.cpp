@@ -264,6 +264,23 @@ namespace matchable
             for (auto const & header : includes)
                 preamble += "#include <" + header + ">\n";
             preamble += "\n\n\n";
+            for (auto const & [type, type_variants] : extern_variants)
+            {
+                int variant_count{0};
+                for (auto const & variant : type_variants)
+                {
+                    if (variant_count % 16 == 0)
+                    {
+                        if (variant_count > 0)
+                            preamble += ")\n";
+                        preamble += "MATCHABLE_EXTERN_VARIANTS(" + type;
+                    }
+                    preamble += ", " + variant;
+                    ++variant_count;
+                }
+                if (variant_count > 0)
+                    preamble += ")\n";
+            }
             if (fputs(preamble.c_str(), f) == EOF)
                 goto save_io_error;
         }
@@ -449,6 +466,7 @@ save_cleanup:
         esc_PROPERTYx20_MATCHABLE,
         esc_PROPERTYx21_MATCHABLE,
         esc_GROW_MATCHABLE,
+        esc_MATCHABLE_EXTERN_VARIANTS,
         esc_MATCHABLE_VARIANT_PROPERTY_VALUE,
         esc_MATCHABLE_VARIANT_PROPERTY_VALUES
     );
@@ -1185,6 +1203,18 @@ save_cleanup:
                         auto m = grab(args[0]);
                         for (int i = 1; i < (int) args.size(); ++i)
                             m->add_variant(args[i]);
+                    }},
+
+                {MatchableKeyword::esc_MATCHABLE_EXTERN_VARIANTS::grab(),
+                    [&](){
+                        if (args.size() < 2)
+                        {
+                            std::cout << "Error loading MATCHABLE_EXTERN_VARIANTS(), expected >= 2 args "
+                                      << "(got " << args.size() << ")" << std::endl;
+                            ret = load__status::syntax_error::grab();
+                            return;
+                        }
+                        extern_variants[args[0]].insert(args.begin() + 1, args.end());
                     }},
 
                 {MatchableKeyword::esc_MATCHABLE_VARIANT_PROPERTY_VALUE::grab(),

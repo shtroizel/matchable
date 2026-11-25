@@ -97,6 +97,7 @@ if(NOT LIB_ONLY)
         target_include_directories(variant_ref_owner PRIVATE include)
         set_target_properties(variant_ref_owner PROPERTIES CXX_VISIBILITY_PRESET hidden
             VISIBILITY_INLINES_HIDDEN ON)
+        target_compile_definitions(variant_ref_owner PRIVATE MATCHABLE_INSTANCE_VISIBILITY=default)
         add_executable(variant_ref_lib test/programs/variant_ref_lib/main.cpp)
         target_include_directories(variant_ref_lib PRIVATE include test/include)
         target_link_libraries(variant_ref_lib PRIVATE variant_ref_owner)
@@ -143,7 +144,7 @@ if(NOT LIB_ONLY)
         DEPENDS matchable_maker_generate
     )
     add_executable(matchable_maker_generated test/programs/matchable_maker_generated/main.cpp
-        ${generated_dir}/matchable_maker_generated.h)
+        test/programs/matchable_maker_generated/planet.cpp ${generated_dir}/matchable_maker_generated.h)
     target_include_directories(matchable_maker_generated PRIVATE include test/include ${generated_dir})
     install(TARGETS matchable_maker_generated RUNTIME DESTINATION share/matchable/test/programs)
     add_matchable_test(version)

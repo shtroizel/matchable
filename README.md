@@ -270,11 +270,21 @@ works as a property type, so variants of one matchable can refer to variants of 
 * `->` and `*` reach the variant, get() gives a `matchable::Variant const *` (nullptr when nil), and
   **type**::from_variant(ref) gives the typed variant back, or nil when the reference is nil or to another
   type
-* code split into libraries with hidden visibility defines each variant's instance in the library that
-  owns it (`template struct __attribute__((visibility("default"))) matchable::Instance<type::variant>;`)
-  and declares it everywhere else (`extern template struct matchable::Instance<type::variant>;`). The
-  linker resolves references to the owner's instance, which answers from the owner's registry. The owner
-  defines it before its own first use, or GCC ignores the visibility
+* code split into libraries defines each variant's instance in the library that owns it and declares it
+  everywhere else. The linker resolves references to the owner's instance, which answers from the owner's
+  registry
+
+#### MATCHABLE_INSTANCE_VISIBILITY
+Define it as `default`, `protected` or `hidden` when compiling the code that owns variants. Each variant's
+instance is then defined where the variant is declared or grown, with that visibility under GCC and Clang,
+so a library built with hidden visibility still exports the instances of its variants. `protected` also
+keeps the library's own references inside it. The matchables of such code are declared at global
+scope.<br/>
+
+#### MATCHABLE_EXTERN_VARIANTS(type, variant...)
+Declares up to 108 variants of **type** that other code owns, so `matchable::variant_ref` refers to them
+without **type**'s declaration. Write it at global scope, in code that leaves the instances to their
+owner.<br/>
 
 Examples: test/programs/variant_ref.cpp, test/programs/variant_ref_lib/
 
